@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aniket Patil - Portfolio</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#home">Aniket Patil</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="#skills">Skills</a></li>
+          <li class="nav-item"><a class="nav-link" href="#projects">Projects</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section id="home" class="hero">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6 hero-content">
+          <h1>Hi, I'm Aniket Patil</h1>
+          <p class="lead">Passionate Full Stack Developer | Java • Spring Boot • MySQL • React.js</p>
+          <a href="#contact" class="btn btn-primary btn-lg">Get In Touch</a>
+        </div>
+        <div class="col-lg-6 text-center">
+          <div class="hero-image" data-aos="fade-left">
+            <img src="MyImage.jpg" alt="Aniket Patil" class="hero-profile">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="py-5">
+    <div class="container">
+      <div class="section-title" data-aos="fade-up">
+        <h2>About Me</h2>
+      </div>
+      <div class="about-content" data-aos="fade-up" data-aos-delay="200">
+        <div class="about-text">
+          <h3>Full Stack Developer | Java & React</h3>
+          <p>I am a passionate Full Stack Developer with hands-on experience in building real-world applications using Java, Spring Boot, MySQL, and React.js. I love designing user-friendly applications and solving complex problems with clean code.</p>
+
+          <div class="mt-4">
+            <h5>Education:</h5>
+            <p><strong>MCA</strong> – KIT`s IMER, Kolhapur (2023 - 2025) – 66.09%<br>
+            <strong>BCA</strong> – New College, Kolhapur (2021 - 2023) – 78.82%<br>
+            <strong>HSC</strong> – LTD College Kalkundri (2018 - 2020) – 59.23%</p>
+          </div>
+        </div>
+        <div class="about-image">
+          <img src="MyImage.jpg" alt="Aniket Patil Professional Photo">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section id="skills" class="py-5" style="background: var(--bg-light);">
+    <div class="container">
+      <div class="section-title" data-aos="fade-up">
+        <h2>Skills</h2>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+          <div class="skill-item">
+            <i class="fab fa-html5"></i>
+            <h4>Frontend</h4>
+            <p>HTML | CSS | Bootstrap | JavaScript | React | JSP</p>
+          </div>
+        </div>
+        <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+          <div class="skill-item">
+            <i class="fas fa-server"></i>
+            <h4>Backend</h4>
+            <p>Java | Servlet | Spring | Spring Boot | Hibernate | JDBC | MySQL</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects" class="py-5">
+    <div class="container">
+      <div class="section-title" data-aos="fade-up">
+        <h2>Projects</h2>
+      </div>
+      <div class="row">
+        <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+          <div class="project-card">
+            <div class="project-image"><i class="fas fa-gavel"></i></div>
+            <div class="project-content">
+              <h4>Online Auction</h4>
+              <p>Developed a dual-user platform enabling vendors to list products and customers to participate in real-time bidding with JSP, Servlet, Java, and MySQL.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+          <div class="project-card">
+            <div class="project-image"><i class="fas fa-user-check"></i></div>
+            <div class="project-content">
+              <h4>Online Attendance System</h4>
+              <p>Web-based attendance management system with role-based access for teachers and students, built with ASP.NET, SQL Server, JavaScript, and MySQL.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="py-5" style="background: var(--bg-light);">
+    <div class="container">
+      <div class="section-title" data-aos="fade-up">
+        <h2>Get In Touch</h2>
+      </div>
+      <div class="row">
+        <div class="col-lg-8 mb-4" data-aos="fade-right">
+          <div class="contact-form">
+            <form id="contactForm">
+              <div class="row">
+                <div class="col-md-6 mb-3"><input type="text" class="form-control" placeholder="Your Name" required></div>
+                <div class="col-md-6 mb-3"><input type="email" class="form-control" placeholder="Your Email" required></div>
+              </div>
+              <div class="mb-3"><input type="text" class="form-control" placeholder="Subject" required></div>
+              <div class="mb-3"><textarea class="form-control" rows="5" placeholder="Your Message" required></textarea></div>
+              <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
+          </div>
+        </div>
+        <div class="col-lg-4 mb-4" data-aos="fade-left">
+          <div class="contact-info">
+            <h4>Contact Information</h4>
+            <div class="contact-info-item"><i class="fas fa-envelope"></i><div><strong>Email</strong><br>patilaniket2562m@gmail.com</div></div>
+            <div class="contact-info-item"><i class="fas fa-phone"></i><div><strong>Phone</strong><br>+91 9112261074</div></div>
+            <div class="contact-info-item"><i class="fas fa-map-marker-alt"></i><div><strong>Location</strong><br>Kolhapur, India</div></div>
+            <div class="contact-info-item"><i class="fab fa-linkedin"></i><div><strong>LinkedIn</strong><br><a href="https://linkedin.com/in/Aniket-patil-5b6a78260" target="_blank">linkedin.com/in/Aniket-patil</a></div></div>
+            <div class="contact-info-item"><i class="fab fa-github"></i><div><strong>GitHub</strong><br><a href="https://github.com/patilaniket2562m" target="_blank">github.com/patilaniket2562m</a></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2024 Aniket Patil. All rights reserved.</p>
+      <div class="social-links">
+        <a href="https://github.com/patilaniket2562m"><i class="fab fa-github"></i></a>
+        <a href="https://linkedin.com/in/Aniket-patil-5b6a78260"><i class="fab fa-linkedin"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>
