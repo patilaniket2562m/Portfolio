@@ -15,6 +15,12 @@ body {
   color: var(--text-dark);
   overflow-x: hidden;
   scroll-behavior: smooth;
+  
+}
+.hero, .container, .row {
+
+  max-width: 100%;
+  
 }
 
 /* Navbar */
@@ -23,7 +29,32 @@ body {
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 20px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
+  
 }
+/* Navbar menu full width on mobile */
+@media (max-width: 991px) {
+  .navbar-collapse {
+    background: #fff;   /* white background under brand */
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  .navbar-nav .nav-link {
+    padding: 0.5rem 0;
+    text-align: left;   /* align text to left under brand */
+  }
+}
+
+.navbar-toggler {
+  border: none;
+}
+.navbar-toggler:focus {
+  box-shadow: none;
+}
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%2820,20,20,0.7%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
 .navbar.scrolled { background: #fff; box-shadow: 0 2px 25px rgba(0,0,0,0.15); }
 .navbar-brand { font-weight: 700; font-size: 1.6rem; color: var(--primary-color) !important; }
 .nav-link { font-weight: 500; margin-left: 10px; color: var(--text-dark) !important; }
