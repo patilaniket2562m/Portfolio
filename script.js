@@ -53,3 +53,32 @@ window.addEventListener('load', () => {
   heroText.textContent = '';
   setTimeout(typeWriter, 500);
 });
+
+// AOS Init
+AOS.init({ duration: 1000, once: true });
+
+function setActiveLink() {
+  const sections = document.querySelectorAll("section");
+  const navLinks = document.querySelectorAll(".nav-link");
+  let current = "";
+
+  sections.forEach((sec) => {
+    if (window.scrollY >= sec.offsetTop - 100) {
+      current = sec.getAttribute("id");
+    }
+  });
+
+  navLinks.forEach((link) => {
+    link.classList.remove("active");
+    if (link.getAttribute("href") === "#" + current) {
+      link.classList.add("active");
+    }
+  });
+}
+
+// Run on scroll
+window.addEventListener("scroll", setActiveLink);
+
+// Run also on page load (refresh)
+window.addEventListener("load", setActiveLink);
+
