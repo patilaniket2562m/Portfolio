@@ -1,112 +1,244 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aniket Patil | Full Stack Developer Portfolio</title>
-<meta name="description" content="Portfolio of Aniket Patil - Full Stack Developer skilled in Java, Spring Boot, React.js, and MySQL. Explore my projects, skills, and resume.">
-<meta name="keywords" content="Aniket Patil, Aniket Patil Portfolio, Java Full Stack Developer, Spring Boot, React.js, MySQL, Web Developer, Software Engineer">
-<meta name="author" content="Aniket Patil">
-<meta name="google-site-verification" content="google380330d6316d9683.html" />
-
-<!-- Open Graph (for social media previews) -->
-<meta property="og:title" content="Aniket Patil | Portfolio">
-<meta property="og:description" content="Passionate Full Stack Developer skilled in Java, Spring Boot, MySQL, and React.js.">
-<meta property="og:image" content="https://portfolio-inky-six-89.vercel.app/MyImage.jpg">
-<meta property="og:url" content="https://portfolio-inky-six-89.vercel.app">
-<meta name="twitter:card" content="summary_large_image">
-
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <title>Aniket Patil | Full Stack Developer</title>
+  <meta name="description" content="Portfolio of Aniket Patil - Full Stack Developer skilled in Java, Spring Boot, React.js, and MySQL.">
+  <meta name="keywords" content="Aniket Patil, Java Full Stack Developer, Spring Boot, React.js, MySQL">
+  <meta name="author" content="Aniket Patil">
+  <meta property="og:title" content="Aniket Patil | Portfolio">
+  <meta property="og:description" content="Passionate Full Stack Developer skilled in Java, Spring Boot, MySQL, and React.js.">
+  <meta property="og:url" content="https://portfolio-inky-six-89.vercel.app">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <!-- Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursor-follower"></div>
+
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <i class="fas fa-sun" id="themeIcon"></i>
+  </button>
+
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg fixed-top">
-  <div class="container">
-    <a class="navbar-brand" href="#home">Aniket Patil</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse justify-content-lg-end" id="navbarNav">
-      <ul class="navbar-nav">
-        <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-        <li class="nav-item"><a class="nav-link" href="#skills">Skills</a></li>
-        <li class="nav-item"><a class="nav-link" href="#projects">Projects</a></li>
-        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a class="nav-brand" href="#home">
+        <span class="brand-dot"></span>AP
+      </a>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home" class="nav-link active" data-section="home">Home</a></li>
+        <li><a href="#about" class="nav-link" data-section="about">About</a></li>
+        <li><a href="#skills" class="nav-link" data-section="skills">Skills</a></li>
+        <li><a href="#projects" class="nav-link" data-section="projects">Projects</a></li>
+        <li><a href="#contact" class="nav-link" data-section="contact">Contact</a></li>
       </ul>
     </div>
-  </div>
-</nav>
-
-
+  </nav>
 
   <!-- Hero -->
   <section id="home" class="hero">
-    <div class="container">
-      <div class="row align-items-center">
-        <div class="col-lg-6 hero-content">
-          <h1>Hi, I'm Aniket Patil</h1>
-          <p class="lead">Passionate Full Stack Developer | Java • Spring Boot • MySQL • React.js</p>
-          <a href="#contact" class="btn btn-primary btn-lg">Get In Touch</a>
-          <a href="./Aniket_Patil_Resume_Java_FullStack.pdf" class="btn btn-outline-light btn-lg ms-3" download>
-            <i class="fas fa-download"></i> Download Resume
+    <div class="hero-bg">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+      <div class="grid-overlay"></div>
+    </div>
+    <div class="hero-container">
+      <div class="hero-left">
+        <div class="hero-badge" data-aos="fade-down">
+          <span class="badge-dot"></span>
+          Available for opportunities
+        </div>
+        <h1 class="hero-title" data-aos="fade-up" data-aos-delay="100">
+          <span class="line">Hi, I'm</span>
+          <span class="line name-line">Aniket<br>Patil<span class="title-accent">.</span></span>
+        </h1>
+        <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="200">
+          Full Stack Developer crafting digital experiences with <span class="highlight">Java</span>, <span class="highlight">Spring Boot</span>, <span class="highlight">React.js</span> & <span class="highlight">MySQL</span>
+        </p>
+        <div class="hero-cta" data-aos="fade-up" data-aos-delay="300">
+          <a href="#contact" class="btn-primary-hero">
+            <span>Let's Talk</span>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+          <a href="./Aniket_Patil_Resume_Java_FullStack.pdf" class="btn-ghost-hero" download>
+            <i class="fas fa-download"></i>
+            <span>Resume</span>
           </a>
         </div>
-        <div class="col-lg-6 text-center">
-          <div class="hero-image" data-aos="fade-left">
-            <img src="MyImage.jpg" alt="Aniket Patil" class="hero-profile">
+        <div class="hero-social" data-aos="fade-up" data-aos-delay="400">
+          <a href="https://github.com/patilaniket2562m" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+          <a href="https://linkedin.com/in/Aniket-patil-5b6a78260" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          <a href="mailto:patilaniket2562m@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+      </div>
+      <div class="hero-right" data-aos="fade-left" data-aos-delay="200">
+        <div class="hero-image-wrapper">
+          <div class="img-ring ring-1"></div>
+          <div class="img-ring ring-2"></div>
+          <div class="img-ring ring-3"></div>
+          <img src="MyImage.jpg" alt="Aniket Patil" class="hero-profile-img">
+          <div class="floating-card card-exp">
+            <i class="fas fa-code"></i>
+            <div>
+              <span class="card-num">2+</span>
+              <span class="card-label">Years Exp</span>
+            </div>
+          </div>
+          <div class="floating-card card-proj">
+            <i class="fas fa-folder-open"></i>
+            <div>
+              <span class="card-num">5+</span>
+              <span class="card-label">Projects</span>
+            </div>
           </div>
         </div>
       </div>
+    </div>
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
     </div>
   </section>
 
   <!-- About -->
-  <section id="about" class="py-5">
-    <div class="container">
-      <div class="section-title" data-aos="fade-up">
-        <h2>About Me</h2>
-      </div>
-      <div class="about-content" data-aos="fade-up" data-aos-delay="200">
-        <div class="about-text">
-          <h3>Full Stack Developer | Java & React</h3>
-          <p>I am a passionate Full Stack Developer with hands-on experience in building real-world applications using Java, Spring Boot, MySQL, and React.js. I love designing user-friendly applications and solving complex problems with clean code.</p>
-          <div class="mt-4">
-            <h5>Education:</h5>
-            <p><strong>MCA</strong> – KIT`s IMER, Kolhapur (2023 - 2025) – 66.09%<br>
-            <strong>BCA</strong> – New College, Kolhapur (2021 - 2023) – 78.82%<br>
-            <strong>HSC</strong> – LTDP College Kalkundri (2018 - 2020) – 59.23%</p>
+  <section id="about" class="about">
+    <div class="section-container">
+      <div class="section-tag" data-aos="fade-up">About</div>
+      <h2 class="section-heading" data-aos="fade-up" data-aos-delay="100">Who I Am</h2>
+      <div class="about-grid">
+        <div class="about-image-col" data-aos="fade-right" data-aos-delay="200">
+          <div class="about-img-frame">
+            <img src="MyImage.jpg" alt="Aniket Patil">
+            <div class="img-accent"></div>
+          </div>
+          <div class="about-stats">
+            <div class="stat-item">
+              <span class="stat-num">66%</span>
+              <span class="stat-label">MCA CGPA</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-num">78%</span>
+              <span class="stat-label">BCA Score</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-num">2025</span>
+              <span class="stat-label">Graduating</span>
+            </div>
           </div>
         </div>
-        <div class="about-image">
-          <img src="MyImage.jpg" alt="Aniket Patil Professional Photo">
+        <div class="about-text-col" data-aos="fade-left" data-aos-delay="200">
+          <p class="about-intro">I'm a passionate Full Stack Developer with hands-on experience building real-world applications. I love designing user-friendly interfaces and solving complex problems with clean, efficient code.</p>
+          <p class="about-body">Currently pursuing my MCA at KIT's IMER, Kolhapur, I bring together strong backend fundamentals with modern frontend skills to deliver complete web solutions.</p>
+          <div class="education-timeline">
+            <h4 class="timeline-heading">Education</h4>
+            <div class="timeline-item">
+              <div class="timeline-icon"><i class="fas fa-graduation-cap"></i></div>
+              <div class="timeline-content">
+                <strong>MCA</strong> — KIT's IMER, Kolhapur
+                <span>2023 – 2025 · 66.09%</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-icon"><i class="fas fa-university"></i></div>
+              <div class="timeline-content">
+                <strong>BCA</strong> — New College, Kolhapur
+                <span>2021 – 2023 · 78.82%</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-icon"><i class="fas fa-school"></i></div>
+              <div class="timeline-content">
+                <strong>HSC</strong> — LTDP College Kalkundri
+                <span>2018 – 2020 · 59.23%</span>
+              </div>
+            </div>
+          </div>
+          <a href="#contact" class="btn-link">
+            Let's Connect <i class="fas fa-arrow-right"></i>
+          </a>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Skills -->
-  <section id="skills" class="py-5" style="background: var(--bg-light);">
-    <div class="container">
-      <div class="section-title" data-aos="fade-up">
-        <h2>Skills</h2>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
-          <div class="skill-item">
-            <i class="fab fa-html5"></i>
-            <h4>Frontend</h4>
-            <p>HTML | CSS | Bootstrap | JavaScript | React | JSP</p>
+  <section id="skills" class="skills">
+    <div class="section-container">
+      <div class="section-tag" data-aos="fade-up">Skills</div>
+      <h2 class="section-heading" data-aos="fade-up" data-aos-delay="100">Tech Stack</h2>
+      <div class="skills-layout">
+        <div class="skills-col" data-aos="fade-up" data-aos-delay="100">
+          <div class="skills-category">
+            <div class="category-header">
+              <div class="category-icon"><i class="fab fa-html5"></i></div>
+              <div>
+                <h3>Frontend</h3>
+                <p>Building beautiful interfaces</p>
+              </div>
+            </div>
+            <div class="skill-tags">
+              <span class="tag">HTML5</span>
+              <span class="tag">CSS3</span>
+              <span class="tag">Bootstrap</span>
+              <span class="tag">JavaScript</span>
+              <span class="tag">React.js</span>
+              <span class="tag">JSP</span>
+            </div>
           </div>
         </div>
-        <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
-          <div class="skill-item">
-            <i class="fas fa-server"></i>
-            <h4>Backend</h4>
-            <p>Java | Servlet | Spring | Spring Boot | Hibernate | JDBC | MySQL</p>
+        <div class="skills-col" data-aos="fade-up" data-aos-delay="200">
+          <div class="skills-category">
+            <div class="category-header">
+              <div class="category-icon backend-icon"><i class="fas fa-server"></i></div>
+              <div>
+                <h3>Backend</h3>
+                <p>Powering robust applications</p>
+              </div>
+            </div>
+            <div class="skill-tags">
+              <span class="tag">Java</span>
+              <span class="tag">Servlet</span>
+              <span class="tag">Spring</span>
+              <span class="tag">Spring Boot</span>
+              <span class="tag">Hibernate</span>
+              <span class="tag">JDBC</span>
+              <span class="tag">MySQL</span>
+            </div>
+          </div>
+        </div>
+        <div class="skills-col skills-col-full" data-aos="fade-up" data-aos-delay="300">
+          <div class="skills-category tools-category">
+            <div class="category-header">
+              <div class="category-icon tools-icon"><i class="fas fa-tools"></i></div>
+              <div>
+                <h3>Tools & Extras</h3>
+                <p>Development workflow</p>
+              </div>
+            </div>
+            <div class="skill-tags">
+              <span class="tag">Git</span>
+              <span class="tag">GitHub</span>
+              <span class="tag">VS Code</span>
+              <span class="tag">IntelliJ IDEA</span>
+              <span class="tag">Postman</span>
+              <span class="tag">Maven</span>
+              <span class="tag">REST APIs</span>
+              <span class="tag">ASP.NET</span>
+            </div>
           </div>
         </div>
       </div>
@@ -114,63 +246,150 @@
   </section>
 
   <!-- Projects -->
-  <section id="projects" class="py-5">
-    <div class="container">
-      <div class="section-title" data-aos="fade-up">
-        <h2>Projects</h2>
-      </div>
-      <div class="row">
-        <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="100">
-          <div class="project-card">
-            <div class="project-image"><i class="fas fa-gavel"></i></div>
-            <div class="project-content">
-              <h4>Online Auction</h4>
-              <p>Developed a dual-user platform enabling vendors to list products and customers to participate in real-time bidding with JSP, Servlet, Java, and MySQL.</p>
+  <section id="projects" class="projects">
+    <div class="section-container">
+      <div class="section-tag" data-aos="fade-up">Projects</div>
+      <h2 class="section-heading" data-aos="fade-up" data-aos-delay="100">Featured Work</h2>
+      <div class="projects-grid">
+
+        <div class="project-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="project-num">01</div>
+          <div class="project-visual auction-visual">
+            <div class="project-glyph"><i class="fas fa-gavel"></i></div>
+            <div class="proj-circles">
+              <div class="proj-circle c1"></div>
+              <div class="proj-circle c2"></div>
             </div>
           </div>
-        </div>
-        <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="200">
-          <div class="project-card">
-            <div class="project-image"><i class="fas fa-user-check"></i></div>
-            <div class="project-content">
-              <h4>Online Attendance System</h4>
-              <p>Web-based attendance management system with role-based access for teachers and students, built with ASP.NET, SQL Server, JavaScript, and MySQL.</p>
+          <div class="project-info">
+            <h3>Online Auction</h3>
+            <p>A dual-user platform enabling vendors to list products and customers to participate in real-time competitive bidding. Features live updates, bid tracking, and secure user authentication.</p>
+            <div class="project-tech">
+              <span>JSP</span><span>Servlet</span><span>Java</span><span>MySQL</span>
             </div>
           </div>
+          <div class="project-footer">
+            <a href="https://github.com/patilaniket2562m" target="_blank" class="proj-link">
+              <i class="fab fa-github"></i> View Code
+            </a>
+          </div>
         </div>
+
+        <div class="project-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="project-num">02</div>
+          <div class="project-visual attend-visual">
+            <div class="project-glyph"><i class="fas fa-user-check"></i></div>
+            <div class="proj-circles">
+              <div class="proj-circle c1"></div>
+              <div class="proj-circle c2"></div>
+            </div>
+          </div>
+          <div class="project-info">
+            <h3>Online Attendance System</h3>
+            <p>Web-based attendance management system featuring role-based access control for teachers and students, with automated reports, dashboard analytics, and secure login flows.</p>
+            <div class="project-tech">
+              <span>ASP.NET</span><span>SQL Server</span><span>JavaScript</span><span>MySQL</span>
+            </div>
+          </div>
+          <div class="project-footer">
+            <a href="https://github.com/patilaniket2562m" target="_blank" class="proj-link">
+              <i class="fab fa-github"></i> View Code
+            </a>
+          </div>
+        </div>
+
+        <!-- CTA Card -->
+        <div class="project-card cta-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="cta-inner">
+            <div class="cta-icon"><i class="fas fa-plus"></i></div>
+            <h3>More on GitHub</h3>
+            <p>Check out my GitHub for more projects and contributions.</p>
+            <a href="https://github.com/patilaniket2562m" target="_blank" class="btn-primary-hero">
+              <span>Visit GitHub</span>
+              <i class="fab fa-github"></i>
+            </a>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
 
   <!-- Contact -->
-  <section id="contact" class="py-5" style="background: var(--bg-light);">
-    <div class="container">
-      <div class="section-title" data-aos="fade-up">
-        <h2>Get In Touch</h2>
-      </div>
-      <div class="row">
-        <div class="col-lg-8 mb-4" data-aos="fade-right">
-          <div class="contact-form">
-            <form id="contactForm">
-              <div class="row">
-                <div class="col-md-6 mb-3"><input type="text" class="form-control" placeholder="Your Name" required></div>
-                <div class="col-md-6 mb-3"><input type="email" class="form-control" placeholder="Your Email" required></div>
+  <section id="contact" class="contact">
+    <div class="section-container">
+      <div class="section-tag" data-aos="fade-up">Contact</div>
+      <h2 class="section-heading" data-aos="fade-up" data-aos-delay="100">Get In Touch</h2>
+      <div class="contact-layout">
+        <div class="contact-left" data-aos="fade-right" data-aos-delay="200">
+          <p class="contact-intro">Have a project in mind or an opportunity to discuss? I'd love to hear from you. Drop a message and I'll get back to you shortly.</p>
+          <div class="contact-links">
+            <a href="mailto:patilaniket2562m@gmail.com" class="contact-item">
+              <div class="ci-icon"><i class="fas fa-envelope"></i></div>
+              <div class="ci-text">
+                <span>Email</span>
+                <strong>patilaniket2562m@gmail.com</strong>
               </div>
-              <div class="mb-3"><input type="text" class="form-control" placeholder="Subject" required></div>
-              <div class="mb-3"><textarea class="form-control" rows="5" placeholder="Your Message" required></textarea></div>
-              <button type="submit" class="btn btn-primary">Send Message</button>
-            </form>
+              <i class="fas fa-arrow-right ci-arrow"></i>
+            </a>
+            <a href="tel:+919112261074" class="contact-item">
+              <div class="ci-icon"><i class="fas fa-phone"></i></div>
+              <div class="ci-text">
+                <span>Phone</span>
+                <strong>+91 9112261074</strong>
+              </div>
+              <i class="fas fa-arrow-right ci-arrow"></i>
+            </a>
+            <a href="https://linkedin.com/in/Aniket-patil-5b6a78260" target="_blank" class="contact-item">
+              <div class="ci-icon linkedin-ci"><i class="fab fa-linkedin-in"></i></div>
+              <div class="ci-text">
+                <span>LinkedIn</span>
+                <strong>Aniket-patil</strong>
+              </div>
+              <i class="fas fa-arrow-right ci-arrow"></i>
+            </a>
+            <a href="https://github.com/patilaniket2562m" target="_blank" class="contact-item">
+              <div class="ci-icon github-ci"><i class="fab fa-github"></i></div>
+              <div class="ci-text">
+                <span>GitHub</span>
+                <strong>patilaniket2562m</strong>
+              </div>
+              <i class="fas fa-arrow-right ci-arrow"></i>
+            </a>
+            <div class="contact-item location-item">
+              <div class="ci-icon loc-ci"><i class="fas fa-map-marker-alt"></i></div>
+              <div class="ci-text">
+                <span>Location</span>
+                <strong>Kolhapur, Maharashtra, India</strong>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="col-lg-4 mb-4" data-aos="fade-left">
-          <div class="contact-info">
-            <h4>Contact Information</h4>
-            <div class="contact-info-item"><i class="fas fa-envelope"></i><div><strong>Email</strong><br>patilaniket2562m@gmail.com</div></div>
-            <div class="contact-info-item"><i class="fas fa-phone"></i><div><strong>Phone</strong><br>+91 9112261074</div></div>
-            <div class="contact-info-item"><i class="fas fa-map-marker-alt"></i><div><strong>Location</strong><br>Kolhapur, India</div></div>
-            <div class="contact-info-item"><i class="fab fa-linkedin"></i><div><strong>LinkedIn</strong><br><a href="https://linkedin.com/in/Aniket-patil-5b6a78260" target="_blank">linkedin.com/in/Aniket-patil</a></div></div>
-            <div class="contact-info-item"><i class="fab fa-github"></i><div><strong>GitHub</strong><br><a href="https://github.com/patilaniket2562m" target="_blank">github.com/patilaniket2562m</a></div></div>
-          </div>
+        <div class="contact-right" data-aos="fade-left" data-aos-delay="200">
+          <form id="contactForm" class="contact-form" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Your Name</label>
+                <input type="text" placeholder="John Doe" required>
+              </div>
+              <div class="form-group">
+                <label>Your Email</label>
+                <input type="email" placeholder="john@example.com" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Subject</label>
+              <input type="text" placeholder="Project Collaboration" required>
+            </div>
+            <div class="form-group">
+              <label>Message</label>
+              <textarea rows="5" placeholder="Tell me about your project or opportunity..." required></textarea>
+            </div>
+            <button type="submit" class="btn-submit">
+              <span>Send Message</span>
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -178,25 +397,19 @@
 
   <!-- Footer -->
   <footer class="footer">
-    <div class="container">
-      <p>&copy; 2025 Aniket Patil. All rights reserved.</p>
-      <div class="social-links">
-        <a href="https://github.com/patilaniket2562m"><i class="fab fa-github"></i></a>
-        <a href="https://linkedin.com/in/Aniket-patil-5b6a78260"><i class="fab fa-linkedin"></i></a>
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="brand-dot"></span>AP
+      </div>
+      <p class="footer-copy">© 2025 Aniket Patil · Built with passion</p>
+      <div class="footer-social">
+        <a href="https://github.com/patilaniket2562m" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+        <a href="https://linkedin.com/in/Aniket-patil-5b6a78260" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        <a href="mailto:patilaniket2562m@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
       </div>
     </div>
   </footer>
 
-  <!-- Scripts -->
-  <!-- Bootstrap Bundle (includes Popper) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<!-- AOS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-<!-- Your custom script -->
-<script src="script.js"></script>
-
+  <script src="script.js"></script>
 </body>
 </html>
-
-
-
