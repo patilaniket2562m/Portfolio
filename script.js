@@ -386,7 +386,7 @@ CIN.begin=()=>{if(CIN.mode!=='idle')return;const s=cam.position.clone();CIN.curv
 CIN.end=()=>{CIN.mode='play';doorPivot.rotation.y=1.65;P.x=-6.4;P.z=6.6;P.y=0;P.vy=0;yaw=0;pitch=0;cam.fov=72;cam.updateProjectionMatrix();started=true;document.body.classList.remove('intro');if(CIN.after!=null){[P.x,P.z,yaw]=TP[CIN.after];pitch=0;P.y=0}CIN.after=null;lock()};
 addEventListener('pointerdown',()=>{if(CIN.mode==='enter')CIN.u=Math.max(CIN.u,.999)});
 const SITE=$('#site');
-window.HOUSE={enter(i){if(CIN.mode!=='idle')return;CIN.after=i;window.SP=false;SITE.classList.add('out');setTimeout(()=>{SITE.style.display='none'},900);CIN.begin()},
+window.HOUSE={enter(i){if(CIN.mode!=='idle')return;CIN.after=i;window.SP=false;SITE.classList.add('out');setTimeout(()=>{SITE.style.display='none'},1700);CIN.begin()},
  home(){if(held)drop();panelOpen=false;pnl.hidden=true;try{document.exitPointerLock()}catch(e){}started=false;CIN.mode='idle';doorPivot.rotation.y=0;document.body.classList.add('intro');SITE.style.display='block';SITE.offsetWidth;SITE.classList.remove('out');SITE.scrollTop=0}};
 // HUD
 const tele=$('#tele'),TP=[[-9,6.2,Math.PI],[-9,-1.2,0],[0,-3.2,0],[9,-1.4,0],[0,1.5,Math.PI],[9,1.6,Math.PI]],order=[3,0,1,2,4,5];
@@ -468,9 +468,8 @@ function tick(){requestAnimationFrame(tick);if(s.style.display==='none')return;
 requestAnimationFrame(tick);
 })();
 
-// ===== premium hero: cursor spotlight, wordmark parallax, pause hidden 3D =====
+// ===== premium hero: cursor spotlight, wordmark parallax, faded 3D house behind =====
 (function(){const s=document.getElementById('site'),hero=s&&s.querySelector('.s-hero');if(!hero)return;
-hero.addEventListener('pointermove',e=>{const r=hero.getBoundingClientRect();hero.style.setProperty('--mx',e.clientX-r.left+'px');hero.style.setProperty('--my',e.clientY-r.top+'px')});
+hero.addEventListener('pointermove',e=>{const r=hero.getBoundingClientRect();hero.style.setProperty('--hx',e.clientX-r.left+'px');hero.style.setProperty('--hy',e.clientY-r.top+'px')});
 s.addEventListener('scroll',()=>hero.style.setProperty('--sy',s.scrollTop),{passive:true});
-(function pause(){requestAnimationFrame(pause);if(s.style.display!=='none'&&!s.classList.contains('out'))window.SP=true})();
 })();
