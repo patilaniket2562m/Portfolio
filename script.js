@@ -438,3 +438,32 @@ h.querySelectorAll('.s-mc').forEach(b=>b.addEventListener('click',()=>set(false)
 s.addEventListener('click',e=>{if(!h.contains(e.target))set(false)});
 s.addEventListener('scroll',()=>set(false),{passive:true});
 addEventListener('keydown',e=>{if(e.key==='Escape')set(false)})})();
+
+// ===== 2026 scroll motion =====
+(function(){const s=document.getElementById('site');if(!s)return;
+const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+function wrap(node,st){[...node.childNodes].forEach(n=>{if(n.nodeType===3){const f=document.createDocumentFragment();n.textContent.split(/(\s+)/).forEach(t=>{if(!t)return;if(/^\s+$/.test(t)){f.appendChild(document.createTextNode(t));return}
+ if(st.fill){const w=document.createElement('span');w.className='fw';w.textContent=t;st.ws.push(w);f.appendChild(w)}
+ else{const o=document.createElement('span'),i=document.createElement('span');o.className='sw';i.className='swi';i.style.setProperty('--i',st.i++);i.textContent=t;o.appendChild(i);f.appendChild(o)}});n.replaceWith(f)}else if(n.nodeType===1)wrap(n,st)})}
+// headline words rise in
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('sv');io.unobserve(e.target)}}),{root:s,threshold:.3});
+s.querySelectorAll('.s-h').forEach(h=>{wrap(h,{i:0});io.observe(h)});
+// paragraph words fill with scroll
+const fills=[...s.querySelectorAll('#s-about .s-p')].map(p=>{const st={fill:1,ws:[]};wrap(p,st);return{p,ws:st.ws,n:-1}});
+s.querySelectorAll('.s-chips,.s-card>div').forEach(g=>g.querySelectorAll('.s-chip').forEach((c,i)=>c.style.setProperty('--i',i)));
+// magnetic buttons
+s.querySelectorAll('.s-btn').forEach(b=>{b.addEventListener('pointermove',e=>{const r=b.getBoundingClientRect();b.style.setProperty('--mx',(e.clientX-r.left-r.width/2)*.25+'px');b.style.setProperty('--my',(e.clientY-r.top-r.height/2)*.35+'px')});b.addEventListener('pointerleave',()=>{b.style.removeProperty('--mx');b.style.removeProperty('--my')})});
+const nav=s.querySelector('.s-nav'),mq=s.querySelector('.s-mq div'),hme=s.querySelector('.s-hme'),cards=[...s.querySelectorAll('#s-work .s-card')];
+let last=-1,vel=0,rate=1,mqA=null;
+function tick(){requestAnimationFrame(tick);if(s.style.display==='none')return;
+ const st=s.scrollTop,d=last<0?0:st-last,H=innerHeight;
+ vel+=(Math.abs(d)-vel)*.15;rate+=(1+Math.min(vel*.4,9)-rate)*.1;
+ if(!mqA&&mq)mqA=mq.getAnimations()[0];if(mqA)mqA.playbackRate=rate;
+ if(d||last<0){
+  if(!nav.classList.contains('open')){if(d>6&&st>300)nav.classList.add('hide');else if(d<-4||st<300)nav.classList.remove('hide')}
+  if(hme){const k=Math.min(st,H*1.2);hme.style.setProperty('--py',k*.16);hme.style.setProperty('--pb',-k*.1);hme.style.setProperty('--sc',1-k/H*.1);hme.style.opacity=Math.max(0,1-st/(H*.85))}
+  fills.forEach(f=>{const r=f.p.getBoundingClientRect(),k=cl((H*.88-r.top)/(H*.5+r.height*.3),0,1),n=Math.round(k*f.ws.length);if(n!==f.n){f.n=n;f.ws.forEach((w,i)=>w.classList.toggle('on',i<n))}});
+  cards.forEach((c,i)=>{const nx=cards[i+1];if(!nx)return;const k=cl(1-(nx.getBoundingClientRect().top-132)/(H*.55),0,1);c.style.transform='scale('+(1-.05*k)+')';c.style.filter='brightness('+(1-.07*k)+')'})}
+ last=st}
+requestAnimationFrame(tick);
+})();
