@@ -119,3 +119,28 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#panel::-webkit-scrollbar,#site:
 /* HUD room tabs inside the 3D house */
 #tele button{font:500 .72rem 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.05em;text-transform:uppercase;background:#f1f1ef;color:#111;border:0;border-radius:99px;box-shadow:inset 0 1px 0 #fff,0 4px 14px rgba(0,0,0,.25);padding:.5rem .95rem}
 #tele button:hover,#tele button.on{background:#ffb8cb;color:#111}
+
+/* ===== contrast + section fixes ===== */
+.s-sec.alt{background:var(--soft)}
+.s-sec.alt .s-row,.s-sec.alt .s-tl,.s-sec.alt .s-ti{border-color:#d8d8d3}
+.s-row{grid-template-columns:140px 1fr auto}
+.s-row span:nth-child(2){margin-left:0;justify-self:start}
+.s-h em{color:#8d8d89}
+#s-contact .s-h em{color:#90b2a2}
+.s-sec.alt .s-card{background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.04),0 0 0 1px #e8e8e4}
+.s-sec.alt .s-chip{background:var(--soft)}
+.s-card:hover,.s-sec.alt .s-card:hover{background:var(--gr);color:#fff;box-shadow:none}
+.s-card:hover .s-n{color:#b8cbbf}.s-card:hover .s-lnk{color:var(--lime)}
+.s-card:hover .s-chip,.s-sec.alt .s-card:hover .s-chip{background:rgba(255,255,255,.16);color:#fff}
+.s-lnk{color:var(--ink)}
+/* skills rows: chips grouped, visible on white */
+#s-skills .s-chips{display:flex;flex-wrap:wrap;gap:.4rem}
+#s-skills .s-chip{background:var(--soft);color:var(--ink);margin:0;border:1px solid #e6e6e1}
+#s-skills .s-card{grid-template-columns:70px minmax(140px,1fr) 2.2fr}
+@media(max-width:800px){#s-skills .s-card{grid-template-columns:44px 1fr}#s-skills .s-chips{grid-column:2;margin-top:.8rem}}
+/* hero legibility over the 3D scene */
+.s-hero{background:linear-gradient(90deg,rgba(6,10,18,.85),rgba(6,10,18,.5) 60%,rgba(6,10,18,.15))}
+.s-cta .s-ghost{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.35)}
+.s-eye{background:rgba(0,0,0,.4)}
+.s-stats span{opacity:.92}
+.s-edu-note{display:none}
