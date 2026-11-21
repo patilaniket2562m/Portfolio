@@ -467,3 +467,10 @@ function tick(){requestAnimationFrame(tick);if(s.style.display==='none')return;
  last=st}
 requestAnimationFrame(tick);
 })();
+
+// ===== premium hero: cursor spotlight, wordmark parallax, pause hidden 3D =====
+(function(){const s=document.getElementById('site'),hero=s&&s.querySelector('.s-hero');if(!hero)return;
+hero.addEventListener('pointermove',e=>{const r=hero.getBoundingClientRect();hero.style.setProperty('--mx',e.clientX-r.left+'px');hero.style.setProperty('--my',e.clientY-r.top+'px')});
+s.addEventListener('scroll',()=>hero.style.setProperty('--sy',s.scrollTop),{passive:true});
+(function pause(){requestAnimationFrame(pause);if(s.style.display!=='none'&&!s.classList.contains('out'))window.SP=true})();
+})();
