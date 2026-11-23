@@ -162,7 +162,7 @@ const GH='https://github.com/patilaniket2562m';
  inf(tv,{t:'Aniket Patil',tag:'Welcome home',h:'<p>I\u2019m a Full Stack Developer at IMAP Systems Pvt. Ltd., Mumbai, building scalable web and Flutter-based applications with ASP.NET, React and SQL Server.</p><p>Every room of this house is part of my portfolio: the Study, Lab, Gallery, Library and Contact room.</p>'});
  'ANIKET'.split('').forEach((ch,i)=>cube(ch,['#b08d4a','#46566a','#6b4f3a','#b08d4a','#46566a','#6b4f3a'][i],.26,{t:'Aniket Patil',tag:'Full Stack Developer',h:'<p>ASP.NET \u00b7 React \u00b7 Flutter \u00b7 SQL Server</p><p>Currently at IMAP Systems, Mumbai. Based in Kolhapur, Maharashtra, India.</p>'},-9.85+i*.34,.5+.13,8.65));
  const rm=new T.Mesh(new T.BoxGeometry(.38,.03,.52),[white,white,M(0xffffff,0,.6,{map:tex(256,360,(x,w,h)=>{x.fillStyle='#fff';x.fillRect(0,0,w,h);x.fillStyle='#1a1030';x.font='800 40px system-ui';x.fillText('RESUME',24,60);x.fillStyle='#b08d4a';x.fillRect(24,80,w-48,8);for(let i=0;i<10;i++){x.fillStyle='#c9cdd6';x.fillRect(24,120+i*20,w-48-(i%3)*40,8)}})}),white,white,white]);
- body(rm,[.19,.015,.26],{t:'Resume',tag:'Download',h:'<p>My resume as a PDF.</p>',l:'Aniket_Patil_-_Resume.pdf',lt:'Download resume',dl:1},-8.5,.46+.016,3.8);
+ body(rm,[.19,.015,.26],{t:'Resume',tag:'Download',h:'<p>My resume as a PDF.</p>',l:'Aniket%20Patil%20-%20Resume.pdf',lt:'Download resume',dl:1},-8.5,.46+.016,3.8);
  cy(.03,.03,1.5,-12.6,0,1.4,steel,10);cy(.28,.4,.4,-12.6,1.5,1.4,M(0xfff0d0,0,.8,{emissive:0xffd9a0,emissiveIntensity:1.2}));plant(-12.8,8.1);plant(-4.9,8.1)
 })();
 // STUDY (About)
