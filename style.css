@@ -405,4 +405,10 @@ body{touch-action:manipulation}
 #ncF{display:flex;gap:.5rem;padding:.7rem 1rem calc(.8rem + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
 #ncF input{flex:1;min-width:0;padding:.65rem .9rem;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:inherit;font-size:16px;outline:none}
 #ncF button{padding:.6rem 1rem;border:0;border-radius:99px;background:var(--cy,#8fd6a6);color:#0b0d12;font-weight:700;cursor:pointer}
-@media (max-width:700px){#npcChat{left:.6rem;right:.6rem;width:auto;bottom:calc(.6rem + env(safe-area-inset-bottom,0px) + var(--kb,0px));max-height:calc(100dvh - 5rem - var(--kb,0px))}#npcHint{bottom:calc(8rem + env(safe-area-inset-bottom,0px))}}
+@media (max-width:700px){#npcChat{left:.6rem;right:.6rem;width:auto;bottom:calc(.6rem + env(safe-area-inset-bottom,0px) + var(--kb,0px));max-height:calc(100dvh - 5rem - var(--kb,0px))}#npcHint{bottom:calc(8rem + env(safe-area-inset-bottom,0px))}}#npcTag{position:fixed;z-index:5;transform:translate(-50%,-100%);padding:.25rem .6rem;border-radius:99px;background:rgba(16,20,26,.78);color:#fff;font:600 .68rem 'DM Sans',system-ui,sans-serif;white-space:nowrap;pointer-events:none;display:none;backdrop-filter:blur(6px)}
+#npcTag.on{display:block}
+#ncM{width:40px;border-radius:50%!important;padding:0!important;background:transparent!important;border:1px solid var(--line)!important;color:inherit!important}
+#ncM.on{background:var(--cy,#8fd6a6)!important;animation:npcpulse 1s infinite}
+@keyframes npcpulse{50%{opacity:.55}}
+.npcHeart{position:fixed;z-index:30;pointer-events:none;font-style:normal;font-size:1.4rem;opacity:0;animation:npcheart 2.4s ease-out forwards}
+@keyframes npcheart{0%{opacity:0;transform:translate(-50%,0) scale(.6)}15%{opacity:1}100%{opacity:0;transform:translate(-50%,-150px) scale(1.2)}}
