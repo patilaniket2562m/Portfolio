@@ -2,7 +2,7 @@
 // Then set window.NPC_API="http://localhost:8787/chat" in index.html (or your deployed URL).
 const http = require('http');
 const { persona } = require('./persona');
-const API_KEY = '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';   // <- put your Anthropic key between the quotes
+const API_KEY = '';   // <- put your Anthropic key between the quotes
 const KEY = API_KEY || process.env.ANTHROPIC_API_KEY, MODEL = process.env.MODEL || 'claude-sonnet-5-5';
 const PORT = process.env.PORT || 8787, ORIGIN = process.env.ALLOW_ORIGIN || '*';   // set ALLOW_ORIGIN to your site in production
 if (!KEY) { console.error('Set ANTHROPIC_API_KEY'); process.exit(1); }
