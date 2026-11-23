@@ -243,3 +243,14 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#panel::-webkit-scrollbar,#site:
 #site.out .s-hme{transform:translateX(130%) rotate(18deg)!important;opacity:0!important;transition:transform .85s cubic-bezier(.7,0,.2,1) .05s,opacity .6s .2s}
 #site.out .s-bg{opacity:0;transition:opacity .9s .15s}
 #site.out .s-prog{opacity:0}
+
+/* ===== v5: experience rows, 5 stacked projects, alt-section tweaks ===== */
+.s-ti .s-d{grid-column:1/-1;color:#55554f;line-height:1.55;max-width:62ch;font-size:1.02rem;margin-top:-.2rem}
+#s-exp .s-ti{align-items:start}
+#s-work .s-card{min-height:360px}
+#s-work .s-card:nth-child(3){top:160px}#s-work .s-card:nth-child(4){top:188px}#s-work .s-card:nth-child(5){top:216px}
+#s-work .s-card h3{font-size:clamp(2rem,4.4vw,3.8rem)}
+#s-skills .s-chip{background:#fff}
+.s-sec.alt .s-room{background:#fff}
+.s-sec.alt .s-room:hover{background:var(--c)}
+@media(max-width:800px){#s-work .s-card:nth-child(n+3){top:116px}}
