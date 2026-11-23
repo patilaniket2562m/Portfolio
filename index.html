@@ -10,6 +10,24 @@
 <meta name="color-scheme" content="dark">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter+Tight:wght@300;400;500;600;700&family=Syne:wght@600;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+/* About section */
+#s-about .s-ab{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:1rem 5rem;align-items:center}
+#s-about .s-ab-txt{min-width:0}
+#s-about .s-h{margin-bottom:1.6rem}
+#s-about .s-p{max-width:58ch}
+#s-about .ab-facts{margin:1.8rem 0 2rem;border-top:1px solid #d8d8d3}
+#s-about .ab-facts>div{display:grid;grid-template-columns:120px 1fr;gap:1rem;padding:.95rem 0;border-bottom:1px solid #d8d8d3;align-items:baseline}
+#s-about .ab-facts dt{margin:0;font:500 .7rem 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;color:#8d8d89}
+#s-about .ab-facts dd{margin:0;font-size:1.02rem;font-weight:500;letter-spacing:-.01em;line-height:1.35;color:var(--ink)}
+#s-about .ab-btns{display:flex;flex-wrap:wrap;gap:.8rem}
+#s-about .ab-btns .s-ghost{background:#fff;border:1px solid #d8d8d3;color:var(--ink)!important}
+#s-about .s-me{position:relative;isolation:isolate;width:min(100%,460px);aspect-ratio:3/4;margin:0;justify-self:center;overflow:visible;background:none;box-shadow:none;border-radius:0}
+#s-about .s-me::before{content:'';position:absolute;z-index:-1;inset:15% 4% 0 4%;border-radius:999px 999px 28px 28px;background:linear-gradient(180deg,#e8ecda,#c9d2a8);transform:none}
+#s-about .s-me img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;mix-blend-mode:multiply;border-radius:0;box-shadow:none;clip-path:none!important;transform:none!important}
+#s-about .s-me figcaption{left:50%;transform:translateX(-50%);bottom:.8rem}
+@media(max-width:800px){#s-about .s-ab{grid-template-columns:1fr;gap:1.5rem}#s-about .ab-facts>div{grid-template-columns:100px 1fr}#s-about .s-me{width:min(100%,340px)}}
+</style>
 </head>
 <body>
 <canvas id="gl" aria-label="Interactive 3D house" role="application"></canvas>
@@ -24,12 +42,12 @@
 <div class="s-stats" data-r style="--d:.65s"><div><b data-count="3">0</b><span>Projects built</span></div><div><b>1+</b><span>Years in industry</span></div><div><b>2025</b><span>MCA graduate</span></div></div>
 </div><figure class="s-hme"><span class="s-ring"><em style="left:33%;top:3%">ASP.NET</em><em style="left:98%;top:37%">React</em><em style="left:67%;top:97%">Flutter</em><em style="left:3%;top:67%">SQL Server</em></span><div class="s-disc"><b>AP</b><img src="MyImage.png" alt="Aniket Patil" onerror="this.remove()"></div><figcaption class="s-badge"><i></i>Open to work</figcaption><span class="s-dot"></span></figure></section>
 <div class="s-mq"><div>ASP.NET<em>✳</em>REACT<em>✳</em>FLUTTER<em>✳</em>SQL SERVER<em>✳</em>NODE.JS<em>✳</em>FIREBASE<em>✳</em>REST APIS<em>✳</em>C#<em>✳</em>ASP.NET<em>✳</em>REACT<em>✳</em>FLUTTER<em>✳</em>SQL SERVER<em>✳</em>NODE.JS<em>✳</em>FIREBASE<em>✳</em>REST APIS<em>✳</em>C#<em>✳</em></div></div>
-<section class="s-sec" id="s-about"><div class="s-in s-two s-ab"><div class="s-row" data-r><span>( 01 )</span><span>The about</span><span>Kolhapur, India</span></div>
+<section class="s-sec" id="s-about"><div class="s-in s-ab"><div class="s-row" data-r><span>( 01 )</span><span>The about</span><span>Kolhapur, India</span></div>
 <div class="s-ab-txt"><div data-r><p class="s-k">About</p><h2 class="s-h">Clean code, <em>complete solutions.</em></h2></div>
 <div data-r style="--d:.1s"><p class="s-p">I’m a Full Stack Developer at IMAP Systems Pvt. Ltd., Mumbai, building scalable web and Flutter-based applications. I work across ASP.NET, React and MySQL / SQL Server, with a focus on REST APIs, authentication and secure, production-ready systems.</p><p class="s-p">I hold a Master of Computer Applications from KIT’s IMER, Kolhapur (2025), and I enjoy turning complex requirements into clean, reliable software.</p></div>
-<dl class="s-facts" data-r style="--d:.2s"><div><dt>Role</dt><dd>Full Stack Developer</dd></div><div><dt>Company</dt><dd>IMAP Systems Pvt. Ltd., Mumbai</dd></div><div><dt>Education</dt><dd>MCA, KIT’s IMER, Kolhapur (2025)</dd></div><div><dt>Based in</dt><dd>Kolhapur, Maharashtra, India</dd></div><div class="w"><dt>Core stack</dt><dd>ASP.NET · React · Flutter · Node.js · SQL Server · MySQL</dd></div></dl>
-<div class="s-cta" data-r style="--d:.3s"><a class="s-btn s-ghost" href="Aniket%20Patil%20-%20Resume.pdf" download>Download resume</a><a class="s-btn s-ghost" href="#s-contact">Get in touch</a></div></div>
-<figure class="s-me" data-r style="--d:.15s"><span>AP</span><img src="MyImage2.png" alt="Aniket Patil" loading="lazy" onerror="this.remove()"><figcaption>Kolhapur, India</figcaption></figure></div></section>
+<dl class="ab-facts" data-r style="--d:.2s"><div><dt>Role</dt><dd>Full Stack Developer</dd></div><div><dt>Company</dt><dd>IMAP Systems Pvt. Ltd., Mumbai</dd></div><div><dt>Education</dt><dd>MCA, KIT’s IMER, Kolhapur (2025)</dd></div><div><dt>Based in</dt><dd>Kolhapur, Maharashtra, India</dd></div><div><dt>Core stack</dt><dd>ASP.NET · React · Flutter · Node.js · SQL Server · MySQL</dd></div></dl>
+<div class="ab-btns" data-r style="--d:.3s"><a class="s-btn s-pri" href="Aniket%20Patil%20-%20Resume.pdf" download>Download resume</a><a class="s-btn s-ghost" href="#s-contact">Get in touch</a></div></div>
+<figure class="s-me" data-r style="--d:.15s"><img src="MyImage2.png" alt="Aniket Patil" loading="lazy" onerror="this.remove()"><figcaption>Kolhapur, India</figcaption></figure></div></section>
 <section class="s-sec alt" id="s-exp"><div class="s-in s-two"><div class="s-row" data-r><span>( 02 )</span><span>Experience</span><span>2025 – Present</span></div><div data-r><h2 class="s-h">Where I <em>work.</em></h2></div><div class="s-tl"><div class="s-ti" data-r><h3>Full Stack Developer</h3><p>IMAP Systems Pvt. Ltd., Mumbai<br>01/2026 – Present</p><span class="s-d">Developing and maintaining web and mobile applications, backend APIs, databases and frontends for enterprise solutions with ASP.NET, C#, SQL Server, React.js and Flutter, plus production-level issue resolution.</span></div><div class="s-ti" data-r style="--d:.12s"><h3>Full Stack Developer Intern</h3><p>Technoworld Software<br>07/2025 – 01/2026</p><span class="s-d">Expanded RESTful APIs with Spring Boot, MySQL and Spring Data JPA; built and tested full CRUD operations with form validation and structured exception handling; connected a responsive HTML, CSS and JavaScript frontend through API integration.</span></div></div></div></section>
 <section class="s-sec" id="s-work"><div class="s-in"><div class="s-row" data-r><span>( 03 )</span><span>Selected work</span><span>5 projects</span></div><p class="s-k" data-r style="--k:#d98a7c">Selected work</p><h2 class="s-h" data-r>Projects <em>built to ship.</em></h2>
 <div class="s-cards">
