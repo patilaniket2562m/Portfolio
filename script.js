@@ -18,12 +18,12 @@ const concT=tex(512,512,(x,w,h)=>{x.fillStyle='#8d9199';x.fillRect(0,0,w,h);for(
 const floorW=tex(512,512,(x,w,h)=>{for(let i=0;i<8;i++){x.fillStyle=`hsl(26,${38+rnd()*10}%,${26+rnd()*8}%)`;x.fillRect(0,i*64,w,64);for(let k=0;k<60;k++){x.fillStyle=`rgba(0,0,0,${rnd()*.12})`;x.fillRect(rnd()*w,i*64+rnd()*64,20+rnd()*90,1)}x.fillStyle='rgba(0,0,0,.45)';x.fillRect(0,i*64,w,2);x.fillRect((i*137)%w,i*64,2,64)}},true,[3,3]);
 const woodT=tex(256,256,(x,w,h)=>{x.fillStyle='#6a4529';x.fillRect(0,0,w,h);for(let i=0;i<160;i++){const l=rnd()>.5;x.fillStyle=`rgba(${l?255:20},${l?210:10},${l?170:5},${rnd()*.12})`;x.fillRect(rnd()*w,0,1+rnd()*3,h)}});
 function lab(text,bg,fg){return tex(256,256,(x,w,h)=>{x.fillStyle=bg;x.fillRect(0,0,w,h);x.strokeStyle='rgba(255,255,255,.28)';x.lineWidth=8;x.strokeRect(10,10,w-20,h-20);x.fillStyle=fg||'#fff';const fs=Math.min(120,Math.floor(215/(text.length*.6)));x.font=`800 ${fs}px system-ui,sans-serif`;x.textAlign='center';x.textBaseline='middle';x.fillText(text,w/2,h/2+6)})}
-function sign(txt,x,y,z,ry,w,h,bg){const t=tex(512,Math.round(512*h/w),(c,W,H)=>{c.fillStyle=bg||'#0f1522';c.fillRect(0,0,W,H);c.fillStyle='#fff';c.font=`800 ${H*.5}px system-ui,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillText(txt,W/2,H/2+3)});const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:t,toneMapped:false}));m.position.set(x,y,z);m.rotation.y=ry;scene.add(m);return m}
+function sign(txt,x,y,z,ry,w,h,bg){const t=tex(512,Math.round(512*h/w),(c,W,H)=>{c.fillStyle=bg||'#16201a';c.fillRect(0,0,W,H);c.fillStyle='#fff';c.font=`800 ${H*.5}px system-ui,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillText(txt,W/2,H/2+3)});const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:t,toneMapped:false}));m.position.set(x,y,z);m.rotation.y=ry;scene.add(m);return m}
 function poster(t1,t2,c1,c2){return tex(1024,640,(x,w,h)=>{const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,c1);g.addColorStop(1,c2);x.fillStyle=g;x.fillRect(0,0,w,h);x.fillStyle='rgba(5,8,14,.55)';x.fillRect(0,0,w,h);x.fillStyle='rgba(255,255,255,.1)';x.fillRect(60,60,w-120,44);[0,1,2].forEach(i=>{x.fillStyle=['#ff5f57','#febc2e','#28c840'][i];x.beginPath();x.arc(84+i*30,82,8,0,6.3);x.fill()});x.fillStyle='#fff';x.font='bold 84px system-ui,sans-serif';x.fillText(t1,70,300);x.fillStyle='#bcd0ff';x.font='38px system-ui,sans-serif';x.fillText(t2,70,365);for(let i=0;i<7;i++){x.fillStyle=i%2?'rgba(0,213,255,.7)':'rgba(66,133,255,.8)';x.fillRect(70+i*70,570-(40+rnd()*130),48,40+rnd()*130)}})}
 function screenTex(title,lines){return tex(512,320,(x,w,h)=>{x.fillStyle='#0a1020';x.fillRect(0,0,w,h);x.fillStyle='#141c33';x.fillRect(0,0,w,26);['#ff5f57','#febc2e','#28c840'].forEach((c,i)=>{x.fillStyle=c;x.beginPath();x.arc(14+i*16,13,4,0,6.3);x.fill()});x.fillStyle='#7dffe0';x.font='800 34px system-ui,sans-serif';x.fillText(title,28,78);x.fillStyle='#cfd8ee';x.font='20px system-ui,sans-serif';lines.forEach((l,i)=>x.fillText(l,28,120+i*30))})}
 // ---- materials
 const M=(c,m,ro,o)=>new T.MeshStandardMaterial(Object.assign({color:c,metalness:m,roughness:ro},o));
-const wallM=M(0xe4dfd6,0,.92,{bumpMap:concT,bumpScale:.4}),trim=M(0x24201c,.3,.5),dark=M(0x15191f,.8,.35),steel=M(0xaab3c0,1,.25),white=M(0xe6e8ec,.05,.55),fabric=M(0x3b4a66,0,1),fabric2=M(0x2d3a52,0,1),leaf=M(0x2f6b3a,0,.8);
+const wallM=M(0xe4dfd6,0,.92,{bumpMap:concT,bumpScale:.4}),trim=M(0x24201c,.3,.5),dark=M(0x15191f,.8,.35),steel=M(0xaab3c0,1,.25),white=M(0xe6e8ec,.05,.55),fabric=M(0x6b665a,0,1),fabric2=M(0x575349,0,1),leaf=M(0x2f6b3a,0,.8);
 const leafT=tex(256,256,(x,w,h)=>{for(let i=0;i<170;i++){x.save();x.translate(rnd()*w,rnd()*h);x.rotate(rnd()*6.28);x.fillStyle=`hsl(${92+rnd()*35},${42+rnd()*20}%,${20+rnd()*20}%)`;x.beginPath();x.ellipse(0,0,13+rnd()*8,5+rnd()*3,0,0,6.3);x.fill();x.strokeStyle='rgba(210,240,170,.25)';x.beginPath();x.moveTo(-12,0);x.lineTo(12,0);x.stroke();x.restore()}});
 const leafCardM=new T.MeshStandardMaterial({map:leafT,alphaTest:.45,side:T.DoubleSide,roughness:.75});
 const woodM=M(0xffffff,0,.55,{map:woodT,bumpMap:woodT,bumpScale:.3,envMapIntensity:.5});
@@ -39,14 +39,15 @@ const WH=3.2,WT=.2;
 function wsplit(a,b,cuts,fn){const pts=[a,...cuts.filter(c=>c>a+.01&&c<b-.01),b];for(let i=0;i<pts.length-1;i++)fn(pts[i],pts[i+1])}
 function wallH(z,x0,x1,gaps){let a=x0;const seg=(p,q,hd)=>wsplit(p,q,[-4.5,4.5],(u,v)=>hd?bx(v-u,WH-2.3,WT,(u+v)/2,2.3,z,wallM,false):bx(v-u,WH,WT,(u+v)/2,0,z,wallM));(gaps||[]).slice().sort((p,q)=>p-q).forEach(g=>{seg(a,g-1.1);seg(g-1.1,g+1.1,1);a=g+1.1});seg(a,x1)}
 function wallV(x,z0,z1,gaps){let a=z0;const seg=(p,q,hd)=>wsplit(p,q,[0],(u,v)=>hd?bx(WT,WH-2.3,v-u,x,2.3,(u+v)/2,wallM,false):bx(WT,WH,v-u,x,0,(u+v)/2,wallM));(gaps||[]).slice().sort((p,q)=>p-q).forEach(g=>{seg(a,g-1.1);seg(g-1.1,g+1.1,1);a=g+1.1});seg(a,z1)}
-wallH(-9,-13.5,13.5);wallH(9,-13.5,13.5,[-6.4]);wallV(-13.5,-9,9);wallV(13.5,-9,9);
+function wallVW(x,z0,z1,zs){let a=z0;const full=(p,q)=>wsplit(p,q,[0],(u,v)=>bx(WT,WH,v-u,x,0,(u+v)/2,wallM));zs.slice().sort((p,q)=>p-q).forEach(zc=>{const p=zc-.95,q=zc+.95;full(a,p);bx(WT,1.0,q-p,x,0,zc,wallM);bx(WT,WH-2.5,q-p,x,2.5,zc,wallM,false);a=q});full(a,z1)}
+wallH(-9,-13.5,13.5);wallH(9,-13.5,13.5,[-6.4]);wallVW(-13.5,-9,9,[5]);wallVW(13.5,-9,9,[-4.5,5.2]);
 wallH(0,-13.5,13.5,[-9,0,9]);wallV(-4.5,-9,9,[-4.5,4.5]);wallV(4.5,-9,9,[-4.5,4.5]);
 const ceil=new T.Mesh(new T.PlaneGeometry(27.2,18.2),M(0xf1eee8,0,.95));ceil.rotation.x=Math.PI/2;ceil.position.y=WH;ceil.receiveShadow=true;scene.add(ceil);
 // rooms: floors, lights
 const RD=[['Study',-9,-4.5,floorW],['Lab',0,-4.5,M(0x9aa2ae,.35,.4,{map:concT,bumpMap:concT,bumpScale:1})],['Gallery',9,-4.5,M(0xc8ccd2,.3,.35,{map:concT,bumpMap:concT,bumpScale:.6})],['Living room',-9,4.5,floorW],['Library',0,4.5,floorW],['Contact',9,4.5,M(0x80858f,.35,.4,{map:concT,bumpMap:concT,bumpScale:1})]];
 RD.forEach(([n,cx,cz,fm],i)=>{rooms.push({n,cx,cz});const f=new T.Mesh(new T.PlaneGeometry(9,9),fm.isMaterial?fm:M(0xffffff,.1,.45,{map:fm,bumpMap:fm,bumpScale:.4}));f.rotation.x=-Math.PI/2;f.receiveShadow=true;scene.add(f);f.position.set(cx,0,cz);
  const pl=bx(2.6,.04,.7,cx,WH-.04,cz,glowM,false);pl.castShadow=false;const lt=new T.PointLight(0xffe0bd,1.15,12);lt.position.set(cx,2.9,cz);scene.add(lt)});
-scene.add(new T.HemisphereLight(0xbfd0ff,0x3a2c20,.28));
+scene.add(new T.HemisphereLight(0xe6e0d4,0x3a2c20,.3));
 const fl=new T.SpotLight(0xfff0d8,.9,24,.5,.6,1.3);fl.castShadow=!coarse;fl.shadow.mapSize.set(1024,1024);fl.shadow.bias=-.0005;fl.shadow.normalBias=.02;scene.add(fl,fl.target);
 // helpers: bodies and info objects
 function body(mesh,half,info,x,y,z){mesh.position.set(x,y,z);mesh.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true}});scene.add(mesh);const b={m:mesh,v:new V3(),h:half,s:1,info,held:false,ground:false,home:new V3(x,y,z),name:info.t};mesh.userData.ref=b;bodies.push(b);pick.push(mesh);ray.push(mesh);return b}
@@ -61,7 +62,7 @@ function shelf(x,z,len,axis,fs){const g=new T.Group();g.position.set(x,0,z);g.ro
  g.traverse(o=>{if(o.isMesh)o.castShadow=o.receiveShadow=true});
  const a=axis==='x'?[len/2,.25]:[.25,len/2];S.push({x0:x-a[0],x1:x+a[0],y0:0,y1:2.5,z0:z-a[1],z1:z+a[1],cx:x,cy:1.25,cz:z,hx:a[0],hy:1.25,hz:a[1]})}
 // ================= CONTENT =================
-const SD={Java:'The core language behind my backend work, used in Online Auction.',Servlet:'Used to build the server side of Online Auction.',JSP:'Server-rendered pages in Online Auction.',MySQL:'My main relational database, used across my projects.','SQL Server':'Used in the Online Attendance System.','ASP.NET':'Used for the Online Attendance System.',JavaScript:'Interactivity and client-side logic.','React.js':'Component-based frontends.','Spring Boot':'Production-ready Java services and REST APIs.',Hibernate:'ORM for mapping Java objects to database tables.'};
+const SD={'C#':'My main backend language at IMAP Systems, used with ASP.NET.',JavaScript:'Client and server logic across React and Node.js projects.',Dart:'The language behind my Flutter mobile apps.',React:'Component-based frontends: TFOD and MedScan AI.',Flutter:'Cross-platform mobile apps: MedScan AI and Square Chat.','ASP.NET':'Backend APIs and web apps at IMAP Systems and in MedScan AI.','Node.js':'REST APIs for TFOD, MedScan AI and Square Chat.',MySQL:'Relational database for MedScan AI and my Spring Boot internship work.','SQL Server':'Enterprise database at IMAP Systems and behind TFOD.',Firebase:'Firestore, authentication and push notifications in Square Chat.',Git:'Version control for every project I ship.',Postman:'Designing and testing REST APIs.',OOP:'Object-oriented design is the base of how I structure code.',MVC:'Clean separation of models, views and controllers.','REST API':'Secure, well-structured APIs for web and mobile clients.',Security:'Authentication and secure data handling in production systems.'};
 const sk=(n,c)=>({t:n,tag:c,h:'<p>'+(SD[n]||n+' is part of my '+c.toLowerCase()+' toolkit.')+'</p>'});
 const GH='https://github.com/patilaniket2562m';
 // LIVING ROOM (start)
@@ -71,11 +72,11 @@ const GH='https://github.com/patilaniket2562m';
  [-9.7,-8.3].forEach(x=>{const c=new T.Mesh(new T.BoxGeometry(1.2,.16,.85),fabric);c.position.set(x,.63,1.95);scene.add(c)});
  table(-9,3.8,1.8,.9,.46);
  bx(2.8,.5,.5,-9,0,8.65,woodM);bx(2.4,1.3,.07,-9,1.0,8.8,dark);
- const tv=new T.Mesh(new T.PlaneGeometry(2.3,1.2),new T.MeshBasicMaterial({map:poster('Aniket Patil','Full Stack Developer','#4285ff','#0b1a3a'),toneMapped:false}));tv.position.set(-9,1.65,8.76);tv.rotation.y=Math.PI;scene.add(tv);
- inf(tv,{t:'Aniket Patil',tag:'Welcome home',h:'<p>I’m a Full Stack Developer building web applications with Java, Spring Boot, React.js and MySQL.</p><p>Everything in this house is interactive. Visit the Study, Lab, Gallery, Library and Contact rooms, and feel free to throw the furniture’s contents around.</p>'});
- 'ANIKET'.split('').forEach((ch,i)=>cube(ch,['#4285ff','#00a8d4','#6b3df5','#4285ff','#00a8d4','#6b3df5'][i],.26,{t:'Aniket Patil',tag:'Full Stack Developer',h:'<p>Java · Spring Boot · React.js · MySQL</p><p>Based in Kolhapur, Maharashtra, India. Currently pursuing an MCA at KIT’s IMER.</p>'},-9.85+i*.34,.5+.13,8.65));
- const rm=new T.Mesh(new T.BoxGeometry(.38,.03,.52),[white,white,M(0xffffff,0,.6,{map:tex(256,360,(x,w,h)=>{x.fillStyle='#fff';x.fillRect(0,0,w,h);x.fillStyle='#1a1030';x.font='800 40px system-ui';x.fillText('RESUME',24,60);x.fillStyle='#4285ff';x.fillRect(24,80,w-48,8);for(let i=0;i<10;i++){x.fillStyle='#c9cdd6';x.fillRect(24,120+i*20,w-48-(i%3)*40,8)}})}),white,white,white]);
- body(rm,[.19,.015,.26],{t:'Resume',tag:'Download',h:'<p>My resume as a PDF. It works once the file sits next to this page on your hosting.</p>',l:'Aniket%20Patil%20-%20Resume%20(1).pdf',lt:'Download resume',dl:1},-8.5,.46+.016,3.8);
+ const tv=new T.Mesh(new T.PlaneGeometry(2.3,1.2),new T.MeshBasicMaterial({map:poster('Aniket Patil','Full Stack Developer','#b08d4a','#0f1a14'),toneMapped:false}));tv.position.set(-9,1.65,8.76);tv.rotation.y=Math.PI;scene.add(tv);
+ inf(tv,{t:'Aniket Patil',tag:'Welcome home',h:'<p>I\u2019m a Full Stack Developer at IMAP Systems Pvt. Ltd., Mumbai, building scalable web and Flutter-based applications with ASP.NET, React and SQL Server.</p><p>Every room of this house is part of my portfolio: the Study, Lab, Gallery, Library and Contact room.</p>'});
+ 'ANIKET'.split('').forEach((ch,i)=>cube(ch,['#b08d4a','#46566a','#6b4f3a','#b08d4a','#46566a','#6b4f3a'][i],.26,{t:'Aniket Patil',tag:'Full Stack Developer',h:'<p>ASP.NET \u00b7 React \u00b7 Flutter \u00b7 SQL Server</p><p>Currently at IMAP Systems, Mumbai. Based in Kolhapur, Maharashtra, India.</p>'},-9.85+i*.34,.5+.13,8.65));
+ const rm=new T.Mesh(new T.BoxGeometry(.38,.03,.52),[white,white,M(0xffffff,0,.6,{map:tex(256,360,(x,w,h)=>{x.fillStyle='#fff';x.fillRect(0,0,w,h);x.fillStyle='#1a1030';x.font='800 40px system-ui';x.fillText('RESUME',24,60);x.fillStyle='#b08d4a';x.fillRect(24,80,w-48,8);for(let i=0;i<10;i++){x.fillStyle='#c9cdd6';x.fillRect(24,120+i*20,w-48-(i%3)*40,8)}})}),white,white,white]);
+ body(rm,[.19,.015,.26],{t:'Resume',tag:'Download',h:'<p>My resume as a PDF.</p>',l:'Aniket_Patil_-_Resume.pdf',lt:'Download resume',dl:1},-8.5,.46+.016,3.8);
  cy(.03,.03,1.5,-12.6,0,1.4,steel,10);cy(.28,.4,.4,-12.6,1.5,1.4,M(0xfff0d0,0,.8,{emissive:0xffd9a0,emissiveIntensity:1.2}));plant(-12.8,8.1);plant(-4.9,8.1)
 })();
 // STUDY (About)
@@ -83,49 +84,51 @@ const GH='https://github.com/patilaniket2562m';
  cy(2.6,2.6,.02,-9,0,-6.2,M(0x3a2a22,0,1),48);
  table(-9,-7.9,2.6,1.1,.8);bx(.6,.74,1,-10.05,0,-7.9,woodM);
  const mon=new T.Group();scene.add(mon);const bz=new T.Mesh(new T.BoxGeometry(1.3,.75,.05),dark);bz.position.set(-9,1.2,-8.3);scene.add(bz);
- const scr=new T.Mesh(new T.PlaneGeometry(1.2,.65),new T.MeshBasicMaterial({map:screenTex('About me',['Passionate Full Stack Developer','Java · Spring Boot · React · MySQL','MCA at KIT’s IMER, Kolhapur','Press E to read more']),toneMapped:false}));scr.position.set(-9,1.2,-8.27);scene.add(scr);
+ const scr=new T.Mesh(new T.PlaneGeometry(1.2,.65),new T.MeshBasicMaterial({map:screenTex('About me',['Full Stack Developer','ASP.NET \u00b7 React \u00b7 Flutter','IMAP Systems, Mumbai','Press E to read more']),toneMapped:false}));scr.position.set(-9,1.2,-8.27);scene.add(scr);
  cy(.05,.05,.35,-9,.8,-8.3,dark,8);
- inf(scr,{t:'About me',tag:'The Study',h:'<p>I’m a passionate Full Stack Developer with hands-on experience building real-world applications. I love designing user-friendly interfaces and solving complex problems with clean, efficient code.</p><p>I’m pursuing my MCA at KIT’s IMER, Kolhapur, combining strong backend fundamentals with modern frontend skills to deliver complete web solutions.</p><div class="chips"><span>MCA 66.09%</span><span>BCA 78.82%</span><span>Graduating 2025</span></div>'});
- const mug=new T.Mesh(new T.CylinderGeometry(.07,.07,.12,20),white);body(mug,[.07,.06,.07],{t:'Coffee mug',tag:'Fuel',h:'<p>Fuel for clean code. Go ahead, knock it over.</p>'},-8.2,.8+.065,-7.7);
- const nb=new T.Mesh(new T.BoxGeometry(.28,.03,.38),[dark,dark,M(0xffffff,0,.6,{map:tex(256,340,(x,w,h)=>{x.fillStyle='#14305c';x.fillRect(0,0,w,h);x.fillStyle='#fff';x.font='800 38px system-ui';x.fillText('NOTES',30,70);x.fillStyle='#7dffe0';x.fillRect(30,90,60,6)})}),dark,dark,dark]);
- body(nb,[.14,.015,.19],{t:'Notebook',tag:'Currently',h:'<p>Currently pursuing an MCA at KIT’s IMER, Kolhapur (2023 – 2025), strengthening backend fundamentals alongside modern frontend skills.</p>'},-9.8,.8+.016,-7.6);
+ inf(scr,{t:'About me',tag:'The Study',h:'<p>Full Stack Developer at IMAP Systems Pvt. Ltd., Mumbai, building scalable web and Flutter-based applications. Skilled in REST APIs, authentication and developing secure, production-ready systems.</p><p>I hold an MCA from KIT\u2019s IMER, Kolhapur (2025) and work across ASP.NET, React, Flutter and MySQL / SQL Server.</p>'});
  bx(.5,.08,.5,-9,.45,-6.8,fabric);bx(.9,.8,.1,-9,.5,-6.4,fabric);cy(.05,.05,.45,-9,0,-6.8,steel,8);
  shelf(-13.25,-4.5,4,'z',1);plant(-5.2,-8.1)
 })();
 // LAB (Skills)
 (function(){
- const st=[['FRONTEND',-2.4,-8.2,0,'#e8527a',[['HTML5'],['CSS3'],['Bootstrap'],['JavaScript'],['React.js'],['JSP']]],
-  ['BACKEND',2.4,-8.2,0,'#6b3df5',[['Java'],['Servlet'],['Spring'],['Spring Boot'],['Hibernate'],['JDBC'],['ASP.NET']]],
-  ['DATA',-2.6,-1.3,Math.PI,'#0fa88c',[['MySQL'],['SQL Server']]],
-  ['TOOLS',2.6,-1.3,Math.PI,'#d98a1c',[['Git'],['GitHub'],['VS Code'],['IntelliJ IDEA'],['Postman'],['Maven'],['REST APIs']]]];
- st.forEach(([cat,x,z,ry,col,items])=>{table(x,z,3.0,1.0,.85,M(0x2b3140,.5,.4));const dz=ry?.3:-.3;
-  sign(cat,x,1.35,z+(ry?.42:-.42),ry,1.5,.32,'#10151f');
+ const st=[['LANGUAGES',-2.4,-8.2,0,'#a9593d',[['C#'],['JavaScript'],['Dart']]],
+   ['STACK',2.4,-8.2,0,'#46566a',[['React'],['Flutter'],['ASP.NET'],['Node.js']]],
+   ['DATA',-2.6,-1.3,Math.PI,'#3f6b57',[['MySQL'],['SQL Server'],['Firebase']]],
+   ['TOOLS',2.6,-1.3,Math.PI,'#b08d4a',[['Git'],['Postman'],['OOP'],['MVC'],['REST API'],['Security']]]];
+ st.forEach(([cat,x,z,ry,col,items])=>{table(x,z,3.0,1.0,.85,M(0x3d3f3d,.5,.4));const dz=ry?.3:-.3;
+  sign(cat,x,1.35,z+(ry?.42:-.42),ry,1.5,.32,'#16201a');
   items.forEach(([n],i)=>{const row=i<4?0:1,idx=row?i-4:i,cnt=row?items.length-4:Math.min(4,items.length),xx=x+(idx-(cnt-1)/2)*.55,zz=z+(row?(ry?-.2:.2):(ry?.2:-.2));cube(n,col,.36,sk(n,cat[0]+cat.slice(1).toLowerCase()),xx,.85+.18+.01,zz)})});
- sign('SKILLS LAB',0,2.55,-8.85,0,3.6,.6,'#0f1522');
+ sign('SKILLS LAB',0,2.55,-8.85,0,3.6,.6,'#16201a');
  [[-4.2,-4.5],[4.2,-4.5]].forEach(([x,z])=>plant(x,z))
 })();
 // GALLERY (Projects)
 (function(){
- const P=[{x:6.9,t:'Online Auction',s:'JSP · Servlet · Java · MySQL',c1:'#4285ff',c2:'#0b1a3a',d:'A dual-user platform enabling vendors to list products and customers to take part in real-time competitive bidding. Features live updates, bid tracking and secure user authentication.',tech:['JSP','Servlet','Java','MySQL']},
-  {x:11.1,t:'Attendance System',s:'ASP.NET · SQL Server · JavaScript',c1:'#00a0c0',c2:'#07202b',d:'A web-based attendance management system with role-based access control for teachers and students, automated reports, dashboard analytics and secure login flows.',tech:['ASP.NET','SQL Server','JavaScript','MySQL']}];
- P.forEach((p,i)=>{const info={t:i?'Online Attendance System':p.t,tag:'Project 0'+(i+1),h:'<p>'+p.d+'</p><div class="chips">'+p.tech.map(t=>'<span>'+t+'</span>').join('')+'</div>',l:GH,lt:'View code on GitHub'};
-  bx(3.7,2.4,.1,p.x,.5,-8.85,dark);const pm=new T.Mesh(new T.PlaneGeometry(3.4,2.12),new T.MeshBasicMaterial({map:poster(p.t,p.s,p.c1,p.c2),toneMapped:false}));pm.position.set(p.x,1.66,-8.78);scene.add(pm);inf(pm,info);
+ const P=[{x:6.9,t:'Online Auction',s:'JSP · Servlet · Java · MySQL',c1:'#b08d4a',c2:'#0f1a14',d:'A dual-user platform enabling vendors to list products and customers to take part in real-time competitive bidding. Features live updates, bid tracking and secure user authentication.',tech:['JSP','Servlet','Java','MySQL']},
+  {x:11.1,t:'Attendance System',s:'ASP.NET · SQL Server · JavaScript',c1:'#2f4a3c',c2:'#07202b',d:'A web-based attendance management system with role-based access control for teachers and students, automated reports, dashboard analytics and secure login flows.',tech:['ASP.NET','SQL Server','JavaScript','MySQL']}];
+ P.forEach((p,i)=>{const info={t:i?'Online Attendance System':p.t,tag:'Earlier project',h:'<p>'+p.d+'</p><div class="chips">'+p.tech.map(t=>'<span>'+t+'</span>').join('')+'</div>',l:GH,lt:'View code on GitHub'};
+  
   bx(.9,1.0,.9,p.x+.7*(i?-1:1),0,-5.5,M(0xe6e8ec,.1,.55));
   const px=p.x+.7*(i?-1:1);
   if(!i){const g=new T.Group(),hd=new T.Mesh(new T.CylinderGeometry(.11,.11,.34,24),M(0x5a3a22,0,.45));hd.rotation.z=Math.PI/2;hd.position.y=.2;g.add(hd);const hn=new T.Mesh(new T.CylinderGeometry(.035,.035,.5,12),woodM);hn.position.y=-.05;g.add(hn);[-.12,.12].forEach(o=>{const b=new T.Mesh(new T.CylinderGeometry(.115,.115,.03,24),steel);b.rotation.z=Math.PI/2;b.position.set(o,.2,0);g.add(b)});body(g,[.17,.3,.11],info,px,1.0+.3+.01,-5.5)}
   else{const g=new T.Group(),bd=new T.Mesh(new T.BoxGeometry(.4,.03,.55),M(0x7a5230,0,.5)),pp=new T.Mesh(new T.BoxGeometry(.34,.006,.48),white),cp=new T.Mesh(new T.BoxGeometry(.14,.02,.06),steel);pp.position.y=.019;cp.position.set(0,.02,-.24);g.add(bd,pp,cp);body(g,[.2,.025,.28],info,px,1.0+.03,-5.5)}});
- sign('PROJECTS',9,2.75,-8.85,0,3.2,.5,'#0f1522');
+ 
+ [['TFOD','The Future Of Design','React \u00b7 Vite \u00b7 Node \u00b7 SQL Server','#2f4a3c','#0f1a14','04/2026 \u2013 10/2026','Website for TFOD built with React.js, Vite, Node.js, Express.js and SQL Server. Responsive UI components, REST APIs, database integration, admin dashboards and website features.',['React.js','Vite','Node.js','Express.js','SQL Server']],
+  ['MedScan AI','Medical Report Management','ASP.NET \u00b7 Node \u00b7 React \u00b7 Flutter','#3d4f6a','#101722','01/2026 \u2013 04/2026','A full-stack medical report management system with secure report uploads, multi-user access and abnormal report detection. Built with ASP.NET, Node.js, React and Flutter on MySQL / SQL Server, focused on scalable architecture and secure data handling.',['ASP.NET','Node.js','React','Flutter','MySQL','SQL Server']],
+  ['Square Chat','Real-Time Messaging','Flutter \u00b7 Node \u00b7 Firebase','#8a5a3c','#1d130d','01/2026 \u2013 02/2026','A real-time messaging and calling app. Chat with Firestore, audio/video calling using WebRTC, authentication, push notifications and a scalable cloud-based architecture.',['Flutter','Node.js','Firebase','WebRTC','Firestore']]].forEach(([t,sub,st2,c1,c2,dt,d,tech],i)=>{const x=6.1+i*2.9;
+  bx(2.8,1.9,.1,x,.9,-8.85,dark);const pm=new T.Mesh(new T.PlaneGeometry(2.6,1.62),new T.MeshBasicMaterial({map:poster(t,st2,c1,c2),toneMapped:false}));pm.position.set(x,1.85,-8.78);scene.add(pm);
+  inf(pm,{t:t+' \u2013 '+sub,tag:'Project 0'+(i+1)+' \u00b7 '+dt,h:'<p>'+d+'</p><div class="chips">'+tech.map(q=>'<span>'+q+'</span>').join('')+'</div>',l:GH,lt:'View code on GitHub'})});
+  sign('PROJECTS',9,2.75,-8.85,0,3.2,.5,'#16201a');
  bx(2.2,.45,.55,9,0,-1.7,woodM);bx(2.2,.45,.55,9,0,-7.9,woodM,false);plant(13,-8.3)
 })();
 // LIBRARY (Education)
 (function(){
  shelf(0,8.75,7.6,'x',-1);cy(2.2,2.2,.02,0,0,5,M(0x4a2b2b,0,1),48);table(0,5,2.6,1.1,.8);
- [['MCA','KIT’s IMER, Kolhapur','2023 – 2025','66.09%','#14305c'],['BCA','New College, Kolhapur','2021 – 2023','78.82%','#4a1f2f'],['HSC','LTDP College Kalkundri','2018 – 2020','59.23%','#1f4a35']].forEach(([d,c,y,p,col],i)=>{
+ [['MCA','KIT’s IMER, Kolhapur','2023 – 2025','66.09%','#2f4a3c'],['BCA','New College, Kolhapur','2021 – 2023','78.82%','#4a1f2f'],['HSC','LTDP College Kalkundri','2018 – 2020','59.23%','#1f4a35']].forEach(([d,c,y,p,col],i)=>{
   const m=new T.Mesh(new T.BoxGeometry(.5,.09,.38),[M(0xf2ead6,0,.8),M(0xf2ead6,0,.8),M(0xffffff,.1,.5,{map:lab(d,col)}),M(0xf2ead6,0,.8),M(col,0,.6),M(col,0,.6)]);
   body(m,[.25,.045,.19],{t:d,tag:'Education',h:'<p><b>'+c+'</b><br>'+y+'</p><div class="chips"><span>'+p+'</span></div>'},-.8+i*.8,.8+.046,5+(i%2?.05:-.05))});
  bx(1.1,.7,1.0,-3.0,.05,2.1,fabric);bx(1.1,.8,.2,-3.0,.4,1.6,fabric2);
- [['EXPERIENCE',1.7],['CERTIFICATIONS',7.4]].forEach(([t,z])=>{const bd=bx(.06,1.3,2.2,4.38,1.0,z,M(0x1b2233,0,.6),false);const p=new T.Mesh(new T.PlaneGeometry(2.0,1.1),new T.MeshBasicMaterial({map:tex(512,280,(x,w,h)=>{x.fillStyle='#10192e';x.fillRect(0,0,w,h);x.setLineDash([12,8]);x.strokeStyle='#4285ff';x.lineWidth=3;x.strokeRect(14,14,w-28,h-28);x.fillStyle='#fff';x.font='800 38px system-ui';x.textAlign='center';x.fillText(t,w/2,110);x.fillStyle='#a9b4cc';x.font='24px system-ui';x.fillText('Add yours here',w/2,160)}),toneMapped:false}));p.position.set(4.34,1.0,z);p.rotation.y=-Math.PI/2;scene.add(p);
-  inf(p,{t:t[0]+t.slice(1).toLowerCase(),tag:'Placeholder',h:'<p>Your original portfolio listed no '+t.toLowerCase()+', so nothing is invented here. Add your details to this board in the code.</p>'})});
+ [['IMAP SYSTEMS','Full Stack Developer','01/2026 \u2013 Present',1.7,'IMAP Systems Pvt. Ltd., Mumbai','<p>Full Stack Developer building and maintaining web and mobile applications for enterprise solutions: backend APIs, database management, frontend development and production-level issue resolution.</p><div class="chips"><span>ASP.NET</span><span>C#</span><span>SQL Server</span><span>React.js</span><span>Flutter</span></div>'],['TECHNOWORLD','Full Stack Developer Intern','07/2025 \u2013 01/2026',7.4,'Technoworld Software','<p>Expanded RESTful APIs with Spring Boot, MySQL and Spring Data JPA. Built and tested full CRUD operations with form validation and structured exception handling, and connected a responsive HTML/CSS/JavaScript frontend through API integration.</p><div class="chips"><span>Spring Boot</span><span>MySQL</span><span>Spring Data JPA</span><span>REST APIs</span></div>']].forEach(([co,role,dt,z,full,html])=>{bx(.06,1.3,2.2,4.38,1.0,z,M(0x1b2420,0,.6),false);const p=new T.Mesh(new T.PlaneGeometry(2.0,1.1),new T.MeshBasicMaterial({map:tex(512,280,(x,w,h)=>{x.fillStyle='#16231c';x.fillRect(0,0,w,h);x.strokeStyle='#b08d4a';x.lineWidth=3;x.strokeRect(14,14,w-28,h-28);x.fillStyle='#f1ece0';x.font='800 40px system-ui';x.textAlign='center';x.fillText(co,w/2,100);x.fillStyle='#d8cfb8';x.font='24px system-ui';x.fillText(role,w/2,150);x.fillStyle='#b08d4a';x.font='700 22px system-ui';x.fillText(dt,w/2,196)}),toneMapped:false}));p.position.set(4.34,1.0,z);p.rotation.y=-Math.PI/2;scene.add(p);inf(p,{t:full,tag:role+' \u00b7 '+dt,h:html})});
  cy(.03,.03,1.5,-4.0,0,7.9,steel,10);cy(.26,.36,.36,-4.0,1.5,7.9,M(0xfff0d0,0,.8,{emissive:0xffd9a0,emissiveIntensity:1.2}))
 })();
 // CONTACT
@@ -133,14 +136,14 @@ const GH='https://github.com/patilaniket2562m';
  bx(3.4,1.0,.9,9,0,5.6,M(0x20262f,.4,.5));cy(2.4,2.4,.02,9,0,3.4,M(0x1a2a44,0,1),48);
  const lg=new T.Group(),lb=new T.Mesh(new T.BoxGeometry(.6,.03,.4),steel),ls=new T.Group();ls.position.set(0,.015,-.2);ls.rotation.x=-.35;const sh=new T.Mesh(new T.BoxGeometry(.6,.4,.02),dark);sh.position.y=.2;const sc2=new T.Mesh(new T.PlaneGeometry(.55,.35),new T.MeshBasicMaterial({map:screenTex('Let’s talk',['Say hello','patilaniket2562m','@gmail.com']),toneMapped:false}));sc2.position.set(0,.2,.011);ls.add(sh,sc2);lg.add(lb,ls);lg.position.set(8.2,1.0,5.6);lg.rotation.y=Math.PI;scene.add(lg);
  inf(lg,{t:'Send a message',tag:'Contact',form:1,h:'<p>Have a project or opportunity in mind? Write below and your email app will open with the message ready.</p>'});
- const ph=new T.Mesh(new T.BoxGeometry(.09,.012,.19),[dark,dark,M(0x0b1a33,.2,.2,{emissive:0x2060ff,emissiveIntensity:.5}),dark,dark,dark]);
+ const ph=new T.Mesh(new T.BoxGeometry(.09,.012,.19),[dark,dark,M(0x0b1a33,.2,.2,{emissive:0x3a5a48,emissiveIntensity:.5}),dark,dark,dark]);
  body(ph,[.05,.007,.1],{t:'Phone',tag:'Call me',h:'<p>+91 9112261074</p>',l:'tel:+919112261074',lt:'Call now'},9.2,1.0+.007,5.5);
- const ev=new T.Mesh(new T.BoxGeometry(.28,.012,.19),[white,white,M(0xffffff,0,.7,{map:tex(256,180,(x,w,h)=>{x.fillStyle='#f4efe3';x.fillRect(0,0,w,h);x.strokeStyle='#bfb59c';x.lineWidth=3;x.beginPath();x.moveTo(0,0);x.lineTo(w/2,h*.6);x.lineTo(w,0);x.stroke();x.fillStyle='#4285ff';x.font='800 30px system-ui';x.textAlign='center';x.fillText('EMAIL ME',w/2,h*.88)})}),white,white,white]);
+ const ev=new T.Mesh(new T.BoxGeometry(.28,.012,.19),[white,white,M(0xffffff,0,.7,{map:tex(256,180,(x,w,h)=>{x.fillStyle='#f4efe3';x.fillRect(0,0,w,h);x.strokeStyle='#bfb59c';x.lineWidth=3;x.beginPath();x.moveTo(0,0);x.lineTo(w/2,h*.6);x.lineTo(w,0);x.stroke();x.fillStyle='#b08d4a';x.font='800 30px system-ui';x.textAlign='center';x.fillText('EMAIL ME',w/2,h*.88)})}),white,white,white]);
  body(ev,[.14,.007,.1],{t:'Letter',tag:'Email',h:'<p>patilaniket2562m@gmail.com</p>',l:'mailto:patilaniket2562m@gmail.com',lt:'Write an email'},9.8,1.0+.007,5.5);
  cube('GitHub','#24292f',.3,{t:'GitHub',tag:'Code',h:'<p>github.com/patilaniket2562m</p>',l:GH,lt:'Open GitHub'},10.3,1.0+.15,5.65);
  cube('LinkedIn','#0a66c2',.3,{t:'LinkedIn',tag:'Network',h:'<p>Connect with me on LinkedIn.</p>',l:'https://linkedin.com/in/Aniket-patil-5b6a78260',lt:'Open LinkedIn'},10.7,1.0+.15,5.65);
  const dr=bx(1.3,2.3,.08,9,0,8.86,woodM,false);cy(.03,.03,.16,9.45,1.0,8.8,steel,8).rotation.x=Math.PI/2;
- sign('CONTACT',9,2.75,3.6,Math.PI,2.4,.45,'#0f1522');
+ sign('CONTACT',9,2.75,3.6,Math.PI,2.4,.45,'#16201a');
  bx(2.4,.45,.55,12.8,0,1.5,woodM);plant(13,8.3);plant(5.2,0.7)
 })();
 
@@ -156,67 +159,22 @@ const crown=M(0xf6f2ea,0,.6),skirt=M(0x2a211b,.1,.45);
 const skyT=tex(512,512,(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#4f98e6');g.addColorStop(.6,'#bfe0ff');g.addColorStop(.78,'#ffe9c0');g.addColorStop(1,'#4d6b3a');x.fillStyle=g;x.fillRect(0,0,w,h);x.fillStyle='#fffbe6';x.beginPath();x.arc(390,150,38,0,6.3);x.fill();for(let i=0;i<7;i++){x.fillStyle='rgba(255,255,255,.7)';x.beginPath();x.ellipse(rnd()*w,60+rnd()*160,50+rnd()*50,14+rnd()*10,0,0,6.3);x.fill()}x.fillStyle='#2e4a2a';for(let i=0;i<14;i++){x.beginPath();x.arc(i*40,430+rnd()*20,40+rnd()*20,0,6.3);x.fill()}});
 const frM=M(0xf2efe8,0,.5),curt=M(0x8a3b3b,0,1),shaftM=new T.MeshBasicMaterial({color:0xffe2a8,transparent:true,opacity:.07,blending:T.AdditiveBlending,depthWrite:false,side:T.DoubleSide});
 function win(x,z,ry){const g=new T.Group();g.position.set(x,1.75,z);g.rotation.y=ry;scene.add(g);const a=(w,h,d,px,py,pz,m)=>{const o=BX(w,h,d,m);o.position.set(px,py,pz);g.add(o)};
- g.add(new T.Mesh(new T.PlaneGeometry(1.7,1.5),new T.MeshBasicMaterial({map:skyT,toneMapped:false})));
+ g.add(new T.Mesh(new T.PlaneGeometry(1.7,1.5),new T.MeshStandardMaterial({color:0xdfeaf0,transparent:true,opacity:.08,roughness:.05,metalness:0,depthWrite:false,side:T.DoubleSide})));
  a(1.9,.1,.12,0,.8,.04,frM);a(1.9,.1,.12,0,-.8,.04,frM);a(.1,1.7,.12,-.9,0,.04,frM);a(.1,1.7,.12,.9,0,.04,frM);a(.05,1.5,.06,0,0,.03,frM);a(1.7,.05,.06,0,0,.03,frM);a(2.1,.08,.3,0,-.88,.12,frM);
  a(.45,2.9,.1,-1.25,-.3,.1,curt);a(.45,2.9,.1,1.25,-.3,.1,curt);
  const sh=new T.Mesh(new T.BoxGeometry(1.7,1.5,4.5),shaftM);sh.position.set(0,-.5,2.2);sh.rotation.x=.38;g.add(sh);
  if(!coarse){const l=new T.PointLight(0xffe6b8,.9,7);l.position.set(0,-.2,.8);g.add(l)}}
 win(13.39,-4.5,-Math.PI/2);win(13.39,5.2,-Math.PI/2);win(-13.39,5.0,Math.PI/2);
-// framed art
-function art(x,y,z,ry,w,h,hue){const t=tex(256,Math.round(256*h/w),(c,W,H)=>{const g=c.createLinearGradient(0,0,W,H);g.addColorStop(0,`hsl(${hue},60%,22%)`);g.addColorStop(1,`hsl(${hue+50},70%,52%)`);c.fillStyle=g;c.fillRect(0,0,W,H);for(let i=0;i<7;i++){c.fillStyle=`hsla(${hue+rnd()*90},70%,${50+rnd()*30}%,.55)`;c.beginPath();c.arc(rnd()*W,rnd()*H,14+rnd()*50,0,6.3);c.fill()}});
- const g=new T.Group();g.position.set(x,y,z);g.rotation.y=ry;scene.add(g);g.add(BX(w+.12,h+.12,.05,woodM));const p=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshStandardMaterial({map:t,roughness:.6}));p.position.z=.03;g.add(p)}
-art(-6.4,1.8,-8.86,0,1.2,.8,210);art(-11.8,1.8,-8.86,0,.8,1.1,20);art(-11.5,1.8,.11,0,1.2,.8,340);art(-6.5,1.8,.11,0,.9,.9,150);art(6.2,1.8,.11,0,1.2,.8,260);art(11.8,1.8,.11,0,.8,1.1,40);
 // woven rugs
 function rug(x,z,w,d,c1,c2){const t=tex(512,Math.round(512*d/w),(c,W,H)=>{c.fillStyle=c1;c.fillRect(0,0,W,H);c.strokeStyle=c2;c.lineWidth=10;c.strokeRect(14,14,W-28,H-28);c.lineWidth=3;c.strokeRect(36,36,W-72,H-72);c.fillStyle=c2;for(let i=0;i<5;i++){c.save();c.translate(W/2+(i-2)*W*.17,H/2);c.rotate(.785);c.fillRect(-18,-18,36,36);c.restore()}for(let i=0;i<4000;i++){c.fillStyle=`rgba(${rnd()>.5?255:0},${rnd()>.5?255:0},0,.04)`;c.fillRect(rnd()*W,rnd()*H,2,2)}});
  const o=new T.Mesh(new T.PlaneGeometry(w,d),new T.MeshStandardMaterial({map:t,roughness:1,bumpMap:t,bumpScale:.8}));o.rotation.x=-Math.PI/2;o.position.set(x,.035,z);o.receiveShadow=true;scene.add(o)}
-rug(-9,3.8,3.6,2.4,'#7a2a2a','#e0b36a');rug(-9,-6.5,2.6,1.8,'#233a5e','#d9c08a');rug(0,5,3.4,2.2,'#3a5a46','#e8d9a8');rug(9,3.4,3.2,2.0,'#2a3b66','#e0b36a');
+rug(-9,3.8,3.6,2.4,'#7a2a2a','#e0b36a');rug(-9,-6.5,2.6,1.8,'#3d4a3a','#d9c08a');rug(0,5,3.4,2.2,'#3a5a46','#e8d9a8');rug(9,3.4,3.2,2.0,'#3a4a40','#e0b36a');
 // lamp glow
 if(!coarse)[[-12.6,1.9,1.4],[-4,1.9,7.9]].forEach(([x,y,z])=>{const l=new T.PointLight(0xffc88a,.8,6);l.position.set(x,y,z);scene.add(l)});
-// live wall clock
-const ck=new T.Group();ck.position.set(-4.38,2.35,2.0);ck.rotation.y=Math.PI/2;scene.add(ck);
-const cd=new T.Mesh(new T.CylinderGeometry(.3,.3,.04,40),dark);cd.rotation.x=Math.PI/2;ck.add(cd);
-const cf=new T.Mesh(new T.CircleGeometry(.27,40),new T.MeshBasicMaterial({map:tex(256,256,(c,W)=>{c.fillStyle='#f6f1e6';c.fillRect(0,0,W,W);c.fillStyle='#222';for(let i=0;i<12;i++){c.save();c.translate(128,128);c.rotate(i*Math.PI/6);c.fillRect(-4,-118,8,i%3?14:26);c.restore()}}),toneMapped:false}));cf.position.z=.025;ck.add(cf);
-const hand=(l,w,c,z)=>{const g=new T.Group(),m=new T.Mesh(new T.BoxGeometry(w,l,.006),new T.MeshBasicMaterial({color:c}));m.position.y=l/2;g.add(m);g.position.z=z;ck.add(g);return g},hH=hand(.15,.02,0x111111,.03),hM=hand(.22,.014,0x111111,.033),hS=hand(.24,.006,0xd02020,.036);
-ANIM.push(()=>{const d=new Date(),s=d.getSeconds(),m=d.getMinutes();hH.rotation.z=-(d.getHours()%12+m/60)/12*6.283;hM.rotation.z=-(m+s/60)/60*6.283;hS.rotation.z=-s/60*6.283});
-// ceiling fan
-const fan=new T.Group();fan.position.set(-9,2.95,2.2);scene.add(fan);fan.add(new T.Mesh(new T.CylinderGeometry(.1,.1,.12,16),dark));
-for(let i=0;i<4;i++){const b=BX(.75,.015,.16,woodM);b.position.set(Math.cos(i*1.571)*.45,0,Math.sin(i*1.571)*.45);b.rotation.y=-i*1.571;fan.add(b)}
-ANIM.push((t,dt)=>{fan.rotation.y+=dt*4});
 // drifting dust in the light
 const N=260,pa=new Float32Array(N*3);for(let i=0;i<N;i++){pa[i*3]=(rnd()-.5)*26;pa[i*3+1]=.3+rnd()*2.7;pa[i*3+2]=(rnd()-.5)*17}
 const dg=new T.BufferGeometry();dg.setAttribute('position',new T.BufferAttribute(pa,3));const dust=new T.Points(dg,new T.PointsMaterial({color:0xfff0d0,size:.035,transparent:true,opacity:.55,blending:T.AdditiveBlending,depthWrite:false}));dust.frustumCulled=false;scene.add(dust);
 ANIM.push(t=>{const a=dg.attributes.position.array;for(let i=0;i<N;i++){a[i*3]+=Math.sin(t*.3+i)*.0008;a[i*3+1]+=Math.cos(t*.2+i*1.7)*.0006;a[i*3+2]+=Math.sin(t*.25+i*.7)*.0008}dg.attributes.position.needsUpdate=true});
-// ---- CHARACTER: Aniket at his desk (swivels and waves when you approach)
-const skin=M(0xd9a47a,0,.7),shirt=M(0x1f6fd1,0,.9),pants=M(0x232a3a,0,.9),hairM=M(0x15110f,0,.6);
-const av=new T.Group();av.position.set(-9,.53,-6.95);scene.add(av);
-const ad=(m,x,y,z,p)=>{(p||av).add(m);m.position.set(x,y,z);m.castShadow=true;return m};
-[-1,1].forEach(s=>{ad(BX(.15,.14,.5,pants),s*.1,.07,-.2);ad(BX(.13,.5,.13,pants),s*.1,-.22,-.42);ad(BX(.14,.07,.24,dark),s*.1,-.5,-.48)});
-ad(new T.Mesh(new T.CylinderGeometry(.19,.16,.56,20),shirt),0,.36,0).scale.z=.7;
-ad(new T.Mesh(new T.CylinderGeometry(.05,.05,.08,10),skin),0,.68,0);
-const head=new T.Group();ad(head,0,.84,0);
-ad(new T.Mesh(new T.SphereGeometry(.125,24,18),skin),0,0,0,head);ad(new T.Mesh(new T.SphereGeometry(.132,24,18,0,6.3,0,1.2),hairM),0,.015,.012,head);ad(new T.Mesh(new T.SphereGeometry(.015,8,6),skin),0,-.015,-.125,head);
-[-1,1].forEach(s=>{ad(new T.Mesh(new T.SphereGeometry(.014,8,6),dark),s*.045,.012,-.113,head);const g=new T.Mesh(new T.TorusGeometry(.034,.005,6,18),dark);ad(g,s*.045,.012,-.122,head)});
-const arms=[-1,1].map(s=>{const g=new T.Group();ad(g,s*.24,.58,0);const u=BX(.09,.09,.5,shirt);u.position.z=-.25;u.castShadow=true;g.add(u);const h=new T.Mesh(new T.SphereGeometry(.05,12,10),skin);h.position.z=-.52;g.add(h);g.rotation.x=-.5;return g});
-const bt=tex(512,160,(c,W,H)=>{c.fillStyle='rgba(255,255,255,.96)';c.beginPath();c.rect(8,8,W-16,H-40);c.fill();c.fillStyle='#10182b';c.font='800 46px system-ui';c.textAlign='center';c.fillText('Hi, I’m Aniket! 👋',W/2,82)});
-const bub=new T.Sprite(new T.SpriteMaterial({map:bt,transparent:true,opacity:0}));bub.scale.set(1.2,.375,1);bub.position.set(-9,1.85,-6.95);scene.add(bub);
-inf(av,{t:'Aniket Patil',tag:'The developer',h:'<p>Yes, that’s me, deep in code. Check my screen for the full story, or look around the house.</p>'});
-ANIM.push((t,dt)=>{const dx=P.x-av.position.x,dz=P.z-av.position.z,near=Math.hypot(dx,dz)<4.2;const ty=near?Math.atan2(-dx,-dz):0,df=((ty-av.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;av.rotation.y+=df*Math.min(1,dt*3);const w=near&&Math.abs(df)<.5,k=Math.min(1,dt*6);
- arms.forEach((a,i)=>{const tx=(i&&w)?1.4:-.5+(near?0:Math.sin(t*13+i*2)*.035);a.rotation.x+=(tx-a.rotation.x)*k;a.rotation.z=(i&&w)?Math.sin(t*8)*.35:0});
- head.rotation.x=Math.sin(t*1.3)*.03;bub.material.opacity+=((w?1:0)-bub.material.opacity)*Math.min(1,dt*5)});
-// ---- CHARACTER: Bug the cat wandering the living room
-const cat=new T.Group(),fur=M(0xc9793a,0,.95),cb=new T.Mesh(new T.SphereGeometry(.1,16,12),fur);cb.scale.set(1.9,.85,.85);cb.position.y=.17;cat.add(cb);
-const chd=new T.Mesh(new T.SphereGeometry(.07,16,12),fur);chd.position.set(.2,.22,0);cat.add(chd);
-[-1,1].forEach(s=>{const e=new T.Mesh(new T.ConeGeometry(.025,.05,4),fur);e.position.set(.2,.29,s*.04);cat.add(e);const ey=new T.Mesh(new T.SphereGeometry(.01,8,6),new T.MeshBasicMaterial({color:0x66ff88}));ey.position.set(.265,.235,s*.03);cat.add(ey)});
-const tail=new T.Group();tail.position.set(-.18,.2,0);const tl=new T.Mesh(new T.CylinderGeometry(.012,.02,.28,8),fur);tl.position.y=.14;tail.add(tl);cat.add(tail);
-const legs=[[.1,.05],[.1,-.05],[-.1,.05],[-.1,-.05]].map(([lx,lz])=>{const g=new T.Group();g.position.set(lx,.1,lz);const l=new T.Mesh(new T.CylinderGeometry(.015,.013,.1,6),fur);l.position.y=-.05;g.add(l);cat.add(g);return g});
-cat.traverse(o=>{if(o.isMesh)o.castShadow=true});cat.scale.setScalar(1.25);cat.position.set(-11.5,0,6.5);scene.add(cat);
-inf(cat,{t:'Bug the cat',tag:'Resident debugger',h:'<p>Meow. I live here, sleep on the keyboard and introduce most of the bugs. Don’t tell anyone.</p>'});
-const wp=[[-11.5,6.5],[-6.5,6.5],[-6.4,3],[-12,3.3]],nb=[[1,3],[0,2],[1],[0]];let ci=0,cn=0,wait=1;
-ANIM.push((t,dt)=>{if(wait>0){wait-=dt;tail.rotation.z=.4+Math.sin(t*2)*.3;legs.forEach(l=>l.rotation.z=0);cat.position.y=0;if(wait<=0){const o=nb[ci];cn=o[(rnd()*o.length)|0]}return}
- const dx=wp[cn][0]-cat.position.x,dz=wp[cn][1]-cat.position.z,d=Math.hypot(dx,dz);if(d<.08){ci=cn;wait=2+rnd()*4;return}
- cat.position.x+=dx/d*.55*dt;cat.position.z+=dz/d*.55*dt;const th=Math.atan2(-dz,dx),df=((th-cat.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;cat.rotation.y+=df*Math.min(1,dt*6);
- legs.forEach((l,i)=>l.rotation.z=Math.sin(t*9+(i%2?3.14:0)+(i>1?1.5:0))*.5);cat.position.y=Math.abs(Math.sin(t*9))*.01;tail.rotation.z=.9+Math.sin(t*4)*.15});
-
 // ===== CINEMATIC POST-PROCESSING (HDR bloom, ACES grade, lens effects) =====
 let comp=null;
 if(false&&T.EffectComposer&&T.UnrealBloomPass&&T.ShaderPass){try{
@@ -261,9 +219,9 @@ const kn=new T.Mesh(new T.SphereGeometry(.04,10,8),steel);kn.position.set(1.95,1
 MS(.12,2.4,.3,-7.56,1.2,9.05,trim);MS(.12,2.4,.3,-5.24,1.2,9.05,trim);MS(2.5,.12,.3,-6.4,2.36,9.05,trim);
 // lit windows seen from outside
 const gl=tex(64,64,(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#ffe2b0');g.addColorStop(1,'#a8743c');x.fillStyle=g;x.fillRect(0,0,w,h);x.fillStyle='rgba(255,255,255,.18)';x.beginPath();x.moveTo(0,40);x.lineTo(40,0);x.lineTo(64,0);x.lineTo(0,64);x.fill()});
-function glass(x,z,ry,w){const g=new T.Group();g.position.set(x,1.75,z);g.rotation.y=ry;scene.add(g);g.add(new T.Mesh(new T.PlaneGeometry(w,1.5),new T.MeshBasicMaterial({map:gl})));
+function glass(x,z,ry,w,clr){const g=new T.Group();g.position.set(x,1.75,z);g.rotation.y=ry;scene.add(g);g.add(new T.Mesh(new T.PlaneGeometry(w,1.5),clr?new T.MeshStandardMaterial({color:0xdfeaf0,transparent:true,opacity:.1,roughness:.05,metalness:0,depthWrite:false,side:T.DoubleSide}):new T.MeshBasicMaterial({map:gl})));
  [[w+.2,.1,0,.8],[w+.2,.1,0,-.8],[.1,1.7,-w/2-.05,0],[.1,1.7,w/2+.05,0],[.06,1.5,0,0],[w,.05,0,0]].forEach(([a,b,c,d])=>{const o=BX(a,b,.1,trim);o.position.set(c,d,.03);g.add(o)});const s=BX(w+.3,.06,.3,stoneM);s.position.set(0,-.87,.12);g.add(s)}
-[-11,-2.5,2.5].forEach(x=>glass(x,9.12,0,2.4));[-4.5,5.2].forEach(z=>glass(13.62,z,Math.PI/2,1.9));[-4.5,5].forEach(z=>glass(-13.62,z,-Math.PI/2,1.9));[-9,0,9].forEach(x=>glass(x,-9.12,Math.PI,2.4));
+[-11,-2.5,2.5].forEach(x=>glass(x,9.12,0,2.4));[-4.5,5.2].forEach(z=>glass(13.62,z,Math.PI/2,1.9,1));glass(-13.62,-4.5,-Math.PI/2,1.9);glass(-13.62,5,-Math.PI/2,1.9,1);[-9,0,9].forEach(x=>glass(x,-9.12,Math.PI,2.4));
 // garden
 const gr=[M(0x3a4d2b,0,1,{bumpMap:concT,bumpScale:2}),M(0x4a5c33,0,1,{bumpMap:concT,bumpScale:2}),M(0x2b3b25,0,1,{bumpMap:concT,bumpScale:2})];const LM=[leafCardM,Object.assign(leafCardM.clone(),{color:new T.Color(0xd6d79a)}),Object.assign(leafCardM.clone(),{color:new T.Color(0xa3b88a)})];
 function tree(x,z,s){const g=new T.Group();g.position.set(x,0,z);scene.add(g);const t=new T.Mesh(new T.CylinderGeometry(.16*s,.3*s,2.8*s,10),M(0x4a3524,0,1,{bumpMap:concT,bumpScale:2}));t.position.y=1.4*s;g.add(t);
@@ -277,7 +235,7 @@ if(!coarse){const dl2=new T.PointLight(0xffd9a0,.9,7);dl2.position.set(-6.4,2.5,
 // sun + daylight (ramps off indoors)
 const sun=new T.DirectionalLight(0xffe4bf,coarse?0:1.9);sun.position.set(-36,27,30);scene.add(sun,sun.target);
 if(!coarse){sun.castShadow=true;sun.shadow.mapSize.set(4096,4096);const c=sun.shadow.camera;c.left=-34;c.right=34;c.top=30;c.bottom=-30;c.near=5;c.far=120;sun.shadow.bias=-.0004;sun.shadow.normalBias=.04}
-const outH=new T.HemisphereLight(0xc4d4e6,0x5b5a44,0);scene.add(outH);ANIM.push(()=>{outH.intensity=(coarse?1.3:.75)*cl((cam.position.z-8.4)/2,0,1)});
+const outH=new T.HemisphereLight(0xc4d4e6,0x5b5a44,0);scene.add(outH);ANIM.push(()=>{outH.intensity=(coarse?1.3:.75)*(.3+.7*cl((cam.position.z-8.4)/2,0,1))});
 
 
 // ===== OUTDOOR REALISM v2: hills, grass tufts, shrubs, rocks =====
