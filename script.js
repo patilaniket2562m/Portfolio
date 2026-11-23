@@ -618,10 +618,11 @@ addEventListener('keydown',e=>{if(/INPUT|TEXTAREA/.test(e.target.tagName))return
  if(e.code.startsWith('Arrow'))e.preventDefault()});
 addEventListener('keyup',e=>{delete K[e.code]});
 // touch
-const tz=$('#tz');
-tz.addEventListener('touchstart',e=>{for(const t of e.changedTouches){if(t.clientX<innerWidth*.45&&touch.jid===null){touch.jid=t.identifier;touch.jx=t.clientX;touch.jy=t.clientY}else if(touch.lid===null){touch.lid=t.identifier;touch.lx=t.clientX;touch.ly=t.clientY;touch.mv=0}}},{passive:true});
-tz.addEventListener('touchmove',e=>{if(panelOpen)return;for(const t of e.changedTouches){if(t.identifier===touch.jid){touch.mx=cl((t.clientX-touch.jx)/45,-1,1);touch.mz=cl((t.clientY-touch.jy)/45,-1,1)}else if(t.identifier===touch.lid){const dx=t.clientX-touch.lx,dy=t.clientY-touch.ly;touch.mv+=Math.abs(dx)+Math.abs(dy);yaw-=dx*.005;pitch=cl(pitch-dy*.005,-1.4,1.4);touch.lx=t.clientX;touch.ly=t.clientY}}},{passive:true});
-const tend=e=>{for(const t of e.changedTouches){if(t.identifier===touch.jid){touch.jid=null;touch.mx=touch.mz=0}if(t.identifier===touch.lid){if(touch.mv<10)act();touch.lid=null}}};
+const tz=$('#tz'),joy=$('#joy'),jk=joy.firstElementChild;
+const joyShow=(x,y)=>{joy.style.left=(x-55)+'px';joy.style.top=(y-55)+'px';joy.style.bottom='auto';joy.classList.add('act')},joyMove=(a,b)=>{jk.style.transform='translate('+a*38+'px,'+b*38+'px)'},joyHide=()=>{joy.classList.remove('act');joy.style.left=joy.style.top=joy.style.bottom='';jk.style.transform=''};
+tz.addEventListener('touchstart',e=>{for(const t of e.changedTouches){if(t.clientX<innerWidth*.45&&touch.jid===null){touch.jid=t.identifier;touch.jx=t.clientX;touch.jy=t.clientY;joyShow(t.clientX,t.clientY)}else if(touch.lid===null){touch.lid=t.identifier;touch.lx=t.clientX;touch.ly=t.clientY;touch.mv=0}}},{passive:true});
+tz.addEventListener('touchmove',e=>{if(panelOpen)return;for(const t of e.changedTouches){if(t.identifier===touch.jid){touch.mx=cl((t.clientX-touch.jx)/45,-1,1);touch.mz=cl((t.clientY-touch.jy)/45,-1,1);joyMove(touch.mx,touch.mz)}else if(t.identifier===touch.lid){const dx=t.clientX-touch.lx,dy=t.clientY-touch.ly;touch.mv+=Math.abs(dx)+Math.abs(dy);yaw-=dx*.005;pitch=cl(pitch-dy*.005,-1.4,1.4);touch.lx=t.clientX;touch.ly=t.clientY}}},{passive:true});
+const tend=e=>{for(const t of e.changedTouches){if(t.identifier===touch.jid){touch.jid=null;touch.mx=touch.mz=0;joyHide()}if(t.identifier===touch.lid){if(touch.mv<10)act();touch.lid=null}}};
 tz.addEventListener('touchend',tend,{passive:true});tz.addEventListener('touchcancel',tend,{passive:true});
 $('#bRead').onclick=readIt;$('#bThrow').onclick=throwIt;$('#bJump').onclick=()=>{if(P.y===0)P.vy=6.2};
 // ================= CINEMATIC ENTRANCE =================
@@ -683,7 +684,7 @@ function frame(now){requestAnimationFrame(frame);if(document.hidden){last=now;re
  // targeting
  tgt=null;if(started&&!panelOpen){if(tp)rc.set(AIM,fwd);else rc.setFromCamera({x:0,y:0},cam);rc.far=3.6;const hs=rc.intersectObjects(ray,true);if(hs.length){let o=hs[0].object;while(o&&!o.userData.ref&&o.parent&&o.parent!==scene)o=o.parent;if(o&&o.userData.ref&&!o.userData.ref.held)tgt=o.userData.ref,bh.setFromObject(o)}}
  const sh=held||tgt;bh.visible=!!tgt;cross.classList.toggle('on',!!sh);
- tipEl.classList.toggle('on',!!sh);if(sh){tipEl.textContent=held?held.name+' · tap/click to drop · F throw · wheel push/pull':(tgt.toggle?tgt.label()+' · click / E':tgt.book?tgt.name+' · click to take · E to read':tgt.m?tgt.name+' · click to pick up · E to read':tgt.name+' · E / click to read')}
+ tipEl.classList.toggle('on',!!sh);if(sh){tipEl.textContent=coarse?(held?held.name+' · tap to drop':tgt.toggle?tgt.label()+' · tap':tgt.book?tgt.name+' · tap to take':tgt.m?tgt.name+' · tap to pick up':tgt.name+' · tap to read'):held?held.name+' · tap/click to drop · F throw · wheel push/pull':(tgt.toggle?tgt.label()+' · click / E':tgt.book?tgt.name+' · click to take · E to read':tgt.m?tgt.name+' · click to pick up · E to read':tgt.name+' · E / click to read')}
  {const rn=roomAt();if(rn!==lastRoom){lastRoom=rn;const ri=rooms.findIndex(q=>q.n===rn);document.documentElement.style.setProperty('--cy',ACC[ri]||'#8fd6a6');Object.keys(tabs).forEach(k=>tabs[k].classList.toggle('on',rooms[k].n===rn));roomEl.textContent=rn;gb.classList.toggle('on',rn==='Garden')}}drawMM();
  if(!window.SP){if(comp)comp.render();else r.render(scene,cam)}
  if(first){first=false;$('#load').style.opacity=0;setTimeout(()=>$('#load').style.display='none',700);const g=$('#go');g.disabled=false;g.textContent='Enter the house';$('#start').hidden=false}}
@@ -743,3 +744,4 @@ requestAnimationFrame(tick);
 hero.addEventListener('pointermove',e=>{const r=hero.getBoundingClientRect();hero.style.setProperty('--hx',e.clientX-r.left+'px');hero.style.setProperty('--hy',e.clientY-r.top+'px')});
 s.addEventListener('scroll',()=>hero.style.setProperty('--sy',s.scrollTop),{passive:true});
 })();
+(function(){const v=window.visualViewport;if(!v)return;const f=()=>document.documentElement.style.setProperty('--kb',Math.max(0,innerHeight-v.height-v.offsetTop)+'px');v.addEventListener('resize',f);v.addEventListener('scroll',f);f()})();
