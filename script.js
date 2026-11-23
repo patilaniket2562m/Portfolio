@@ -410,84 +410,139 @@ dress(doorPivot,0,2.15,.07);
 const FD=mkdoor(-7.5,9,0,1,1.65,{x0:-7.5,x1:-5.3,z0:8.93,z1:9.07},false,doorPivot);FD.front=true;
 ANIM.push((t,dt)=>{DR.forEach(d=>{if(d.front&&CIN.mode!=='play')return;const tg=d.open?1:0;if(d.a!==tg){d.a+=(tg-d.a)*(1-Math.exp(-5*dt));if(Math.abs(tg-d.a)<.003)d.a=tg;d.sync()}})});
 // ================= PLAYER AVATAR (rigged GLB, procedural animation) =================
-// The GLB has no baked animations, so walking / running / jumping / carrying are driven
-// by rotating the skeleton bones every frame. Angles are in *character space*
-// (X = character's left, Y = up, Z = forward) and are converted to bone-local rotations.
+// The GLB has no baked animations, so the walk / run / jump / carry motion is generated every frame from the skeleton.
+// The walk is built from human gait data (hip, knee and foot curves), scaled by the *actual* movement speed, with a
+// foot-to-floor solver for the pelvis height so the feet plant instead of skating. All angles are in character space
+// (X = character's left, Y = up, Z = forward) and measured from true vertical/forward: the rig's rest pose (splayed legs,
+// feet turned out 19 deg, shins tilted back, forearms pre-bent) is measured once at load and compensated.
+const WALK_V=2.2,RUN_V=4.2;   // metres/second for walking / holding Shift (also drives the stride length)
 function createAvatar(T,model){
- const Q=T.Quaternion,E=T.Euler,AX=new T.Vector3(1,0,0),AY=new T.Vector3(0,1,0),AZ=new T.Vector3(0,0,1);
+ const Q=T.Quaternion,AX=new T.Vector3(1,0,0),AY=new T.Vector3(0,1,0),AZ=new T.Vector3(0,0,1);
  const qa=(ax,a)=>new Q().setFromAxisAngle(ax,a),rx=a=>qa(AX,a),ry=a=>qa(AY,a),rz=a=>qa(AZ,a),mul=(...l)=>l.reduce((a,b)=>a.clone().multiply(b));
  const root=new T.Group();root.add(model);
  const bones={};model.updateMatrixWorld(true);
  model.traverse(o=>{if(o.isBone){bones[o.name]=o;o.userData.qb=o.quaternion.clone();const w=new Q();o.getWorldQuaternion(w);o.userData.W=w;o.userData.Wi=w.clone().invert()}
   if(o.isMesh){o.frustumCulled=false;o.castShadow=true;o.receiveShadow=false}});
- const hips=bones.Hips,hipY=hips?hips.position.y:.94;
- // phase / blend state
- const st={ph:0,walk:0,run:0,air:0,hold:0,thr:0,lean:0,bt:0};
+ const hips=bones.Hips,hipY=hips?hips.position.y:.94;if(hips){hips.userData.x0=hips.position.x}
+ // ---- body proportions read from the skeleton (used by the foot-ground solver)
+ const wp=n=>{const v=new T.Vector3();if(bones[n])bones[n].getWorldPosition(v);return v},dirOf=(a,b)=>wp(b).sub(wp(a));
+ const L1=bones.LeftLeg?bones.LeftLeg.position.length():.423,L2=bones.LeftFoot?bones.LeftFoot.position.length():.43,
+  hipOff=bones.LeftUpLeg?bones.LeftUpLeg.position.y:-.0107,aH=Math.max(.04,wp('LeftFoot').y||.083),   // aH = ankle height above the floor (rest pose)
+  hipW=Math.abs(wp('LeftUpLeg').x)||.0723,FOOT_OUT=.328;   // FOOT_OUT: the rest pose has the feet turned out ~19 deg
+ // The rest pose is not a neutral stance (legs splayed, shins tilted back, forearms pre-bent), so measure it once and
+ // express every animation angle relative to true vertical / forward instead.
+ const bind={};['Left','Right'].forEach(sd=>{
+  const t=dirOf(sd+'UpLeg',sd+'Leg'),k=dirOf(sd+'Leg',sd+'Foot'),a=dirOf(sd+'Arm',sd+'ForeArm'),f=dirOf(sd+'ForeArm',sd+'Hand'),h=dirOf(sd+'Hand',sd+'HandMiddle1');
+  bind[sd]={ts:Math.atan2(t.z,-t.y),tl:Math.atan2(t.x,-t.y),ss:Math.atan2(k.z,-k.y),sl:Math.atan2(k.x,-k.y),
+   aDrop:Math.atan2(-a.y,Math.abs(a.x)),aSag:Math.atan2(a.z,Math.hypot(a.x,a.y)),fSag:Math.atan2(f.z,Math.hypot(f.x,f.y)),hSag:Math.atan2(h.z,Math.hypot(h.x,h.y))}});
+ // ---- animation state
+ const st={ph:0,walk:0,run:0,air:0,hold:0,thr:0,bt:0,v:0};
  const ease=(v,t,k,dt)=>v+(t-v)*(1-Math.exp(-k*dt));
+ const lerp=(a,b,k)=>a+(b-a)*k,sat=(x,a,b)=>Math.max(a,Math.min(b,x));
  let pose={},memo={};
  const I=new Q();
  function rcOf(b){if(!b||!b.isBone)return I;const n=b.name;if(pose[n])return pose[n];if(n in memo)return memo[n];return memo[n]=rcOf(b.parent)}
  function apply(){
   memo={};
   for(const n in pose){const b=bones[n];if(!b)continue;const p=b.parent,Rp=rcOf(p),Wp=p&&p.isBone?p.userData.W:I,Wpi=p&&p.isBone?p.userData.Wi:I;
-   // local = Wp^-1 * Rp^-1 * Rc * Wp * qb
+   // local = Wp^-1 * Rp^-1 * Rc * Wp * qb   (Rc = rotation of the bone in character space)
    b.quaternion.copy(Wpi).multiply(Rp.clone().invert()).multiply(pose[n]).multiply(Wp).multiply(b.userData.qb)}
  }
+ // ---- gait data: one full stride (left heel-strike -> next left heel-strike), sampled at 12 points,
+ // joined with a periodic Catmull-Rom spline. Values are modelled on normal human walking / jogging kinematics.
+ const TAU=Math.PI*2,D=Math.PI/180;
+ const cyc=(k,t)=>{const n=k.length;t-=Math.floor(t);const f=t*n,i=Math.floor(f),u=f-i,p0=k[(i+n-1)%n],p1=k[i%n],p2=k[(i+1)%n],p3=k[(i+2)%n];
+  return .5*((2*p1)+(-p0+p2)*u+(2*p0-5*p1+4*p2-p3)*u*u+(-p0+3*p1-3*p2+p3)*u*u*u)};
+ const deg=a=>a.map(x=>x*D);
+ const KW=deg([5,14,18,12,6,8,18,38,58,64,48,15]),     // knee flexion (walk): loading dip, then ~60 deg swing flexion
+       FW=deg([18,3,0,0,0,-6,-22,-48,-38,-15,0,10]),    // foot pitch vs ground (+ = toes up): heel strike, flat, heel rise, toe-off
+       KR=deg([22,40,45,30,22,45,70,95,105,95,70,40]),  // knee flexion (run)
+       FR=deg([10,0,0,0,-8,-30,-50,-45,-30,-10,5,12]);  // foot pitch (run)
+ // height the hip joint must have so the lowest point of the foot touches the floor
+ const legPose=(t,rn,aA,mA,sh,kS)=>{const th=mA+aA*Math.cos(TAU*(t+sh)),k=lerp(cyc(KW,t),cyc(KR,t),rn)*kS,p=lerp(cyc(FW,t),cyc(FR,t),rn);return{th,k,p,ths:th-k}};
+ const reach=g=>{const p=g.p,foot=p>=0?.057*Math.sin(p)+aH*Math.cos(p):aH*Math.cos(p)+.097*Math.sin(-p);   // heel .057 behind / ball .097 ahead of the ankle
+  return L1*Math.cos(g.th)+L2*Math.cos(g.ths)+foot};
  function update(dt,s){
-  // s: {speed:0..1 of full walk, run:bool, air:bool, vy, hold:bool, pitch}
-  const sp=Math.min(1,s.speed||0);
-  st.walk=ease(st.walk,sp>.05&&!s.air?1:0,12,dt);
-  st.run=ease(st.run,s.run&&sp>.05&&!s.air?1:0,8,dt);
+  // s: {speed:0..1, run:bool, air:bool, vy, hold:bool, pitch, v:(m/s, optional)}
+  const sp=Math.min(1,s.speed||0),mv=sp>.05&&!s.air;
+  const vT=s.v!=null?s.v:sp*(s.run?RUN_V:WALK_V);
+  st.walk=ease(st.walk,mv?1:0,12,dt);
+  st.run=ease(st.run,s.run&&mv?1:0,8,dt);
   st.air=ease(st.air,s.air?1:0,s.air?14:10,dt);
   st.hold=ease(st.hold,s.hold?1:0,9,dt);
   st.thr=Math.max(0,st.thr-dt*3.2);
   st.bt+=dt;
-  const freq=(1.9+st.run*.5)*(sp>0?Math.max(.55,sp):1);
-  if(sp>.05&&!s.air)st.ph+=dt*freq*Math.PI*2;
-  const w=st.walk,rn=st.run,ar=st.air;
-  const sw=Math.sin(st.ph),cw=Math.cos(st.ph);
-  const amp=.5+.38*rn;                      // leg swing
-  const idleB=Math.sin(st.bt*1.6)*.012*(1-w);
-  const lean=(.04+.14*rn)*w+(.05*ar);
-  pose={};
+  if(mv)st.v=ease(st.v,vT,9,dt);
+  const w=st.walk,rn=st.run,ar=st.air,hd=st.hold,idle=1-w;
+  const v=Math.max(st.v,.35);
+  // cadence (steps/s) and stride grow with speed like a real person: ~1.9 steps/s at 1.4 m/s, ~2.5 at 2.2 m/s
+  const cW=1.15+.6*Math.min(v,2.6),cR=2.5+.1*Math.max(0,v-3),cad=lerp(cW,cR,rn);
+  if(mv)st.ph=(st.ph+dt*cad*.5)%1;                       // st.ph = fraction of a full stride (two steps)
+  const tL=st.ph,tR=(st.ph+.5)%1,bt=st.bt,breath=Math.sin(bt*1.7);
+  const ks=sat(v/1.6,.25,1);                              // how pronounced the body motion is
+  // ---- leg parameters (hip swing is sized from the step length so feet do not skate)
+  const aA=lerp(.57*v/cW,sat(.21*v,.4,.75),rn),mA=lerp(.12,.2,rn),sh=lerp(.03,.1,rn),kS=lerp(.8+.2*sat(v/1.5,0,1),1,rn);
+  const gL=legPose(tL,rn,aA,mA,sh,kS),gR=legPose(tR,rn,aA,mA,sh,kS);
+  const sL=Math.sin(TAU*tL),cL=Math.cos(TAU*tL);
+  // ---- pelvis: yaw with the stride, drops on the swinging side, and shifts over the standing leg
+  const hy=-cL*(.075+.03*rn)*ks*w,hr=sL*(.045+.01*rn)*ks*w,sway=sL*.022*ks*w,tilt=.04+.05*rn*w;
+  pose.Hips=mul(ry(hy),rz(hr),rx(tilt*w));
   // ---- legs
-  let lSw=sw*amp*w,rSw=-sw*amp*w;           // forward positive
-  let lK=Math.max(0,-cw*sw*0+Math.sin(st.ph+1.9))*(.55+.7*rn)*w, rK=Math.max(0,Math.sin(st.ph+1.9+Math.PI))*(.55+.7*rn)*w;
-  // jump / fall tuck
-  const tuck=ar*(s.vy>0?1:.55);
-  lSw=lSw*(1-ar)+ar*.55*tuck;rSw=rSw*(1-ar)+ar*(-.15);lK=lK*(1-ar)+ar*1.1*tuck;rK=rK*(1-ar)+ar*.5*tuck;
-  const leg=(side,swg,k)=>{const U=side+'UpLeg',L=side+'Leg',F=side+'Foot',T_=side+'ToeBase';
-   const ru=rx(-swg);pose[U]=ru;const rl=mul(rx(k),ru);pose[L]=rl;
-   pose[F]=mul(rx(.08*w+.05*ar),I);                     // keep foot roughly flat in the world
-   pose[T_]=pose[F]};
-  leg('Left',lSw,lK);leg('Right',rSw,rK);
-  // ---- spine / head
-  const lx=lean+idleB;
-  pose.Spine=rx(lx*.35);pose.Spine1=mul(ry(sw*.10*w),rx(lx*.7));pose.Spine2=mul(ry(sw*.16*w),rx(lx));
-  pose.Neck=mul(ry(-sw*.12*w),rx(lx*.5-(s.pitch||0)*.25));pose.Head=mul(ry(-sw*.05*w),rx(-(s.pitch||0)*.35));
-  // ---- arms
-  const down=1.28;                                      // ~70 deg: T-pose -> arms by the sides
-  const armSw=(side,swg,throwK)=>{
-   const sg=side==='Left'?-1:1;
-   const a=mul(rx(-swg),rz(sg*down));                    // free-hanging swing
-   const holdA=mul(ry(-sg*.35),rx(-.8),rz(sg*1.5));                 // carrying: forearms raised in front
-   const flap=mul(rx(-.5),rz(sg*.75));                    // airborne: arms out
-   let A=a.clone().slerp(holdA,st.hold);A=A.slerp(flap,ar*(1-st.hold));
+  const legs=[['Left',-1,gL,tL],['Right',1,gR,tR]],tuckV=s.vy>0?1:.55;
+  legs.forEach(([side,sg,g,t],i)=>{
+   const bd=bind[side],e=-sg,airS=i?-.15:.55*tuckV,airK=i?.5*tuckV:1.1*tuckV;
+   const swg=lerp(g.th*w,airS,ar),k=lerp(g.k*w+.03*idle,airK,ar),ths=swg-k;
+   // lateral: feet land close to the midline (step width ~10 cm) and the leg angles in under the shifted pelvis
+   const footX=e*(.09-.025*w*(1-ar)),phi=(footX-(e*hipW+sway))/(L1+L2);
+   const yawT=hy,yawS=hy*.6;
+   pose[side+'UpLeg']=mul(ry(yawT),rz(phi-bd.tl),rx(-(swg-bd.ts)));
+   pose[side+'Leg']=mul(ry(yawS),rz(phi-bd.sl),rx(-(ths-bd.ss)));
+   const p=lerp(g.p*w,-.4,ar),yawF=e*(lerp(.17,.12,w)-FOOT_OUT)+hy*.3,tt=((t%1)+1)%1;
+   const tp=tt<.62?Math.max(p,0):p*sat((tt-.62)/.1,0,1);                       // toes stay on the floor while the heel lifts
+   pose[side+'Foot']=mul(ry(yawF),rx(-p));
+   pose[side+'ToeBase']=mul(ry(yawF),rx(-lerp(tp,p,ar)))});
+  // ---- spine / head: shoulders counter-rotate against the pelvis, trunk leans slightly, head stays steady
+  const lean=(.02+.1*rn)*w+(.05*ar)+breath*.012*idle,ys=cL*(.09+.04*rn)*ks*w;
+  pose.Spine=mul(ry(ys*.35),rz(-.006*sL*ks*w),rx(lean*.35));
+  pose.Spine1=mul(ry(ys*.7),rz(-.013*sL*ks*w),rx(lean*.7));
+  pose.Spine2=mul(ry(ys),rz(-.02*sL*ks*w),rx(lean+breath*.01*idle));
+  const look=Math.sin(bt*.45)*.06*idle;
+  pose.Neck=mul(ry(ys*.1+look*.5),rx(lean*.4-(s.pitch||0)*.25));
+  pose.Head=mul(ry(look),rx(-(s.pitch||0)*.35-.03*idle*breath));
+  // ---- arms: hang close to the body, swing opposite to the legs, elbows flex a little more on the forward swing
+  const abd=.1,as=lerp(.26+.2*sat(v/2.2,0,1),.75,rn)*w*(1-hd);
+  const armSw=(side,swg0,throwK,ph0)=>{
+   const sg=side==='Left'?-1:1,bd=bind[side],swg=swg0+Math.sin(bt*1.15+ph0)*.015*idle,nrm=as>.001?swg0/as:0,hb=1-hd;
+   const a=mul(rx(-(swg-bd.aSag*hb)),rz(sg*(Math.PI/2-abd-bd.aDrop)));
+   const holdA=mul(rx(-.55),rz(sg*1.38)),flap=mul(rx(-.5),rz(sg*.75));
+   let A=a.clone().slerp(holdA,hd);A=A.slerp(flap,ar*(1-hd));
    if(throwK>0)A=A.slerp(mul(rx(-1.7+1.1*(1-throwK)),rz(sg*1.0)),Math.min(1,throwK*1.4));
    pose[side+'Arm']=A;
-   const bend=(.18+.55*rn*w)*(1-st.hold)+st.hold*.95+ar*.3;
-   pose[side+'ForeArm']=mul(rx(-bend),A);
+   const wb=lerp(.1+.24*(1+nrm)*.5*sat(v/1.2,.5,1),1.25+.25*nrm,rn),bend=(.1*idle+wb*w)*hb+hd*1.25+ar*.3;
+   const F=mul(rx(-(bend+(bd.aSag-bd.fSag)*hb)),ry(-sg*.45*hd),A);pose[side+'ForeArm']=F;
+   const H=mul(F,rx(-((bd.fSag-bd.hSag)*hb-.03*hb)+swg*.1),rz(sg*.06));   // wrist straightened (the rest pose has the hand bent back), then a slight natural flexpose[side+'Hand']=H;
+   const g=1+.45*hd,mvv=n=>1+.07*Math.sin(bt*.8+n+ph0);
+   const fingers={Index:[.28,.40,.28],Middle:[.40,.48,.32],Ring:[.50,.54,.34],Pinky:[.60,.56,.34]};
+   let n0=0;for(const f in fingers){let prev=H;fingers[f].forEach((k,n)=>{const nm=side+'Hand'+f+(n+1);prev=mul(prev,rz(sg*k*g*mvv(n0+n)));pose[nm]=prev});n0++}
+   let tp=mul(H,ry(sg*.25),rz(sg*.12));pose[side+'HandThumb1']=tp;
+   tp=mul(tp,rz(sg*.3*g));pose[side+'HandThumb2']=tp;tp=mul(tp,rz(sg*.25*g));pose[side+'HandThumb3']=tp;
   };
-  armSw('Left',-sw*(.35+.45*rn)*w*(1-st.hold),0);armSw('Right',sw*(.35+.45*rn)*w*(1-st.hold),st.thr);
+  armSw('Left',-cL*as-.03*w,0,0);armSw('Right',cL*as-.03*w,st.thr,2.1);
   apply();
-  // hips bob
-  if(hips){hips.position.y=hipY-(.025+.03*rn)*w*Math.abs(cw)*1-.05*ar*(s.vy>0?0:1)+idleB*.5}
+  // ---- hips: height from the foot/ground solver (feet always meet the floor), side sway over the standing leg
+  if(hips){
+   // Geometry alone would bob the pelvis ~10 cm at a brisk pace; real people keep it to ~5-7 cm (pelvic rotation, ankle rocker),
+   // so ease the bob toward the stride's mean height. Feet stay within ~1-2 cm of the floor.
+   let Hm=0;for(let q=0;q<6;q++){const u=q/12;Hm+=Math.max(reach(legPose(u,rn,aA,mA,sh,kS)),reach(legPose(u+.5,rn,aA,mA,sh,kS)))/6}
+   const H=Math.max(reach(gL),reach(gR)),flight=rn*.04*(.5+.5*Math.cos(TAU*2*(tL-.43))),stand=L1+L2+aH;
+   const walkH=Hm+lerp(.62,.8,rn)*(H-Hm)+flight,hj=lerp(stand,walkH,w),jump=hj-.05*(s.vy>0?0:1);
+   hips.position.y=lerp(hj,jump,ar)-hipOff+(breath*.004*idle);
+   hips.position.x=(hips.userData.x0||0)+sway}
  }
  return{root,bones,update,throwIt(){st.thr=1},st};
 }
-
 let AV=null;const TPS={on:false,fp:false,cd:0,sd:1,so:.55},CAMD=3.1,SHO=.55,AIM=new V3(),rcc=new T.Raycaster(),lastP={x:0,z:0};
-let mvAmt=0,mvRun=false,mvX=0,mvZ=-1,heading=Math.PI;
+let mvAmt=0,mvV=0,mvRun=false,mvX=0,mvZ=-1,heading=Math.PI;
 (function(){
  const msg=t=>{console.warn('[avatar] '+t);let d=document.getElementById('avmsg');if(!d){d=document.createElement('div');d.id='avmsg';d.style.cssText='position:fixed;left:50%;bottom:1rem;transform:translateX(-50%);z-index:60;max-width:90vw;padding:.6rem 1rem;border-radius:12px;background:rgba(120,20,20,.92);color:#fff;font:500 .8rem system-ui,sans-serif;text-align:center';document.body.appendChild(d);setTimeout(()=>d.remove(),15000)}d.textContent='Avatar not loaded: '+t+' (using first-person view)'};
  const loadScript=urls=>new Promise((ok,no)=>{const n=()=>{const u=urls.shift();if(!u)return no(new Error('could not download GLTFLoader (check internet / ad-blocker)'));const e=document.createElement('script');e.src=u;e.onload=()=>T.GLTFLoader?ok():n();e.onerror=n;document.head.appendChild(e)};n()});
@@ -522,11 +577,11 @@ function physics(dt){
 }
 function lookDir(){fwd.set(-Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),-Math.cos(yaw)*Math.cos(pitch))}
 function movePlayer(dt){
- if(panelOpen||!started){mvAmt=0;return}
+ if(panelOpen||!started){mvAmt=0;mvV=0;return}
  let f=((K.KeyW||K.ArrowUp)?1:0)-((K.KeyS||K.ArrowDown)?1:0)-touch.mz,s=((K.KeyD||K.ArrowRight)?1:0)-((K.KeyA||K.ArrowLeft)?1:0)+touch.mx;
  const l=Math.hypot(f,s);if(l>1){f/=l;s/=l}
- const sp=(K.ShiftLeft||K.ShiftRight)?5.4:3.1,sy=Math.sin(yaw),cy2=Math.cos(yaw);
- mvAmt=Math.min(1,l);mvRun=!!(K.ShiftLeft||K.ShiftRight);if(l>.05){mvX=-sy*f+cy2*s;mvZ=-cy2*f-sy*s}
+ const sp=(K.ShiftLeft||K.ShiftRight)?RUN_V:WALK_V,sy=Math.sin(yaw),cy2=Math.cos(yaw);
+ mvAmt=Math.min(1,l);mvV=mvAmt*sp;mvRun=!!(K.ShiftLeft||K.ShiftRight);if(l>.05){mvX=-sy*f+cy2*s;mvZ=-cy2*f-sy*s}
  P.x+=(-sy*f+cy2*s)*sp*dt;P.z+=(-cy2*f-sy*s)*sp*dt;
  for(let i=0;i<S.length;i++){const b=S[i];if(b.y1>P.y+.2&&b.y0<P.y+1.5)pushOut(P,.32,b)}
  P.x=cl(P.x,-58,58);P.z=cl(P.z,-46,46);
@@ -618,7 +673,7 @@ function frame(now){requestAnimationFrame(frame);if(document.hidden){last=now;re
   if(Math.hypot(P.x-lastP.x,P.z-lastP.z)>1.5)heading=yaw+Math.PI;lastP.x=P.x;lastP.z=P.z;
   if(vis){const th=held?yaw+Math.PI:(mvAmt>.05?Math.atan2(mvX,mvZ):heading);heading+=Math.atan2(Math.sin(th-heading),Math.cos(th-heading))*(1-Math.exp(-14*dt));
    AV.root.position.set(P.x,P.y,P.z);AV.root.rotation.y=heading;
-   AV.update(dt,{speed:mvAmt,run:mvRun,air:P.y>.03,vy:P.vy,hold:!!held,pitch})}}
+   AV.update(dt,{speed:mvAmt,v:mvV,run:mvRun,air:P.y>.03,vy:P.vy,hold:!!held,pitch})}}
  fl.position.copy(AIM).addScaledVector(fwd,tp?.45:0);fl.target.position.copy(AIM).addScaledVector(fwd,6);
  if(held){const b=held,p=b.m.position,hy=b.h[1]*b.s;let d=holdD;rc.set(AIM,fwd);rc.far=d+.4;const h=rc.intersectObjects(solids)[0];if(h)d=Math.max(.6,h.distance-.4);
   const tg=AIM.clone().addScaledVector(fwd,d);tg.y=cl(tg.y,hy+.02,2.9);tg.x=cl(tg.x,-58,58);tg.z=cl(tg.z,-46,46);
