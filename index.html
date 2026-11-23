@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="style.css">
 <style>
 /* About section */
-#s-about{min-height:100vh;min-height:100svh;display:flex;align-items:center;padding-top:6rem;padding-bottom:5rem}
+#s-about{min-height:100vh;min-height:100svh;display:flex;align-items:center;padding-top:6rem;padding-bottom:7rem!important}
 #s-about .s-in{width:100%}
 #s-about .s-ab{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:.6rem 4rem;align-items:center}
 #s-about .s-row{margin-bottom:.6rem;padding-top:1rem}
@@ -27,9 +27,9 @@
 #s-about .ab-facts dd{margin:0;font-size:.95rem;font-weight:500;letter-spacing:-.01em;line-height:1.3;color:var(--ink)}
 #s-about .ab-btns{display:flex;flex-wrap:wrap;gap:.8rem}
 #s-about .ab-btns .s-ghost{background:#fff;border:1px solid #d8d8d3;color:var(--ink)!important}
-#s-about .s-me{position:relative;isolation:isolate;height:clamp(440px,calc(100svh - 11.5rem),820px);aspect-ratio:3/4;max-width:100%;margin:0;justify-self:center;overflow:visible;background:none;box-shadow:none;border-radius:0}
+#s-about .s-me{position:relative;isolation:isolate;height:clamp(440px,calc(100svh - 9.5rem),900px);aspect-ratio:3/4;max-width:100%;margin:0;justify-self:center;overflow:visible;background:none;box-shadow:none;border-radius:0}
 #s-about .s-me::before{content:'';position:absolute;z-index:-1;inset:14% 3% 0 3%;border-radius:999px 999px 28px 28px;background:linear-gradient(180deg,#e8ecda,#c9d2a8);transform:none}
-#s-about .s-me img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;border-radius:0;box-shadow:none;clip-path:none!important;transform:none!important}
+#s-about .s-me img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;mix-blend-mode:multiply;filter:brightness(1.04);border-radius:0;box-shadow:none;clip-path:none!important;transform:scale(1.1)!important;transform-origin:50% 100%}
 #s-about .s-me figcaption{left:50%;transform:translateX(-50%);bottom:.8rem}
 @media(max-width:800px){#s-about{display:block;min-height:0;padding-top:5.5rem}#s-about .s-ab{grid-template-columns:1fr;gap:1.2rem}#s-about .ab-facts{grid-template-columns:1fr}#s-about .s-me{height:auto;width:min(100%,340px)}}
 </style>
