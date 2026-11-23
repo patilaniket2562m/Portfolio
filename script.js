@@ -660,6 +660,102 @@ function thirdPerson(dt){
  cam.position.copy(pv).addScaledVector(u,TPS.cd);
  const inside=Math.abs(P.x)<13.4&&Math.abs(P.z)<8.9;cam.position.y=cl(cam.position.y,.22,inside?3.05:10);
  AIM.copy(pv).addScaledVector(rt,TPS.so/L*TPS.cd)}
+// ================= NPC: autonomous character + chat bot =================
+// She plans her own routes (A* on a grid built from the house colliders), opens closed doors, wanders room to room, and
+// when you walk up to her she stops, turns to face you, greets you (speech bubble + voice) and chats (press T / tap Chat).
+const NPC=(function(){
+ const NAME='Ava',R=.38,CS=.25,X0=-13.2,Z0=-8.7,NX=Math.round(26.4/CS),NZ=Math.round(17.4/CS),WV=1.35;
+ const n={av:null,x:0,z:0,h:0,v:0,path:[],wait:1.5,grid:null,near:false,talk:false,chk:0,cx:0,cz:0,last:-1e9,bt:0,voice:true};
+ const idx=(i,j)=>j*NX+i,ci=x=>cl(Math.floor((x-X0)/CS),0,NX-1),cj=z=>cl(Math.floor((z-Z0)/CS),0,NZ-1),pick=a=>a[Math.floor(rnd()*a.length)];
+ const free=(x,z)=>!n.grid[idx(ci(x),cj(z))];
+ function build(){const ds=new Set(DR.map(d=>d.e)),g=new Uint8Array(NX*NZ);
+  for(let j=0;j<NZ;j++)for(let i=0;i<NX;i++){const x=X0+(i+.5)*CS,z=Z0+(j+.5)*CS;
+   for(const o of S){if(ds.has(o)||o.y1<.25||o.y0>1.6)continue;const dx=x-cl(x,o.x0,o.x1),dz=z-cl(z,o.z0,o.z1);if(dx*dx+dz*dz<R*R){g[idx(i,j)]=1;break}}}
+  n.grid=g;
+  for(let r=0;r<12&&!n.av._ok;r+=.5)for(let a=0;a<12;a++){const x=0+Math.cos(a/12*6.283)*r,z=4.5+Math.sin(a/12*6.283)*r;if(Math.abs(z)<8.4&&free(x,z)){n.x=x;n.z=z;n.av._ok=1;break}}}
+ const los=(a,b)=>{const d=Math.hypot(b[0]-a[0],b[1]-a[1]),k=Math.max(1,Math.ceil(d/(CS*.5)));for(let q=0;q<=k;q++)if(!free(a[0]+(b[0]-a[0])*q/k,a[1]+(b[1]-a[1])*q/k))return false;return true};
+ function smooth(p){if(p.length<3)return p;const o=[p[0]];let a=0;while(a<p.length-1){let b=p.length-1;while(b>a+1&&!los(p[a],p[b]))b--;o.push(p[b]);a=b}return o}
+ function astar(sx,sz,tx,tz){const g=n.grid,s=idx(ci(sx),cj(sz)),t=idx(ci(tx),cj(tz));if(g[t])return null;
+  const N=NX*NZ,gs=new Float32Array(N).fill(1e9),f=new Float32Array(N),par=new Int32Array(N).fill(-1),dn=new Uint8Array(N),open=[s],tx_=t%NX,tj=(t/NX)|0,hf=k=>Math.hypot((k%NX)-tx_,((k/NX)|0)-tj);gs[s]=0;
+  while(open.length){let bi=0;for(let q=1;q<open.length;q++)if(f[open[q]]<f[open[bi]])bi=q;const c=open[bi];open[bi]=open[open.length-1];open.pop();if(c===t)break;if(dn[c])continue;dn[c]=1;
+   const x=c%NX,y=(c/NX)|0;
+   for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){if(!di&&!dj)continue;const a=x+di,b=y+dj;if(a<0||b<0||a>=NX||b>=NZ)continue;const k=idx(a,b);if(g[k])continue;if(di&&dj&&(g[idx(x+di,y)]||g[idx(x,y+dj)]))continue;
+    const ng=gs[c]+(di&&dj?1.414:1);if(ng<gs[k]){gs[k]=ng;par[k]=c;f[k]=ng+hf(k);open.push(k)}}}
+  if(s!==t&&par[t]<0)return null;const p=[];for(let k=t;k!==-1;k=par[k])p.push([X0+((k%NX)+.5)*CS,Z0+(((k/NX)|0)+.5)*CS]);p.reverse();p.shift();return smooth([[sx,sz]].concat(p)).slice(1)}
+ function wander(){for(let q=0;q<25;q++){const x=X0+1+rnd()*(26.4-2),z=Z0+1+rnd()*(17.4-2);if(!free(x,z)||Math.hypot(x-n.x,z-n.z)<3.5)continue;const p=astar(n.x,n.z,x,z);if(p&&p.length){n.path=p;return}}n.wait=1}
+ // ---------- speech bubble + voice
+ const bub=document.createElement('div');bub.id='npcBub';document.body.appendChild(bub);let bubT=0;
+ function speak(t){if(!n.voice||!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/gu,''));const vs=speechSynthesis.getVoices();u.voice=vs.find(v=>/en/i.test(v.lang)&&/female|zira|samantha|aria|jenny|susan|google uk english female/i.test(v.name))||vs.find(v=>/^en/i.test(v.lang))||null;u.rate=1.02;u.pitch=1.15;speechSynthesis.speak(u)}catch(e){}}
+ function bubble(t,ms){bub.textContent=t;bub.classList.add('on');bubT=ms||5000;speak(t)}
+ // ---------- chat UI
+ const box=document.createElement('div');box.id='npcChat';box.hidden=true;
+ box.innerHTML='<header><div class="av">A</div><div><b>'+NAME+'</b><small>Aniket\u2019s guide \u00b7 online</small></div><button id="ncV" title="Voice on/off">\uD83D\uDD0A</button><button id="ncX" aria-label="Close">\u2715</button></header><div id="ncLog"></div><div id="ncChips"></div><form id="ncF" autocomplete="off"><input id="ncI" placeholder="Ask me anything\u2026" enterkeyhint="send"><button>Send</button></form>';
+ document.body.appendChild(box);
+ const hint=document.createElement('button');hint.id='npcHint';hint.hidden=true;hint.innerHTML=coarse?'\uD83D\uDCAC Chat with '+NAME:'Press <b>T</b> to chat with '+NAME;document.body.appendChild(hint);
+ const log=box.querySelector('#ncLog'),inp=box.querySelector('#ncI'),chips=box.querySelector('#ncChips');
+ const CH=['Who is Aniket?','Skills','Projects','Experience','Contact / hire','Tell me a joke'];
+ chips.innerHTML=CH.map(c=>'<button type="button">'+c+'</button>').join('');
+ const add=(who,t)=>{const m=document.createElement('div');m.className='m '+who;m.textContent=t;log.appendChild(m);log.scrollTop=log.scrollHeight;return m};
+ const KB=[
+  [/^(hi+|hello+|hey+|yo|namaste|hola|good (morning|evening|afternoon))\b/,()=>pick(['Hey! Great to see you. Ask me about Aniket\u2019s skills, projects or how to reach him.','Hello there! I live in this house. Want a tour of Aniket\u2019s work?'])],
+  [/how are you|how r u|what.?s up|sup\b/,()=>'Doing great, just wandering around the house. What would you like to know?'],
+  [/who are you|your name|what are you|are you (a )?(bot|ai|real)/,()=>'I\u2019m '+NAME+', a little AI guide who lives in Aniket\u2019s 3D portfolio. I walk around on my own and answer questions about his work.'],
+  [/who is aniket|about aniket|tell me about (aniket|him|you)|owner|who (made|built|created)|developer/,()=>'Aniket Patil is a Full Stack Developer at IMAP Systems, Mumbai. He builds web and Flutter apps with ASP.NET, React and SQL Server, and finished his MCA at KIT\u2019s IMER, Kolhapur in 2025.'],
+  [/skill|tech|stack|language|asp|react|flutter|sql|\.net|c#|node|firebase|javascript|java\b|spring/,()=>'Aniket works with ASP.NET and C#, React, Flutter, Node.js, SQL Server and MySQL, plus Firebase, REST APIs and Spring Boot. The Lab room has the full skills list.'],
+  [/project|built|portfolio work|medscan|tfod|square chat|auction|attendance/,()=>'Highlights: TFOD (React + Node website with admin dashboards), MedScan AI (medical report system with abnormal-report detection), Square Chat (Flutter + Firebase + WebRTC calls), Online Auction and an Online Attendance System. See the Gallery room!'],
+  [/experience|company|imap|intern|technoworld|career|job history|work(ed)? at/,()=>'Since January 2026 he is a Full Stack Developer at IMAP Systems, Mumbai (ASP.NET, C#, SQL Server, React, Flutter). Before that he interned at Technoworld Software building Spring Boot + MySQL APIs.'],
+  [/educat|study|degree|mca|college|kit|university/,()=>'Aniket has a Master of Computer Applications from KIT\u2019s IMER, Kolhapur (2025). The Library room covers his education.'],
+  [/contact|email|mail|hire|reach|phone|call|available|opening|open to work|work with|linkedin|github/,()=>'He is open to work! Email patilaniket2562m@gmail.com, or find him on LinkedIn and GitHub (links are in the Contact room, next to the mailbox).'],
+  [/resume|cv/,()=>'You can download his resume from the About section of the website or from the Study room.'],
+  [/where|location|based|live|kolhapur|mumbai|city/,()=>'Aniket is based in Kolhapur, Maharashtra, and works with the team in Mumbai.'],
+  [/room|house|tour|around|show me|explore|go to|navigate/,()=>'Use the buttons at the top to jump between rooms: Living room (welcome), Study (about), Lab (skills), Gallery (projects), Library (education) and Contact. You can also pick up and throw things!'],
+  [/joke|funny|make me laugh/,()=>pick(['Why do programmers prefer dark mode? Because light attracts bugs.','A SQL query walks into a bar, walks up to two tables and asks: can I join you?','There are 10 kinds of people: those who understand binary and those who don\u2019t.'])],
+  [/thank|thanks|thx|awesome|great|nice|cool/,()=>pick(['Anytime! \uD83D\uDE0A','Happy to help!','You\u2019re welcome. Anything else?'])],
+  [/bye|goodbye|see you|cya|later/,()=>'Bye! Come back any time. I\u2019ll be wandering around.'],
+  [/help|what can you|what do you/,()=>'Ask me about Aniket, his skills, projects, experience, education or how to contact him. I can also tell a joke.']];
+ function reply(q){q=q.toLowerCase().trim();for(const [re,f] of KB)if(re.test(q))return f();return pick(['I\u2019m not sure about that one. Try asking about skills, projects, experience or contact details.','Hmm, I can mostly talk about Aniket and his work. Try the buttons below!'])}
+ function ask(t){t=t.trim();if(!t)return;add('u',t);const th=add('b','\u2026');setTimeout(()=>{const a=reply(t);th.textContent=a;log.scrollTop=log.scrollHeight;bubble(a,6000)},350+rnd()*350)}
+ box.querySelector('#ncF').onsubmit=e=>{e.preventDefault();const v=inp.value;inp.value='';ask(v)};
+ chips.onclick=e=>{if(e.target.tagName==='BUTTON')ask(e.target.textContent)};
+ box.querySelector('#ncV').onclick=e=>{n.voice=!n.voice;e.currentTarget.textContent=n.voice?'\uD83D\uDD0A':'\uD83D\uDD07';if(!n.voice&&window.speechSynthesis)speechSynthesis.cancel()};
+ function startTalk(){if(n.talk||panelOpen||!started)return;n.talk=true;panelOpen=true;try{document.exitPointerLock()}catch(e){}box.hidden=false;hint.hidden=true;if(!log.children.length)add('b','Hi, I\u2019m '+NAME+'! Ask me anything about Aniket, or tap a suggestion below.');if(!coarse)setTimeout(()=>inp.focus(),30)}
+ function stopTalk(){if(!n.talk)return;n.talk=false;panelOpen=false;box.hidden=true;inp.blur();lock()}
+ box.querySelector('#ncX').onclick=stopTalk;hint.onclick=startTalk;
+ addEventListener('keydown',e=>{if(!n.talk&&e.code==='KeyT'&&n.near&&!/INPUT|TEXTAREA/.test(e.target.tagName)){e.preventDefault();startTalk()}else if(n.talk&&e.code==='Escape'){e.stopImmediatePropagation();stopTalk()}},true);
+ // ---------- load the model
+ (async()=>{try{
+  for(let i=0;i<200&&!T.GLTFLoader;i++)await new Promise(r=>setTimeout(r,100));if(!T.GLTFLoader)return;
+  const fromJs=()=>new Promise((ok,no)=>{const go=()=>{try{const b=atob(window.NPC_GLB),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);new T.GLTFLoader().parse(u.buffer,'',ok,no)}catch(e){no(e)}};if(window.NPC_GLB)return go();const s=document.createElement('script');s.src='avatar/npc.js';s.onload=go;s.onerror=()=>no(new Error('avatar/npc.js not found'));document.head.appendChild(s)});
+  const tryLoad=ps=>new Promise((ok,no)=>{const nx=()=>{const u=ps.shift();if(!u)return no(new Error('avatar/npc.glb not found'));new T.GLTFLoader().load(u,ok,undefined,nx)};nx()});
+  let g;if(location.protocol==='file:')g=await fromJs();else{try{g=await tryLoad(['avatar/npc.glb','./avatar/npc.glb','npc.glb'])}catch(e){g=await fromJs()}}
+  g.scene.traverse(o=>{if(o.isMesh&&o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{if(m.isMeshStandardMaterial){m.envMapIntensity=.55;if(m.metalness>.3)m.metalness=.1}})}});
+  n.av=createAvatar(T,g.scene);n.av.root.visible=false;scene.add(n.av.root);
+ }catch(e){console.warn('[npc] '+(e&&e.message||e))}})();
+ const pv=new V3();
+ function update(dt){
+  if(!n.av)return;if(!started||CIN.mode!=='play'){n.av.root.visible=false;bub.classList.remove('on');return}
+  if(!n.grid)build();n.av.root.visible=true;
+  const dx=P.x-n.x,dz=P.z-n.z,d=Math.hypot(dx,dz),near=d<3.2&&Math.abs(P.x)<13.6&&Math.abs(P.z)<9.2;
+  if(near&&!n.near){n.near=true;if(performance.now()-n.last>45000){n.last=performance.now();bubble(pick(['Hi! I\u2019m '+NAME+'. Welcome to Aniket\u2019s house!','Oh, hello! Looking for something? I can tell you about Aniket.']),5500)}}
+  if(!near&&n.near){n.near=false;if(n.talk)stopTalk();bub.classList.remove('on');if(window.speechSynthesis)speechSynthesis.cancel()}
+  hint.hidden=!(n.near&&!n.talk);
+  let th=n.h,tv=0;
+  if(n.near||n.talk){n.path.length=0;th=Math.atan2(dx,dz)}
+  else if(n.path.length){const w=n.path[0],wx=w[0]-n.x,wz=w[1]-n.z,wd=Math.hypot(wx,wz);
+   if(wd<.18){n.path.shift();if(!n.path.length)n.wait=2+rnd()*5}else{th=Math.atan2(wx,wz);tv=WV}
+   n.chk+=dt;if(n.chk>1.6){if(Math.hypot(n.x-n.cx,n.z-n.cz)<.3)n.path.length=0;n.chk=0;n.cx=n.x;n.cz=n.z}}
+  else{n.wait-=dt;if(n.wait<=0)wander()}
+  // open closed doors that are close to her
+  for(const dr of DR){if(dr.open||dr.front)continue;const e=dr.e;if(Math.hypot(n.x-(e.x0+e.x1)/2,n.z-(e.z0+e.z1)/2)<1.7&&(tv>0||n.path.length)){dr.open=true}}
+  const df=Math.atan2(Math.sin(th-n.h),Math.cos(th-n.h));n.h+=df*(1-Math.exp(-7*dt));
+  const sp=tv*cl(Math.cos(df),0,1);n.v+=(sp-n.v)*(1-Math.exp(-6*dt));
+  if(n.v>.02){const nx=n.x+Math.sin(n.h)*n.v*dt,nz=n.z+Math.cos(n.h)*n.v*dt;if(free(nx,nz)||!free(n.x,n.z)){n.x=nx;n.z=nz}else{n.path.length=0}}
+  n.av.root.position.set(n.x,0,n.z);n.av.root.rotation.y=n.h;
+  n.av.update(dt,{speed:n.v>.08?1:0,v:Math.max(n.v,.35),run:false,air:false,vy:0,hold:false,pitch:0});
+  if(bubT>0){bubT-=dt*1000;if(bubT<=0)bub.classList.remove('on');else{pv.set(n.x,2.05,n.z).project(cam);const vis=pv.z<1&&d<10;bub.style.opacity=vis?'':'0';bub.style.left=((pv.x*.5+.5)*innerWidth)+'px';bub.style.top=((-pv.y*.5+.5)*innerHeight)+'px'}}
+ }
+ return{update};
+})();
 let last=performance.now(),first=true;
 function frame(now){requestAnimationFrame(frame);if(document.hidden){last=now;return}
  const dt=Math.min(.05,(now-last)/1000);last=now;
@@ -675,6 +771,7 @@ function frame(now){requestAnimationFrame(frame);if(document.hidden){last=now;re
   if(vis){const th=held?yaw+Math.PI:(mvAmt>.05?Math.atan2(mvX,mvZ):heading);heading+=Math.atan2(Math.sin(th-heading),Math.cos(th-heading))*(1-Math.exp(-14*dt));
    AV.root.position.set(P.x,P.y,P.z);AV.root.rotation.y=heading;
    AV.update(dt,{speed:mvAmt,v:mvV,run:mvRun,air:P.y>.03,vy:P.vy,hold:!!held,pitch})}}
+ NPC.update(dt);
  fl.position.copy(AIM).addScaledVector(fwd,tp?.45:0);fl.target.position.copy(AIM).addScaledVector(fwd,6);
  if(held){const b=held,p=b.m.position,hy=b.h[1]*b.s;let d=holdD;rc.set(AIM,fwd);rc.far=d+.4;const h=rc.intersectObjects(solids)[0];if(h)d=Math.max(.6,h.distance-.4);
   const tg=AIM.clone().addScaledVector(fwd,d);tg.y=cl(tg.y,hy+.02,2.9);tg.x=cl(tg.x,-58,58);tg.z=cl(tg.z,-46,46);
