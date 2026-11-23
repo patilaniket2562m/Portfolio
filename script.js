@@ -409,6 +409,98 @@ function mkdoor(hx,hz,rot0,sgn,ang,bx0,open0,leaf){
 dress(doorPivot,0,2.15,.07);
 const FD=mkdoor(-7.5,9,0,1,1.65,{x0:-7.5,x1:-5.3,z0:8.93,z1:9.07},false,doorPivot);FD.front=true;
 ANIM.push((t,dt)=>{DR.forEach(d=>{if(d.front&&CIN.mode!=='play')return;const tg=d.open?1:0;if(d.a!==tg){d.a+=(tg-d.a)*(1-Math.exp(-5*dt));if(Math.abs(tg-d.a)<.003)d.a=tg;d.sync()}})});
+// ================= PLAYER AVATAR (rigged GLB, procedural animation) =================
+// The GLB has no baked animations, so walking / running / jumping / carrying are driven
+// by rotating the skeleton bones every frame. Angles are in *character space*
+// (X = character's left, Y = up, Z = forward) and are converted to bone-local rotations.
+function createAvatar(T,model){
+ const Q=T.Quaternion,E=T.Euler,AX=new T.Vector3(1,0,0),AY=new T.Vector3(0,1,0),AZ=new T.Vector3(0,0,1);
+ const qa=(ax,a)=>new Q().setFromAxisAngle(ax,a),rx=a=>qa(AX,a),ry=a=>qa(AY,a),rz=a=>qa(AZ,a),mul=(...l)=>l.reduce((a,b)=>a.clone().multiply(b));
+ const root=new T.Group();root.add(model);
+ const bones={};model.updateMatrixWorld(true);
+ model.traverse(o=>{if(o.isBone){bones[o.name]=o;o.userData.qb=o.quaternion.clone();const w=new Q();o.getWorldQuaternion(w);o.userData.W=w;o.userData.Wi=w.clone().invert()}
+  if(o.isMesh){o.frustumCulled=false;o.castShadow=true;o.receiveShadow=false}});
+ const hips=bones.Hips,hipY=hips?hips.position.y:.94;
+ // phase / blend state
+ const st={ph:0,walk:0,run:0,air:0,hold:0,thr:0,lean:0,bt:0};
+ const ease=(v,t,k,dt)=>v+(t-v)*(1-Math.exp(-k*dt));
+ let pose={},memo={};
+ const I=new Q();
+ function rcOf(b){if(!b||!b.isBone)return I;const n=b.name;if(pose[n])return pose[n];if(n in memo)return memo[n];return memo[n]=rcOf(b.parent)}
+ function apply(){
+  memo={};
+  for(const n in pose){const b=bones[n];if(!b)continue;const p=b.parent,Rp=rcOf(p),Wp=p&&p.isBone?p.userData.W:I,Wpi=p&&p.isBone?p.userData.Wi:I;
+   // local = Wp^-1 * Rp^-1 * Rc * Wp * qb
+   b.quaternion.copy(Wpi).multiply(Rp.clone().invert()).multiply(pose[n]).multiply(Wp).multiply(b.userData.qb)}
+ }
+ function update(dt,s){
+  // s: {speed:0..1 of full walk, run:bool, air:bool, vy, hold:bool, pitch}
+  const sp=Math.min(1,s.speed||0);
+  st.walk=ease(st.walk,sp>.05&&!s.air?1:0,12,dt);
+  st.run=ease(st.run,s.run&&sp>.05&&!s.air?1:0,8,dt);
+  st.air=ease(st.air,s.air?1:0,s.air?14:10,dt);
+  st.hold=ease(st.hold,s.hold?1:0,9,dt);
+  st.thr=Math.max(0,st.thr-dt*3.2);
+  st.bt+=dt;
+  const freq=(1.9+st.run*.5)*(sp>0?Math.max(.55,sp):1);
+  if(sp>.05&&!s.air)st.ph+=dt*freq*Math.PI*2;
+  const w=st.walk,rn=st.run,ar=st.air;
+  const sw=Math.sin(st.ph),cw=Math.cos(st.ph);
+  const amp=.5+.38*rn;                      // leg swing
+  const idleB=Math.sin(st.bt*1.6)*.012*(1-w);
+  const lean=(.04+.14*rn)*w+(.05*ar);
+  pose={};
+  // ---- legs
+  let lSw=sw*amp*w,rSw=-sw*amp*w;           // forward positive
+  let lK=Math.max(0,-cw*sw*0+Math.sin(st.ph+1.9))*(.55+.7*rn)*w, rK=Math.max(0,Math.sin(st.ph+1.9+Math.PI))*(.55+.7*rn)*w;
+  // jump / fall tuck
+  const tuck=ar*(s.vy>0?1:.55);
+  lSw=lSw*(1-ar)+ar*.55*tuck;rSw=rSw*(1-ar)+ar*(-.15);lK=lK*(1-ar)+ar*1.1*tuck;rK=rK*(1-ar)+ar*.5*tuck;
+  const leg=(side,swg,k)=>{const U=side+'UpLeg',L=side+'Leg',F=side+'Foot',T_=side+'ToeBase';
+   const ru=rx(-swg);pose[U]=ru;const rl=mul(rx(k),ru);pose[L]=rl;
+   pose[F]=mul(rx(.08*w+.05*ar),I);                     // keep foot roughly flat in the world
+   pose[T_]=pose[F]};
+  leg('Left',lSw,lK);leg('Right',rSw,rK);
+  // ---- spine / head
+  const lx=lean+idleB;
+  pose.Spine=rx(lx*.35);pose.Spine1=mul(ry(sw*.10*w),rx(lx*.7));pose.Spine2=mul(ry(sw*.16*w),rx(lx));
+  pose.Neck=mul(ry(-sw*.12*w),rx(lx*.5-(s.pitch||0)*.25));pose.Head=mul(ry(-sw*.05*w),rx(-(s.pitch||0)*.35));
+  // ---- arms
+  const down=1.28;                                      // ~70 deg: T-pose -> arms by the sides
+  const armSw=(side,swg,throwK)=>{
+   const sg=side==='Left'?-1:1;
+   const a=mul(rx(-swg),rz(sg*down));                    // free-hanging swing
+   const holdA=mul(ry(-sg*.35),rx(-.8),rz(sg*1.5));                 // carrying: forearms raised in front
+   const flap=mul(rx(-.5),rz(sg*.75));                    // airborne: arms out
+   let A=a.clone().slerp(holdA,st.hold);A=A.slerp(flap,ar*(1-st.hold));
+   if(throwK>0)A=A.slerp(mul(rx(-1.7+1.1*(1-throwK)),rz(sg*1.0)),Math.min(1,throwK*1.4));
+   pose[side+'Arm']=A;
+   const bend=(.18+.55*rn*w)*(1-st.hold)+st.hold*.95+ar*.3;
+   pose[side+'ForeArm']=mul(rx(-bend),A);
+  };
+  armSw('Left',-sw*(.35+.45*rn)*w*(1-st.hold),0);armSw('Right',sw*(.35+.45*rn)*w*(1-st.hold),st.thr);
+  apply();
+  // hips bob
+  if(hips){hips.position.y=hipY-(.025+.03*rn)*w*Math.abs(cw)*1-.05*ar*(s.vy>0?0:1)+idleB*.5}
+ }
+ return{root,bones,update,throwIt(){st.thr=1},st};
+}
+
+let AV=null;const TPS={on:false,fp:false,cd:0,sd:1,so:.55},CAMD=3.1,SHO=.55,AIM=new V3(),rcc=new T.Raycaster(),lastP={x:0,z:0};
+let mvAmt=0,mvRun=false,mvX=0,mvZ=-1,heading=Math.PI;
+(function(){
+ const msg=t=>{console.warn('[avatar] '+t);let d=document.getElementById('avmsg');if(!d){d=document.createElement('div');d.id='avmsg';d.style.cssText='position:fixed;left:50%;bottom:1rem;transform:translateX(-50%);z-index:60;max-width:90vw;padding:.6rem 1rem;border-radius:12px;background:rgba(120,20,20,.92);color:#fff;font:500 .8rem system-ui,sans-serif;text-align:center';document.body.appendChild(d);setTimeout(()=>d.remove(),15000)}d.textContent='Avatar not loaded: '+t+' (using first-person view)'};
+ const loadScript=urls=>new Promise((ok,no)=>{const n=()=>{const u=urls.shift();if(!u)return no(new Error('could not download GLTFLoader (check internet / ad-blocker)'));const e=document.createElement('script');e.src=u;e.onload=()=>T.GLTFLoader?ok():n();e.onerror=n;document.head.appendChild(e)};n()});
+ const tryLoad=paths=>new Promise((ok,no)=>{const n=()=>{const u=paths.shift();if(!u)return no(new Error('model file not found. Put it at avatar/model.glb next to index.html'));new T.GLTFLoader().load(u,ok,undefined,n)};n()});
+ (async()=>{try{
+  if(!T.GLTFLoader)await loadScript(['https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js','https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js','https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.js']);
+  let g;
+  // opened by double-click (file://) browsers block fetching the .glb, so use the embedded copy avatar/model.js instead
+  const fromJs=()=>new Promise((ok,no)=>{const load=()=>{try{const b=atob(window.AVATAR_GLB),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);new T.GLTFLoader().parse(u.buffer,'',ok,no)}catch(e){no(e)}};if(window.AVATAR_GLB)return load();const e=document.createElement('script');e.src='avatar/model.js';e.onload=load;e.onerror=()=>no(new Error('avatar/model.js not found'));document.head.appendChild(e)});
+  if(location.protocol==='file:')g=await fromJs();else{try{g=await tryLoad(['avatar/model.glb','./avatar/model.glb','model.glb','avatar.glb','Avatar/model.glb'])}catch(e){g=await fromJs()}}
+  g.scene.traverse(o=>{if(o.isMesh&&o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.isMeshStandardMaterial){m.envMapIntensity=.55;if(m.metalness>.3)m.metalness=.1}})}});
+  AV=createAvatar(T,g.scene);AV.root.visible=false;scene.add(AV.root);TPS.on=true;if(CIN.mode==='play'){cam.fov=62;cam.updateProjectionMatrix()}
+ }catch(e){msg(e&&e.message||String(e))}})()})();
 // ================= PHYSICS & PLAYER =================
 const P={x:-9,z:6.2,y:0,vy:0};let yaw=Math.PI,pitch=0,started=false,panelOpen=false,held=null,holdD=1.8,tgt=null;
 const K={},touch={mx:0,mz:0,jid:null,jx:0,jy:0,lid:null,lx:0,ly:0,mv:0,t0:0},hv=new V3(),fwd=new V3(),rc=new T.Raycaster(),bh=new T.BoxHelper(new T.Mesh(new T.BoxGeometry(1,1,1)),0x00d5ff);bh.visible=false;scene.add(bh);
@@ -430,20 +522,21 @@ function physics(dt){
 }
 function lookDir(){fwd.set(-Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),-Math.cos(yaw)*Math.cos(pitch))}
 function movePlayer(dt){
- if(panelOpen||!started)return;
+ if(panelOpen||!started){mvAmt=0;return}
  let f=((K.KeyW||K.ArrowUp)?1:0)-((K.KeyS||K.ArrowDown)?1:0)-touch.mz,s=((K.KeyD||K.ArrowRight)?1:0)-((K.KeyA||K.ArrowLeft)?1:0)+touch.mx;
  const l=Math.hypot(f,s);if(l>1){f/=l;s/=l}
  const sp=(K.ShiftLeft||K.ShiftRight)?5.4:3.1,sy=Math.sin(yaw),cy2=Math.cos(yaw);
+ mvAmt=Math.min(1,l);mvRun=!!(K.ShiftLeft||K.ShiftRight);if(l>.05){mvX=-sy*f+cy2*s;mvZ=-cy2*f-sy*s}
  P.x+=(-sy*f+cy2*s)*sp*dt;P.z+=(-cy2*f-sy*s)*sp*dt;
  for(let i=0;i<S.length;i++){const b=S[i];if(b.y1>P.y+.2&&b.y0<P.y+1.5)pushOut(P,.32,b)}
  P.x=cl(P.x,-58,58);P.z=cl(P.z,-46,46);
  P.vy-=20*dt;P.y+=P.vy*dt;if(P.y<=0){P.y=0;P.vy=0}
  moving=Math.abs(f)+Math.abs(s)>.05&&P.y===0}
 let moving=false,bob=0;
-function grab(b){held=b;b.held=true;b.v.set(0,0,0);holdD=cl(b.m.position.distanceTo(cam.position),1,2.6);hv.set(0,0,0)}
+function grab(b){held=b;b.held=true;b.v.set(0,0,0);holdD=cl(b.m.position.distanceTo(AIM),1,2.6);hv.set(0,0,0)}
 function drop(){const b=held;b.held=false;b.v.copy(hv).clampLength(0,9);held=null}
-function throwIt(){if(!held)return;const b=held;drop();lookDir();b.v.copy(fwd).multiplyScalar(11).add(new V3(0,1.5,0))}
-function takeBook(ref){const m=ref.mesh;scene.attach(m);const p=m.position;m.rotation.set(0,Math.atan2(cam.position.x-p.x,cam.position.z-p.z),0);const hh=Math.max(ref.w,ref.d)/2*.9,b=body(m,[hh,ref.h/2,hh],ref.info,p.x,p.y,p.z);b.name=ref.info.t;grab(b)}
+function throwIt(){if(!held)return;if(AV)AV.throwIt();const b=held;drop();lookDir();b.v.copy(fwd).multiplyScalar(11).add(new V3(0,1.5,0))}
+function takeBook(ref){const m=ref.mesh;scene.attach(m);const p=m.position;m.rotation.set(0,Math.atan2(AIM.x-p.x,AIM.z-p.z),0);const hh=Math.max(ref.w,ref.d)/2*.9,b=body(m,[hh,ref.h/2,hh],ref.info,p.x,p.y,p.z);b.name=ref.info.t;grab(b)}
 function act(){if(!started||panelOpen)return;if(held){drop();return}if(tgt){if(tgt.toggle)tgt.toggle();else if(tgt.m)grab(tgt);else if(tgt.book)takeBook(tgt);else readIt()}}
 function readIt(){if(!held&&tgt&&tgt.toggle&&started&&!panelOpen){tgt.toggle();return}const t=held||tgt;if(t&&t.info&&started)openPanel(t.info)}
 // panel
@@ -466,7 +559,7 @@ addEventListener('keydown',e=>{if(/INPUT|TEXTAREA/.test(e.target.tagName))return
  if(e.code==='Escape'){if(panelOpen)closePanel();return}
  if(!started)return;K[e.code]=1;
  if(e.code==='Space'){e.preventDefault();if(!panelOpen&&P.y===0)P.vy=6.2}
- if(e.code==='KeyE'&&!panelOpen)readIt();if(e.code==='KeyF')throwIt();if(e.code==='KeyL')fl.visible=!fl.visible;
+ if(e.code==='KeyE'&&!panelOpen)readIt();if(e.code==='KeyF')throwIt();if(e.code==='KeyL')fl.visible=!fl.visible;if(e.code==='KeyV'&&AV&&!panelOpen){TPS.fp=!TPS.fp;cam.fov=TPS.fp?72:62;cam.updateProjectionMatrix()}
  if(e.code.startsWith('Arrow'))e.preventDefault()});
 addEventListener('keyup',e=>{delete K[e.code]});
 // touch
@@ -485,7 +578,7 @@ CIN.update=(t,dt)=>{
   tmpL.copy(u<.6?L0.clone().lerp(L1,smooth(u/.6)):L1.clone().lerp(L2,smooth((u-.6)/.4)));cam.lookAt(tmpL);
   doorPivot.rotation.y=1.65*smooth(cl((u-.35)/.25,0,1));cam.fov=55+17*smooth(cl((u-.5)/.5,0,1));cam.updateProjectionMatrix();if(u>=1)CIN.end()}};
 CIN.begin=()=>{if(CIN.mode!=='idle')return;const s=cam.position.clone();CIN.curve=new T.CatmullRomCurve3([s,new V3(-6.4+(s.x+6.4)*.35,6.5,30),new V3(-6.4,3,20),new V3(-6.4,1.9,13.5),new V3(-6.4,1.65,10),new V3(-6.4,1.65,8.2),new V3(-6.4,1.65,6.6)]);CIN.mode='enter';CIN.u=0;$('#start').hidden=true};
-CIN.end=()=>{CIN.mode='play';FD.a=1;FD.open=true;FD.sync();P.x=-6.4;P.z=6.6;P.y=0;P.vy=0;yaw=0;pitch=0;cam.fov=72;cam.updateProjectionMatrix();started=true;document.body.classList.remove('intro');if(CIN.after!=null){[P.x,P.z,yaw]=TP[CIN.after];pitch=0;P.y=0}CIN.after=null;lock()};
+CIN.end=()=>{CIN.mode='play';FD.a=1;FD.open=true;FD.sync();P.x=-6.4;P.z=6.6;P.y=0;P.vy=0;yaw=0;pitch=0;cam.fov=TPS.on&&!TPS.fp?62:72;cam.updateProjectionMatrix();started=true;TPS.cd=0;document.body.classList.remove('intro');if(CIN.after!=null){[P.x,P.z,yaw]=TP[CIN.after];pitch=0;P.y=0}CIN.after=null;heading=yaw+Math.PI;lock()};
 addEventListener('pointerdown',()=>{if(CIN.mode==='enter')CIN.u=Math.max(CIN.u,.999)});
 const SITE=$('#site');
 window.HOUSE={enter(i){if(CIN.mode!=='idle')return;CIN.after=i;window.SP=false;SITE.classList.add('out');setTimeout(()=>{SITE.style.display='none'},1700);CIN.begin()},
@@ -500,20 +593,40 @@ const roomEl=$('#room'),tipEl=$('#tip'),cross=$('#cross');
 function roomAt(){if(Math.abs(P.x)>13.5||Math.abs(P.z)>9)return 'Garden';const c=P.x<-4.5?0:P.x<4.5?1:2,rw=P.z<0?0:1;return rooms[[0,1,2,3,4,5][rw*3+c]].n}
 function resize(){r.setSize(innerWidth,innerHeight,false);if(comp)comp.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}
 resize();addEventListener('resize',resize);
+function camRay(pv,rt,so){const u=new V3().addScaledVector(fwd,-CAMD).addScaledVector(rt,so),L=u.length();u.divideScalar(L);rcc.set(pv,u);rcc.far=L+.3;const h=rcc.intersectObjects(solids)[0];return{u,L,w:h?Math.max(.3,Math.min(L,h.distance-.28)):L}}
+function thirdPerson(dt){
+ const sy=Math.sin(yaw),cy2=Math.cos(yaw),pv=new V3(P.x,P.y+1.85,P.z),rt=new V3(cy2,0,-sy);
+ // swap shoulders when a wall is in the way on the current side
+ const a=camRay(pv,rt,TPS.sd*SHO);if(a.w<a.L-.05){const b=camRay(pv,rt,-TPS.sd*SHO);if(b.w>a.w+.5)TPS.sd=-TPS.sd}
+ TPS.so+=(TPS.sd*SHO-TPS.so)*(1-Math.exp(-7*dt));
+ const c=camRay(pv,rt,TPS.so),u=c.u,L=c.L,want=c.w;
+ TPS.cd=want<TPS.cd?want:TPS.cd+(want-TPS.cd)*(1-Math.exp(-3.2*dt));
+ cam.position.copy(pv).addScaledVector(u,TPS.cd);
+ const inside=Math.abs(P.x)<13.4&&Math.abs(P.z)<8.9;cam.position.y=cl(cam.position.y,.22,inside?3.05:10);
+ AIM.copy(pv).addScaledVector(rt,TPS.so/L*TPS.cd)}
 let last=performance.now(),first=true;
 function frame(now){requestAnimationFrame(frame);if(document.hidden){last=now;return}
  const dt=Math.min(.05,(now-last)/1000);last=now;
  movePlayer(dt);
- bob+=moving?dt*9:0;const eye=1.65+(moving?Math.sin(bob)*.03:0);
- cam.position.set(P.x,P.y+eye,P.z);cam.rotation.order='YXZ';cam.rotation.set(pitch,yaw,0);lookDir();if(CIN.mode!=='play')CIN.update(now/1000,dt);
- fl.position.copy(cam.position);fl.target.position.copy(cam.position).addScaledVector(fwd,6);
- if(held){const b=held,p=b.m.position,hy=b.h[1]*b.s;let d=holdD;rc.set(cam.position,fwd);rc.far=d+.4;const h=rc.intersectObjects(solids)[0];if(h)d=Math.max(.6,h.distance-.4);
-  const tg=cam.position.clone().addScaledVector(fwd,d);tg.y=cl(tg.y,hy+.02,2.9);tg.x=cl(tg.x,-58,58);tg.z=cl(tg.z,-46,46);
+ bob+=moving?dt*9:0;
+ const tp=!!AV&&TPS.on&&!TPS.fp&&CIN.mode==='play'&&started;
+ if(tp)pitch=cl(pitch,-.95,1.05);
+ cam.rotation.order='YXZ';cam.rotation.set(pitch,yaw,0);lookDir();
+ if(tp)thirdPerson(dt);else{const eye=1.65+(moving?Math.sin(bob)*.03:0);cam.position.set(P.x,P.y+eye,P.z);AIM.copy(cam.position);TPS.cd=0}
+ if(CIN.mode!=='play')CIN.update(now/1000,dt);
+ if(AV){const vis=tp&&TPS.cd>.5;AV.root.visible=vis;
+  if(Math.hypot(P.x-lastP.x,P.z-lastP.z)>1.5)heading=yaw+Math.PI;lastP.x=P.x;lastP.z=P.z;
+  if(vis){const th=held?yaw+Math.PI:(mvAmt>.05?Math.atan2(mvX,mvZ):heading);heading+=Math.atan2(Math.sin(th-heading),Math.cos(th-heading))*(1-Math.exp(-14*dt));
+   AV.root.position.set(P.x,P.y,P.z);AV.root.rotation.y=heading;
+   AV.update(dt,{speed:mvAmt,run:mvRun,air:P.y>.03,vy:P.vy,hold:!!held,pitch})}}
+ fl.position.copy(AIM).addScaledVector(fwd,tp?.45:0);fl.target.position.copy(AIM).addScaledVector(fwd,6);
+ if(held){const b=held,p=b.m.position,hy=b.h[1]*b.s;let d=holdD;rc.set(AIM,fwd);rc.far=d+.4;const h=rc.intersectObjects(solids)[0];if(h)d=Math.max(.6,h.distance-.4);
+  const tg=AIM.clone().addScaledVector(fwd,d);tg.y=cl(tg.y,hy+.02,2.9);tg.x=cl(tg.x,-58,58);tg.z=cl(tg.z,-46,46);
   const old=p.clone();p.lerp(tg,1-Math.exp(-16*dt));hv.lerp(p.clone().sub(old).divideScalar(Math.max(dt,.001)),.3);
   if(K.KeyR)b.m.rotation.y+=dt*2.5;if(K.Equal||K.NumpadAdd){b.s=Math.min(3,b.s*(1+dt*1.2));b.m.scale.setScalar(b.s)}if(K.Minus||K.NumpadSubtract){b.s=Math.max(.35,b.s*(1-dt*1.2));b.m.scale.setScalar(b.s)}}
  ANIM.forEach(f=>f(now/1000,dt));physics(dt);
  // targeting
- tgt=null;if(started&&!panelOpen){rc.setFromCamera({x:0,y:0},cam);rc.far=3.6;const hs=rc.intersectObjects(ray,true);if(hs.length){let o=hs[0].object;while(o&&!o.userData.ref&&o.parent&&o.parent!==scene)o=o.parent;if(o&&o.userData.ref&&!o.userData.ref.held)tgt=o.userData.ref,bh.setFromObject(o)}}
+ tgt=null;if(started&&!panelOpen){if(tp)rc.set(AIM,fwd);else rc.setFromCamera({x:0,y:0},cam);rc.far=3.6;const hs=rc.intersectObjects(ray,true);if(hs.length){let o=hs[0].object;while(o&&!o.userData.ref&&o.parent&&o.parent!==scene)o=o.parent;if(o&&o.userData.ref&&!o.userData.ref.held)tgt=o.userData.ref,bh.setFromObject(o)}}
  const sh=held||tgt;bh.visible=!!tgt;cross.classList.toggle('on',!!sh);
  tipEl.classList.toggle('on',!!sh);if(sh){tipEl.textContent=held?held.name+' · tap/click to drop · F throw · wheel push/pull':(tgt.toggle?tgt.label()+' · click / E':tgt.book?tgt.name+' · click to take · E to read':tgt.m?tgt.name+' · click to pick up · E to read':tgt.name+' · E / click to read')}
  {const rn=roomAt();if(rn!==lastRoom){lastRoom=rn;const ri=rooms.findIndex(q=>q.n===rn);document.documentElement.style.setProperty('--cy',ACC[ri]||'#8fd6a6');Object.keys(tabs).forEach(k=>tabs[k].classList.toggle('on',rooms[k].n===rn));roomEl.textContent=rn;gb.classList.toggle('on',rn==='Garden')}}drawMM();
