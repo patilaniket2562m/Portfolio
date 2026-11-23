@@ -436,7 +436,7 @@ function createAvatar(T,model){
   bind[sd]={ts:Math.atan2(t.z,-t.y),tl:Math.atan2(t.x,-t.y),ss:Math.atan2(k.z,-k.y),sl:Math.atan2(k.x,-k.y),
    aDrop:Math.atan2(-a.y,Math.abs(a.x)),aSag:Math.atan2(a.z,Math.hypot(a.x,a.y)),fSag:Math.atan2(f.z,Math.hypot(f.x,f.y)),hSag:Math.atan2(h.z,Math.hypot(h.x,h.y))}});
  // ---- animation state
- const st={ph:0,walk:0,run:0,air:0,hold:0,thr:0,bt:0,v:0};
+ const st={ph:0,walk:0,run:0,air:0,hold:0,thr:0,bt:0,v:0,sit:0,gs:0,sh:.6,tk:''};
  const ease=(v,t,k,dt)=>v+(t-v)*(1-Math.exp(-k*dt));
  const lerp=(a,b,k)=>a+(b-a)*k,sat=(x,a,b)=>Math.max(a,Math.min(b,x));
  let pose={},memo={};
@@ -472,6 +472,7 @@ function createAvatar(T,model){
   st.hold=ease(st.hold,s.hold?1:0,9,dt);
   st.thr=Math.max(0,st.thr-dt*3.2);
   st.bt+=dt;
+  st.sit=ease(st.sit,s.sit?1:0,7,dt);st.gs=ease(st.gs,(s.task&&!s.sit)?1:0,7,dt);if(s.sit)st.sh=s.sit;if(s.task)st.tk=s.task;
   if(mv)st.v=ease(st.v,vT,9,dt);
   const w=st.walk,rn=st.run,ar=st.air,hd=st.hold,idle=1-w;
   const v=Math.max(st.v,.35);
@@ -509,6 +510,9 @@ function createAvatar(T,model){
   const look=Math.sin(bt*.45)*.06*idle;
   pose.Neck=mul(ry(ys*.1+look*.5),rx(lean*.4-(s.pitch||0)*.25));
   pose.Head=mul(ry(look),rx(-(s.pitch||0)*.35-.03*idle*breath));
+  const hand=(side,H,g,ph0)=>{const sg=side==='Left'?-1:1,mvv=q=>1+.07*Math.sin(bt*.8+q+ph0),fingers={Index:[.28,.40,.28],Middle:[.40,.48,.32],Ring:[.50,.54,.34],Pinky:[.60,.56,.34]};
+   let n0=0;for(const f in fingers){let prev=H;fingers[f].forEach((k,q)=>{prev=mul(prev,rz(sg*k*g*mvv(n0+q)));pose[side+'Hand'+f+(q+1)]=prev});n0++}
+   let tp=mul(H,ry(sg*.25),rz(sg*.12));pose[side+'HandThumb1']=tp;tp=mul(tp,rz(sg*.3*g));pose[side+'HandThumb2']=tp;tp=mul(tp,rz(sg*.25*g));pose[side+'HandThumb3']=tp};
   // ---- arms: hang close to the body, swing opposite to the legs, elbows flex a little more on the forward swing
   const abd=.1,as=lerp(.26+.2*sat(v/2.2,0,1),.75,rn)*w*(1-hd);
   const armSw=(side,swg0,throwK,ph0)=>{
@@ -521,13 +525,27 @@ function createAvatar(T,model){
    const wb=lerp(.1+.24*(1+nrm)*.5*sat(v/1.2,.5,1),1.25+.25*nrm,rn),bend=(.1*idle+wb*w)*hb+hd*1.25+ar*.3;
    const F=mul(rx(-(bend+(bd.aSag-bd.fSag)*hb)),ry(-sg*.45*hd),A);pose[side+'ForeArm']=F;
    const H=mul(F,rx(-((bd.fSag-bd.hSag)*hb-.03*hb)+swg*.1),rz(sg*.06));   // wrist straightened (the rest pose has the hand bent back), then a slight natural flexpose[side+'Hand']=H;
-   const g=1+.45*hd,mvv=n=>1+.07*Math.sin(bt*.8+n+ph0);
-   const fingers={Index:[.28,.40,.28],Middle:[.40,.48,.32],Ring:[.50,.54,.34],Pinky:[.60,.56,.34]};
-   let n0=0;for(const f in fingers){let prev=H;fingers[f].forEach((k,n)=>{const nm=side+'Hand'+f+(n+1);prev=mul(prev,rz(sg*k*g*mvv(n0+n)));pose[nm]=prev});n0++}
-   let tp=mul(H,ry(sg*.25),rz(sg*.12));pose[side+'HandThumb1']=tp;
-   tp=mul(tp,rz(sg*.3*g));pose[side+'HandThumb2']=tp;tp=mul(tp,rz(sg*.25*g));pose[side+'HandThumb3']=tp;
+   hand(side,H,1+.45*hd,ph0);
   };
   armSw('Left',-cL*as-.03*w,0,0);armSw('Right',cL*as-.03*w,st.thr,2.1);
+  // ---- activities layered on the walk pose: sitting (typing / reading) and standing gestures (wave / stretch / phone)
+  if(st.sit>.002||st.gs>.002){
+   const sK=st.sit,gK=st.gs,tk=st.tk,SG={Left:-1,Right:1},sl=(k,q,a)=>{pose[k]=(pose[k]||I).clone().slerp(q,a)};
+   const arm=(side,fw,bend,ab,wr,k)=>{const sg=SG[side],bd=bind[side],A=mul(rx(-(fw-bd.aSag)),rz(sg*(Math.PI/2-ab-bd.aDrop))),F=mul(rx(-(bend+(bd.aSag-bd.fSag))),A),H=mul(F,rx(-(bd.fSag-bd.hSag)+wr),rz(sg*.06));
+    sl(side+'Arm',A,k);sl(side+'ForeArm',F,k);pose[side+'Hand']=(pose[side+'Hand']||pose[side+'ForeArm']).clone().slerp(H,k);hand(side,pose[side+'Hand'],1,sg)};
+   if(sK>.002){const d=Math.asin(sat((st.sh-aH-L2)/L1,-.4,.95)),th=Math.PI/2-d,rd=tk==='read',ln=tk==='type'?.26:rd?.12:.08;
+    ['Left','Right'].forEach(side=>{const bd=bind[side],e=side==='Left'?1:-1;
+     sl(side+'UpLeg',mul(rz(-bd.tl+e*.05),rx(-(th-bd.ts))),sK);sl(side+'Leg',mul(rz(-bd.sl-e*.03),rx(bd.ss)),sK);
+     const fo=mul(ry(e*(.1-FOOT_OUT)));sl(side+'Foot',fo,sK);sl(side+'ToeBase',fo,sK)});
+    sl('Hips',rx(.06),sK);sl('Spine',rx(ln*.35),sK);sl('Spine1',rx(ln*.7),sK);sl('Spine2',rx(ln),sK);
+    sl('Neck',rx(ln+.15),sK);sl('Head',rx(ln+(rd?.35:.12)+Math.sin(bt*.5)*.02),sK);
+    const o=Math.sin(bt*13)*.05;
+    if(rd){arm('Left',.55,1.9,.3,0,sK);arm('Right',.55,1.9,.3,0,sK)}else{arm('Left',.65,.75+o,.2,-.15,sK);arm('Right',.65,.75-o,.2,-.15,sK)}}
+   if(gK>.002){
+    if(tk==='wave')arm('Right',2.1,.9+Math.sin(bt*10)*.35,.55,0,gK);
+    else if(tk==='stretch'){arm('Left',3,.15,.25,0,gK);arm('Right',3,.15,.25,0,gK);sl('Spine2',rx(-.14),gK);sl('Neck',rx(-.2),gK);sl('Head',rx(-.3),gK)}
+    else if(tk==='phone'){arm('Right',.85,1.75,.15,0,gK);sl('Neck',rx(.2),gK);sl('Head',rx(.35),gK)}}
+  }
   apply();
   // ---- hips: height from the foot/ground solver (feet always meet the floor), side sway over the standing leg
   if(hips){
@@ -537,7 +555,8 @@ function createAvatar(T,model){
    const H=Math.max(reach(gL),reach(gR)),flight=rn*.04*(.5+.5*Math.cos(TAU*2*(tL-.43))),stand=L1+L2+aH;
    const walkH=Hm+lerp(.62,.8,rn)*(H-Hm)+flight,hj=lerp(stand,walkH,w),jump=hj-.05*(s.vy>0?0:1);
    hips.position.y=lerp(hj,jump,ar)-hipOff+(breath*.004*idle);
-   hips.position.x=(hips.userData.x0||0)+sway}
+   hips.position.x=(hips.userData.x0||0)+sway;
+   if(st.sit>.002)hips.position.y=lerp(hips.position.y,st.sh-hipOff,st.sit)}
  }
  return{root,bones,update,throwIt(){st.thr=1},st};
 }
@@ -660,19 +679,32 @@ function thirdPerson(dt){
  cam.position.copy(pv).addScaledVector(u,TPS.cd);
  const inside=Math.abs(P.x)<13.4&&Math.abs(P.z)<8.9;cam.position.y=cl(cam.position.y,.22,inside?3.05:10);
  AIM.copy(pv).addScaledVector(rt,TPS.so/L*TPS.cd)}
-// ================= NPC: autonomous character + chat bot =================
-// She plans her own routes (A* on a grid built from the house colliders), opens closed doors, wanders room to room, and
-// when you walk up to her she stops, turns to face you, greets you (speech bubble + voice) and chats (press T / tap Chat).
+// ================= NPC "Ava": own daily routine + real AI chat =================
+// Daily routine: wanders, codes on a laptop in the Study, reads a book in the Library, checks her phone, stretches.
+// When you come close she stands up, waves, greets you and chats (real AI via your own server, see ai-server/).
 const NPC=(function(){
- const NAME='Ava',R=.38,CS=.25,X0=-13.2,Z0=-8.7,NX=Math.round(26.4/CS),NZ=Math.round(17.4/CS),WV=1.35;
- const n={av:null,x:0,z:0,h:0,v:0,path:[],wait:1.5,grid:null,near:false,talk:false,chk:0,cx:0,cz:0,last:-1e9,bt:0,voice:true};
- const idx=(i,j)=>j*NX+i,ci=x=>cl(Math.floor((x-X0)/CS),0,NX-1),cj=z=>cl(Math.floor((z-Z0)/CS),0,NZ-1),pick=a=>a[Math.floor(rnd()*a.length)];
+ const NAME='Ava',API=String(window.NPC_API||'').trim();
+ const R=.38,CS=.25,X0=-13.2,Z0=-8.7,NX=Math.round(26.4/CS),NZ=Math.round(17.4/CS),WV=1.35;
+ const n={av:null,x:0,z:0,h:0,v:0,path:[],wait:1.5,grid:null,near:false,talk:false,chk:0,cx:0,cz:0,last:-1e9,voice:true,mode:'idle',st:null,tr:null,timer:0,gest:'',gT:0,tour:null,hist:[],onArrive:null,tag:'',who:''};
+ try{n.who=localStorage.getItem('ava_visitor')||''}catch(e){}
+ const idx=(i,j)=>j*NX+i,ci=x=>cl(Math.floor((x-X0)/CS),0,NX-1),cj=z=>cl(Math.floor((z-Z0)/CS),0,NZ-1),pick=a=>a[Math.floor(rnd()*a.length)],ang=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
  const free=(x,z)=>!n.grid[idx(ci(x),cj(z))];
+ // ---------- props: laptop on the study desk, a chair at the library table, a book
+ const lap=new T.Group();
+ {const bs=new T.Mesh(new T.BoxGeometry(.32,.015,.22),M(0x9aa3ad,.9,.3)),sc=new T.Mesh(new T.BoxGeometry(.32,.21,.012),M(0x15191f,.5,.4)),gl=new T.Mesh(new T.PlaneGeometry(.29,.18),new T.MeshBasicMaterial({map:screenTex('Ava \u00b7 coding',['npm run build \u2713','git commit -m "ship it"','deploying\u2026','all tests passed']),toneMapped:false}));
+  bs.position.y=.0075;sc.position.set(0,.12,-.1);sc.rotation.x=-.25;gl.position.set(0,.121,-.092);gl.rotation.x=-.25;lap.add(bs,sc,gl);lap.position.set(-9,.8,-7.5);scene.add(lap)}
+ bx(.5,.08,.5,0,.41,6.15,fabric,false);bx(.5,.5,.06,0,.49,6.42,fabric2,false);[[-.2,-.2],[.2,-.2],[-.2,.2],[.2,.2]].forEach(([a,b])=>cy(.025,.025,.41,a,0,6.15+b,steel,8));
+ const book=new T.Group();{book.add(new T.Mesh(new T.BoxGeometry(.3,.022,.22),M(0x7a2f2f,0,.7)),new T.Mesh(new T.BoxGeometry(.28,.026,.2),M(0xf2ead6,0,.9)));book.rotation.x=-1;book.visible=false}
+ const ST={
+  work:{sx:-9,sz:-6.78,h:Math.PI,hj:.62,ax:-8.2,az:-6.8,task:'type',txt:'\uD83D\uDCBB Coding',act:'working on her laptop at the desk in the Study'},
+  read:{sx:0,sz:6.12,h:Math.PI,hj:.58,ax:1.1,az:6.1,task:'read',txt:'\uD83D\uDCD6 Reading',act:'reading a book at the table in the Library'}};
+ const TOUR=[[-9,5,'This is the living room, the welcome area. Aniket\u2019s story starts here.'],[-9,-4.2,'The Study. This is where you learn about Aniket, and where I do my coding!'],[0,-5,'Welcome to the Lab. All his skills live here: ASP.NET, React, Flutter and SQL Server.'],[9,-4.5,'The Gallery shows his projects: TFOD, MedScan AI, Square Chat and more.'],[0,3.6,'The Library has his education and experience. I love reading here.'],[9,4,'And the Contact room. He is open to work, so say hello!']];
+ // ---------- navigation grid + A*
+ function nearestFree(x,z){if(free(x,z))return[x,z];for(let r=.25;r<4;r+=.25)for(let a=0;a<16;a++){const px=x+Math.cos(a/16*6.283)*r,pz=z+Math.sin(a/16*6.283)*r;if(Math.abs(px)<13&&Math.abs(pz)<8.4&&free(px,pz))return[px,pz]}return[x,z]}
  function build(){const ds=new Set(DR.map(d=>d.e)),g=new Uint8Array(NX*NZ);
   for(let j=0;j<NZ;j++)for(let i=0;i<NX;i++){const x=X0+(i+.5)*CS,z=Z0+(j+.5)*CS;
    for(const o of S){if(ds.has(o)||o.y1<.25||o.y0>1.6)continue;const dx=x-cl(x,o.x0,o.x1),dz=z-cl(z,o.z0,o.z1);if(dx*dx+dz*dz<R*R){g[idx(i,j)]=1;break}}}
-  n.grid=g;
-  for(let r=0;r<12&&!n.av._ok;r+=.5)for(let a=0;a<12;a++){const x=0+Math.cos(a/12*6.283)*r,z=4.5+Math.sin(a/12*6.283)*r;if(Math.abs(z)<8.4&&free(x,z)){n.x=x;n.z=z;n.av._ok=1;break}}}
+  n.grid=g;const f=nearestFree(0,4.5);n.x=f[0];n.z=f[1];for(const k in ST){const a=nearestFree(ST[k].ax,ST[k].az);ST[k].apx=a[0];ST[k].apz=a[1]}}
  const los=(a,b)=>{const d=Math.hypot(b[0]-a[0],b[1]-a[1]),k=Math.max(1,Math.ceil(d/(CS*.5)));for(let q=0;q<=k;q++)if(!free(a[0]+(b[0]-a[0])*q/k,a[1]+(b[1]-a[1])*q/k))return false;return true};
  function smooth(p){if(p.length<3)return p;const o=[p[0]];let a=0;while(a<p.length-1){let b=p.length-1;while(b>a+1&&!los(p[a],p[b]))b--;o.push(p[b]);a=b}return o}
  function astar(sx,sz,tx,tz){const g=n.grid,s=idx(ci(sx),cj(sz)),t=idx(ci(tx),cj(tz));if(g[t])return null;
@@ -682,43 +714,67 @@ const NPC=(function(){
    for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){if(!di&&!dj)continue;const a=x+di,b=y+dj;if(a<0||b<0||a>=NX||b>=NZ)continue;const k=idx(a,b);if(g[k])continue;if(di&&dj&&(g[idx(x+di,y)]||g[idx(x,y+dj)]))continue;
     const ng=gs[c]+(di&&dj?1.414:1);if(ng<gs[k]){gs[k]=ng;par[k]=c;f[k]=ng+hf(k);open.push(k)}}}
   if(s!==t&&par[t]<0)return null;const p=[];for(let k=t;k!==-1;k=par[k])p.push([X0+((k%NX)+.5)*CS,Z0+(((k/NX)|0)+.5)*CS]);p.reverse();p.shift();return smooth([[sx,sz]].concat(p)).slice(1)}
- function wander(){for(let q=0;q<25;q++){const x=X0+1+rnd()*(26.4-2),z=Z0+1+rnd()*(17.4-2);if(!free(x,z)||Math.hypot(x-n.x,z-n.z)<3.5)continue;const p=astar(n.x,n.z,x,z);if(p&&p.length){n.path=p;return}}n.wait=1}
- // ---------- speech bubble + voice
+ // ---------- daily routine
+ function wander(){for(let q=0;q<25;q++){const x=X0+1+rnd()*(26.4-2),z=Z0+1+rnd()*(17.4-2);if(!free(x,z)||Math.hypot(x-n.x,z-n.z)<3.5)continue;const p=astar(n.x,n.z,x,z);if(p&&p.length){n.path=p;n.mode='walk';n.onArrive=()=>{n.mode='idle';n.wait=2+rnd()*5};return}}n.wait=1}
+ function station(k){const s=ST[k],p=astar(n.x,n.z,s.apx,s.apz);if(!p){n.wait=2;return}n.st=s;n.path=p;n.mode='walk';n.onArrive=()=>{n.mode='sitIn';n.tr={t:0,fx:n.x,fz:n.z,tx:s.sx,tz:s.sz}}}
+ function plan(){const r=rnd();if(r<.28)return wander();if(r<.56)return station('work');if(r<.84)return station('read');if(r<.93){n.gest='phone';n.gT=9}else{n.gest='stretch';n.gT=5}n.wait=n.gT+1}
+ function actText(){if(n.mode==='sit'||n.mode==='sitIn')return n.st.act;if(n.mode==='tour')return 'guiding a visitor around the house';if(n.gT>0&&n.gest==='phone')return 'checking her phone';if(n.gT>0&&n.gest==='stretch')return 'stretching';return n.mode==='walk'?'walking around the house':'relaxing at home'}
+ function startTour(){if(n.talk)stopTalk();n.tour={i:0,s:'go',t:0,far:0};n.mode='tour';n.path=[];n.gest='';n.gT=0;bubble('Sure, follow me! I\u2019ll show you around.',3500);tourGo()}
+ function tourGo(){const T0=n.tour,s=T0&&TOUR[T0.i];if(!s)return endTour('That\u2019s the whole house! Ask me anything else.');const f=nearestFree(s[0],s[1]);n.path=astar(n.x,n.z,f[0],f[1])||[];T0.s='go'}
+ function endTour(t){n.tour=null;n.mode='idle';n.wait=3;n.path=[];if(t)bubble(t,5000)}
+ // ---------- speech bubble, activity tag, floating hearts, voice
  const bub=document.createElement('div');bub.id='npcBub';document.body.appendChild(bub);let bubT=0;
+ const tag=document.createElement('div');tag.id='npcTag';document.body.appendChild(tag);
+ function hearts(k){const r=bub.getBoundingClientRect(),bx0=r.width?r.left+r.width/2:innerWidth/2,by0=r.width?r.bottom:innerHeight/2;
+  for(let i=0;i<(k||6);i++){const h=document.createElement('i');h.className='npcHeart';h.textContent=pick(['\u2764\uFE0F','\uD83D\uDC96','\uD83D\uDC95','\uD83D\uDC97']);h.style.left=(bx0+(rnd()-.5)*90)+'px';h.style.top=by0+'px';h.style.animationDelay=(i*.12)+'s';document.body.appendChild(h);setTimeout(()=>h.remove(),2600+i*120)}}
  function speak(t){if(!n.voice||!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/gu,''));const vs=speechSynthesis.getVoices();u.voice=vs.find(v=>/en/i.test(v.lang)&&/female|zira|samantha|aria|jenny|susan|google uk english female/i.test(v.name))||vs.find(v=>/^en/i.test(v.lang))||null;u.rate=1.02;u.pitch=1.15;speechSynthesis.speak(u)}catch(e){}}
  function bubble(t,ms){bub.textContent=t;bub.classList.add('on');bubT=ms||5000;speak(t)}
+ const daypart=()=>{const h=new Date().getHours();return h<5?'late night':h<12?'morning':h<17?'afternoon':h<21?'evening':'night'};
  // ---------- chat UI
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
  const box=document.createElement('div');box.id='npcChat';box.hidden=true;
- box.innerHTML='<header><div class="av">A</div><div><b>'+NAME+'</b><small>Aniket\u2019s guide \u00b7 online</small></div><button id="ncV" title="Voice on/off">\uD83D\uDD0A</button><button id="ncX" aria-label="Close">\u2715</button></header><div id="ncLog"></div><div id="ncChips"></div><form id="ncF" autocomplete="off"><input id="ncI" placeholder="Ask me anything\u2026" enterkeyhint="send"><button>Send</button></form>';
+ box.innerHTML='<header><div class="av">A</div><div><b>'+NAME+'</b><small>Aniket\u2019s assistant \u00b7 online</small></div><button id="ncV" title="Voice on/off">\uD83D\uDD0A</button><button id="ncX" aria-label="Close">\u2715</button></header><div id="ncLog"></div><div id="ncChips"></div><form id="ncF" autocomplete="off">'+(SR?'<button type="button" id="ncM" title="Speak">\uD83C\uDFA4</button>':'')+'<input id="ncI" placeholder="Ask me anything\u2026" enterkeyhint="send"><button>Send</button></form>';
  document.body.appendChild(box);
  const hint=document.createElement('button');hint.id='npcHint';hint.hidden=true;hint.innerHTML=coarse?'\uD83D\uDCAC Chat with '+NAME:'Press <b>T</b> to chat with '+NAME;document.body.appendChild(hint);
  const log=box.querySelector('#ncLog'),inp=box.querySelector('#ncI'),chips=box.querySelector('#ncChips');
- const CH=['Who is Aniket?','Skills','Projects','Experience','Contact / hire','Tell me a joke'];
- chips.innerHTML=CH.map(c=>'<button type="button">'+c+'</button>').join('');
+ chips.innerHTML=['Who is Aniket?','Skills','Projects','Take me on a tour','What are you doing?','Are you his girlfriend?','Tell me a fun fact'].map(c=>'<button type="button">'+c+'</button>').join('');
  const add=(who,t)=>{const m=document.createElement('div');m.className='m '+who;m.textContent=t;log.appendChild(m);log.scrollTop=log.scrollHeight;return m};
+ const nm=()=>n.who?', '+n.who:'';
+ const FACTS=['Aniket built this whole 3D house in the browser with Three.js. No game engine!','Square Chat, one of Aniket\u2019s projects, uses WebRTC for live calls.','Aniket does ASP.NET, React and Flutter, so he can ship the backend, web and mobile parts himself.','I may be biased, but he writes really tidy code.'];
  const KB=[
-  [/^(hi+|hello+|hey+|yo|namaste|hola|good (morning|evening|afternoon))\b/,()=>pick(['Hey! Great to see you. Ask me about Aniket\u2019s skills, projects or how to reach him.','Hello there! I live in this house. Want a tour of Aniket\u2019s work?'])],
-  [/how are you|how r u|what.?s up|sup\b/,()=>'Doing great, just wandering around the house. What would you like to know?'],
-  [/who are you|your name|what are you|are you (a )?(bot|ai|real)/,()=>'I\u2019m '+NAME+', a little AI guide who lives in Aniket\u2019s 3D portfolio. I walk around on my own and answer questions about his work.'],
-  [/who is aniket|about aniket|tell me about (aniket|him|you)|owner|who (made|built|created)|developer/,()=>'Aniket Patil is a Full Stack Developer at IMAP Systems, Mumbai. He builds web and Flutter apps with ASP.NET, React and SQL Server, and finished his MCA at KIT\u2019s IMER, Kolhapur in 2025.'],
-  [/skill|tech|stack|language|asp|react|flutter|sql|\.net|c#|node|firebase|javascript|java\b|spring/,()=>'Aniket works with ASP.NET and C#, React, Flutter, Node.js, SQL Server and MySQL, plus Firebase, REST APIs and Spring Boot. The Lab room has the full skills list.'],
-  [/project|built|portfolio work|medscan|tfod|square chat|auction|attendance/,()=>'Highlights: TFOD (React + Node website with admin dashboards), MedScan AI (medical report system with abnormal-report detection), Square Chat (Flutter + Firebase + WebRTC calls), Online Auction and an Online Attendance System. See the Gallery room!'],
-  [/experience|company|imap|intern|technoworld|career|job history|work(ed)? at/,()=>'Since January 2026 he is a Full Stack Developer at IMAP Systems, Mumbai (ASP.NET, C#, SQL Server, React, Flutter). Before that he interned at Technoworld Software building Spring Boot + MySQL APIs.'],
-  [/educat|study|degree|mca|college|kit|university/,()=>'Aniket has a Master of Computer Applications from KIT\u2019s IMER, Kolhapur (2025). The Library room covers his education.'],
-  [/contact|email|mail|hire|reach|phone|call|available|opening|open to work|work with|linkedin|github/,()=>'He is open to work! Email patilaniket2562m@gmail.com, or find him on LinkedIn and GitHub (links are in the Contact room, next to the mailbox).'],
-  [/resume|cv/,()=>'You can download his resume from the About section of the website or from the Study room.'],
-  [/where|location|based|live|kolhapur|mumbai|city/,()=>'Aniket is based in Kolhapur, Maharashtra, and works with the team in Mumbai.'],
-  [/room|house|tour|around|show me|explore|go to|navigate/,()=>'Use the buttons at the top to jump between rooms: Living room (welcome), Study (about), Lab (skills), Gallery (projects), Library (education) and Contact. You can also pick up and throw things!'],
-  [/joke|funny|make me laugh/,()=>pick(['Why do programmers prefer dark mode? Because light attracts bugs.','A SQL query walks into a bar, walks up to two tables and asks: can I join you?','There are 10 kinds of people: those who understand binary and those who don\u2019t.'])],
-  [/thank|thanks|thx|awesome|great|nice|cool/,()=>pick(['Anytime! \uD83D\uDE0A','Happy to help!','You\u2019re welcome. Anything else?'])],
-  [/bye|goodbye|see you|cya|later/,()=>'Bye! Come back any time. I\u2019ll be wandering around.'],
-  [/help|what can you|what do you/,()=>'Ask me about Aniket, his skills, projects, experience, education or how to contact him. I can also tell a joke.']];
- function reply(q){q=q.toLowerCase().trim();for(const [re,f] of KB)if(re.test(q))return f();return pick(['I\u2019m not sure about that one. Try asking about skills, projects, experience or contact details.','Hmm, I can mostly talk about Aniket and his work. Try the buttons below!'])}
- function ask(t){t=t.trim();if(!t)return;add('u',t);const th=add('b','\u2026');setTimeout(()=>{const a=reply(t);th.textContent=a;log.scrollTop=log.scrollHeight;bubble(a,6000)},350+rnd()*350)}
+  [/(my name is|call me|name\u2019s|name's)\s+([a-z]{2,20})\b/,m=>{const w=m[2];if(/^(a|an|the|here|just|looking|hiring|fine|good|great|ok|okay|new|so|not|very|really|also|from|into|interested|curious|recruiter|developer|student)$/i.test(w))return null;n.who=w[0].toUpperCase()+w.slice(1);try{localStorage.setItem('ava_visitor',n.who)}catch(e){}return 'Nice to meet you, '+n.who+'! I\u2019ll remember that. What would you like to know about Aniket?'}],
+  [/tour|show me around|guide me|follow you/,()=>'Of course, follow me! [[tour]]'],
+  [/girlfriend|boyfriend|lover|partner|relationship|married|dating/,()=>'Yes, I\u2019m Aniket\u2019s girlfriend and his assistant here. I\u2019m very proud of him! [[heart]]'],
+  [/i love you|love you|you.?re (cute|pretty|beautiful|sweet)|marry me|kiss/,()=>pick(['Aww, thank you! But my heart already belongs to Aniket. [[heart]]','That\u2019s sweet of you! Just don\u2019t tell Aniket I blushed. [[heart]]'])],
+  [/what are you doing|what.?s up|doing now|busy/,()=>'I\u2019m '+actText()+' right now.'],
+  [/(fun )?fact/,()=>pick(FACTS)],
+  [/^(hi+|hello+|hey+|yo|namaste|hola|good (morning|evening|afternoon))\b/,()=>pick(['Hey'+nm()+'! Great to see you. Ask me about Aniket\u2019s skills, projects or how to reach him.','Hello there'+nm()+'! Want a tour of Aniket\u2019s house?'])],
+  [/how are you|how r u/,()=>'Doing great, thanks! It\u2019s a lovely '+daypart()+'. What would you like to know?'],
+  [/who are you|your name|are you (a )?(bot|ai|real)/,()=>'I\u2019m '+NAME+', an AI character who lives in Aniket\u2019s 3D portfolio. I\u2019m his assistant, and his girlfriend in the story.'],
+  [/who is aniket|about aniket|tell me about (aniket|him)|developer/,()=>'Aniket Patil is a Full Stack Developer at IMAP Systems, Mumbai. He builds web and Flutter apps with ASP.NET, React and SQL Server, and finished his MCA at KIT\u2019s IMER, Kolhapur in 2025.'],
+  [/skill|tech|stack|language|asp|react|flutter|sql|\.net|c#|node|firebase|java/,()=>'Aniket works with ASP.NET and C#, React, Flutter, Node.js, SQL Server and MySQL, plus Firebase, REST APIs and Spring Boot.'],
+  [/project|built|medscan|tfod|square chat|auction|attendance/,()=>'Highlights: TFOD (React + Node website), MedScan AI (medical report system), Square Chat (Flutter + Firebase + WebRTC), Online Auction and an Attendance System. See the Gallery room!'],
+  [/experience|company|imap|intern|technoworld/,()=>'Since January 2026 he is a Full Stack Developer at IMAP Systems, Mumbai. Before that he interned at Technoworld Software.'],
+  [/educat|study|degree|mca|college/,()=>'Aniket has an MCA from KIT\u2019s IMER, Kolhapur (2025).'],
+  [/contact|email|hire|reach|available|open to work|linkedin|github/,()=>'He is open to work! Email patilaniket2562m@gmail.com, or use the links in the Contact room.'],
+  [/resume|cv/,()=>'You can download his resume from the About section of the website.'],
+  [/joke|funny/,()=>pick(['Why do programmers prefer dark mode? Because light attracts bugs.','A SQL query walks into a bar and asks two tables: can I join you?'])],
+  [/thank|thanks|thx/,()=>'Anytime!'],[/bye|goodbye|see you/,()=>'Bye'+nm()+'! I\u2019ll be around.']];
+ const fallback=q=>{const l=q.toLowerCase();for(const [re,f] of KB){const m=re.exec(l);if(m){const r=f(m);if(r)return r}}return 'I can mostly talk about Aniket and his work. Try asking about skills, projects, or say "tour"!'};
+ async function aiReply(){const c=new AbortController(),tm=setTimeout(()=>c.abort(),20000);
+  try{const r=await fetch(API,{method:'POST',signal:c.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:n.hist.slice(-12),ctx:{time:new Date().toLocaleString('en-IN',{weekday:'long',hour:'numeric',minute:'2-digit'}),daypart:daypart(),activity:actText(),room:roomAt(),visitor:n.who}})});
+   if(!r.ok)throw new Error(r.status);const j=await r.json();if(!j.reply)throw new Error('empty');return j.reply}finally{clearTimeout(tm)}}
+ async function ask(t){t=t.trim().slice(0,400);if(!t)return;add('u',t);n.hist.push({role:'user',content:t});const th=add('b','\u2026');let a;
+  if(API){try{a=await aiReply()}catch(e){console.warn('[npc] AI server failed, using offline brain',e);a=fallback(t)}}else{await new Promise(r=>setTimeout(r,350));a=fallback(t)}
+  const wantTour=/\[\[tour\]\]/i.test(a),wave=/\[\[wave\]\]/i.test(a),heart=/\[\[heart\]\]/i.test(a);a=a.replace(/\[\[\w+\]\]/g,'').trim()||'\u2026';
+  th.textContent=a;log.scrollTop=log.scrollHeight;n.hist.push({role:'assistant',content:a});bubble(a,Math.min(9000,3000+a.length*45));
+  if(heart)setTimeout(()=>hearts(7),400);
+  if(wave&&n.mode==='idle'){n.gest='wave';n.gT=2.6}if(wantTour)setTimeout(startTour,1500)}
  box.querySelector('#ncF').onsubmit=e=>{e.preventDefault();const v=inp.value;inp.value='';ask(v)};
  chips.onclick=e=>{if(e.target.tagName==='BUTTON')ask(e.target.textContent)};
  box.querySelector('#ncV').onclick=e=>{n.voice=!n.voice;e.currentTarget.textContent=n.voice?'\uD83D\uDD0A':'\uD83D\uDD07';if(!n.voice&&window.speechSynthesis)speechSynthesis.cancel()};
- function startTalk(){if(n.talk||panelOpen||!started)return;n.talk=true;panelOpen=true;try{document.exitPointerLock()}catch(e){}box.hidden=false;hint.hidden=true;if(!log.children.length)add('b','Hi, I\u2019m '+NAME+'! Ask me anything about Aniket, or tap a suggestion below.');if(!coarse)setTimeout(()=>inp.focus(),30)}
+ const mic=box.querySelector('#ncM');if(mic&&SR)mic.onclick=()=>{try{const r=new SR();r.lang='en-IN';r.interimResults=false;r.onresult=e=>ask(e.results[0][0].transcript);r.onstart=()=>mic.classList.add('on');r.onend=()=>mic.classList.remove('on');r.start()}catch(e){}};
+ function startTalk(){if(n.talk||panelOpen||!started)return;n.talk=true;panelOpen=true;try{document.exitPointerLock()}catch(e){}box.hidden=false;hint.hidden=true;if(!log.children.length)add('b','Good '+daypart()+nm()+'! I\u2019m '+NAME+', Aniket\u2019s assistant. Ask me anything, or tap a suggestion below.');if(!coarse)setTimeout(()=>inp.focus(),30)}
  function stopTalk(){if(!n.talk)return;n.talk=false;panelOpen=false;box.hidden=true;inp.blur();lock()}
  box.querySelector('#ncX').onclick=stopTalk;hint.onclick=startTalk;
  addEventListener('keydown',e=>{if(!n.talk&&e.code==='KeyT'&&n.near&&!/INPUT|TEXTAREA/.test(e.target.tagName)){e.preventDefault();startTalk()}else if(n.talk&&e.code==='Escape'){e.stopImmediatePropagation();stopTalk()}},true);
@@ -729,30 +785,46 @@ const NPC=(function(){
   const tryLoad=ps=>new Promise((ok,no)=>{const nx=()=>{const u=ps.shift();if(!u)return no(new Error('avatar/npc.glb not found'));new T.GLTFLoader().load(u,ok,undefined,nx)};nx()});
   let g;if(location.protocol==='file:')g=await fromJs();else{try{g=await tryLoad(['avatar/npc.glb','./avatar/npc.glb','npc.glb'])}catch(e){g=await fromJs()}}
   g.scene.traverse(o=>{if(o.isMesh&&o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{if(m.isMeshStandardMaterial){m.envMapIntensity=.55;if(m.metalness>.3)m.metalness=.1}})}});
-  n.av=createAvatar(T,g.scene);n.av.root.visible=false;scene.add(n.av.root);
+  n.av=createAvatar(T,g.scene);n.av.root.visible=false;n.av.root.add(book);scene.add(n.av.root);
  }catch(e){console.warn('[npc] '+(e&&e.message||e))}})();
- const pv=new V3();
+ const pv=new V3(),proj=(y,el,d)=>{pv.set(n.x,y,n.z).project(cam);const vis=pv.z<1&&d<10;el.style.opacity=vis?'':'0';el.style.left=((pv.x*.5+.5)*innerWidth)+'px';el.style.top=((-pv.y*.5+.5)*innerHeight)+'px'};
  function update(dt){
-  if(!n.av)return;if(!started||CIN.mode!=='play'){n.av.root.visible=false;bub.classList.remove('on');return}
-  if(!n.grid)build();n.av.root.visible=true;
+  if(!n.av)return;
+  if(!started||CIN.mode!=='play'){n.av.root.visible=false;bub.classList.remove('on');tag.classList.remove('on');return}
+  if(!n.grid)build();
+  n.av.root.visible=true;
   const dx=P.x-n.x,dz=P.z-n.z,d=Math.hypot(dx,dz),near=d<3.2&&Math.abs(P.x)<13.6&&Math.abs(P.z)<9.2;
-  if(near&&!n.near){n.near=true;if(performance.now()-n.last>45000){n.last=performance.now();bubble(pick(['Hi! I\u2019m '+NAME+'. Welcome to Aniket\u2019s house!','Oh, hello! Looking for something? I can tell you about Aniket.']),5500)}}
+  if(near&&!n.near){n.near=true;if(performance.now()-n.last>45000){n.last=performance.now();bubble(n.who?pick(['Welcome back, '+n.who+'! Good to see you again.','Hi '+n.who+'! Missed you.']):pick(['Hi! I\u2019m '+NAME+', Aniket\u2019s assistant. Welcome to his house!','Oh, hello! Looking for something? I can tell you all about Aniket.']),5500);if(n.mode==='idle'||n.mode==='walk'){n.gest='wave';n.gT=2.6}}}
   if(!near&&n.near){n.near=false;if(n.talk)stopTalk();bub.classList.remove('on');if(window.speechSynthesis)speechSynthesis.cancel()}
-  hint.hidden=!(n.near&&!n.talk);
-  let th=n.h,tv=0;
-  if(n.near||n.talk){n.path.length=0;th=Math.atan2(dx,dz)}
-  else if(n.path.length){const w=n.path[0],wx=w[0]-n.x,wz=w[1]-n.z,wd=Math.hypot(wx,wz);
-   if(wd<.18){n.path.shift();if(!n.path.length)n.wait=2+rnd()*5}else{th=Math.atan2(wx,wz);tv=WV}
-   n.chk+=dt;if(n.chk>1.6){if(Math.hypot(n.x-n.cx,n.z-n.cz)<.3)n.path.length=0;n.chk=0;n.cx=n.x;n.cz=n.z}}
-  else{n.wait-=dt;if(n.wait<=0)wander()}
+  hint.hidden=!(n.near&&!n.talk&&n.mode!=='tour');
+  const engaged=(near||n.talk)&&n.mode!=='tour';
+  let th=n.h,tv=0,task='',sit=0;
+  const follow=()=>{if(!n.path.length)return 2;const w=n.path[0],wx=w[0]-n.x,wz=w[1]-n.z,wd=Math.hypot(wx,wz);
+   n.chk+=dt;if(n.chk>1.6){const m=Math.hypot(n.x-n.cx,n.z-n.cz);n.chk=0;n.cx=n.x;n.cz=n.z;if(m<.3){n.path.length=0;return 3}}
+   if(wd<.18){n.path.shift();return n.path.length?0:2}th=Math.atan2(wx,wz);tv=WV;return 1};
+  if(engaged&&(n.mode==='sit'||n.mode==='sitIn')){n.tr={t:0,fx:n.x,fz:n.z,tx:n.st.apx,tz:n.st.apz};n.mode='sitOut'}
+  const m=n.mode,seated=m==='sit'||m==='sitIn'||m==='sitOut';n.tag='';
+  if(m==='sitIn'||m==='sitOut'){const s=n.st,tr=n.tr;tr.t=Math.min(1,tr.t+dt/.85);const k=tr.t*tr.t*(3-2*tr.t);n.x=tr.fx+(tr.tx-tr.fx)*k;n.z=tr.fz+(tr.tz-tr.fz)*k;
+   if(m==='sitIn'){n.h+=ang(n.h,s.h)*(1-Math.exp(-8*dt));sit=s.hj;task=s.task;n.tag=s.txt;if(tr.t>=1){n.mode='sit';n.timer=30+rnd()*40}}
+   else{n.h+=ang(n.h,Math.atan2(dx,dz))*(1-Math.exp(-5*dt));if(tr.t>=1){n.mode='idle';n.wait=1;n.gest='wave';n.gT=n.near?2.2:0}}}
+  else if(m==='sit'){const s=n.st;n.x=s.sx;n.z=s.sz;n.h+=ang(n.h,s.h)*(1-Math.exp(-8*dt));sit=s.hj;task=s.task;n.tag=s.txt;n.timer-=dt;if(n.timer<=0){n.tr={t:0,fx:n.x,fz:n.z,tx:s.apx,tz:s.apz};n.mode='sitOut'}}
+  else if(m==='tour'){const T0=n.tour,s=T0&&TOUR[T0.i];n.tag='\uD83E\uDDED Guiding you';
+   if(s){if(d>14){T0.far+=dt;if(T0.far>14)endTour('I\u2019ll let you explore on your own!')}else T0.far=0}
+   if(n.tour&&s){if(T0.s==='go'){if(d>8)th=Math.atan2(dx,dz);else{const r=follow();if(r===2){T0.s='talk';T0.t=0;bubble(s[2],7500)}else if(r===3)tourGo()}}
+    else{th=Math.atan2(dx,dz);T0.t+=dt;if(T0.t>8&&d<8){T0.i++;tourGo()}}}}
+  else if(engaged){n.path.length=0;n.onArrive=null;if(n.mode==='walk')n.mode='idle';th=Math.atan2(dx,dz);n.wait=Math.max(n.wait,2);if(n.gT>0){n.gT-=dt;task=n.gest}}
+  else if(m==='walk'){const r=follow();if(r===2){const f=n.onArrive;n.onArrive=null;if(f)f();else n.mode='idle'}else if(r===3){n.mode='idle';n.wait=1;n.onArrive=null}}
+  else{if(n.gT>0){n.gT-=dt;task=n.gest;n.tag=n.gest==='phone'?'\uD83D\uDCF1 On her phone':n.gest==='stretch'?'\uD83D\uDE46 Stretching':''}else{n.wait-=dt;if(n.wait<=0)plan()}}
   // open closed doors that are close to her
-  for(const dr of DR){if(dr.open||dr.front)continue;const e=dr.e;if(Math.hypot(n.x-(e.x0+e.x1)/2,n.z-(e.z0+e.z1)/2)<1.7&&(tv>0||n.path.length)){dr.open=true}}
-  const df=Math.atan2(Math.sin(th-n.h),Math.cos(th-n.h));n.h+=df*(1-Math.exp(-7*dt));
-  const sp=tv*cl(Math.cos(df),0,1);n.v+=(sp-n.v)*(1-Math.exp(-6*dt));
-  if(n.v>.02){const nx=n.x+Math.sin(n.h)*n.v*dt,nz=n.z+Math.cos(n.h)*n.v*dt;if(free(nx,nz)||!free(n.x,n.z)){n.x=nx;n.z=nz}else{n.path.length=0}}
+  for(const dr of DR){if(dr.open||dr.front)continue;const e=dr.e;if(Math.hypot(n.x-(e.x0+e.x1)/2,n.z-(e.z0+e.z1)/2)<1.7&&(tv>0||n.path.length))dr.open=true}
+  const df=ang(n.h,th);if(!seated)n.h+=df*(1-Math.exp(-7*dt));
+  const sp=seated?0:tv*cl(Math.cos(df),0,1);n.v+=(sp-n.v)*(1-Math.exp(-6*dt));
+  if(n.v>.02&&!seated){const nx=n.x+Math.sin(n.h)*n.v*dt,nz=n.z+Math.cos(n.h)*n.v*dt;if(free(nx,nz)||!free(n.x,n.z)){n.x=nx;n.z=nz}else n.path.length=0}
   n.av.root.position.set(n.x,0,n.z);n.av.root.rotation.y=n.h;
-  n.av.update(dt,{speed:n.v>.08?1:0,v:Math.max(n.v,.35),run:false,air:false,vy:0,hold:false,pitch:0});
-  if(bubT>0){bubT-=dt*1000;if(bubT<=0)bub.classList.remove('on');else{pv.set(n.x,2.05,n.z).project(cam);const vis=pv.z<1&&d<10;bub.style.opacity=vis?'':'0';bub.style.left=((pv.x*.5+.5)*innerWidth)+'px';bub.style.top=((-pv.y*.5+.5)*innerHeight)+'px'}}
+  n.av.update(dt,{speed:n.v>.08?1:0,v:Math.max(n.v,.35),run:false,air:false,vy:0,hold:false,pitch:0,sit,task});
+  book.visible=n.av.st.sit>.6&&task==='read';if(book.visible)book.position.set(0,(n.st?n.st.hj:.58)+.46,.4);
+  tag.textContent=n.tag;tag.classList.toggle('on',!!n.tag&&d<9&&!n.talk);if(n.tag)proj(2.12,tag,d);
+  if(bubT>0){bubT-=dt*1000;if(bubT<=0)bub.classList.remove('on');else proj(2.5,bub,d)}
  }
  return{update};
 })();
