@@ -239,11 +239,11 @@ const vgEl=document.getElementById('vg');if(vgEl&&comp)vgEl.style.display='none'
 
 // ================= EXTERIOR WORLD =================
 const MS=(w,h,d,x,y,z,m)=>{const o=MM(w,h,d,x,y,z,m);o.castShadow=o.receiveShadow=true;return o};
-scene.background=new T.Color(0xcfe0f0);scene.fog=new T.Fog(0xcfe0f0,45,130);cam.far=220;cam.updateProjectionMatrix();
-const skyD=new T.Mesh(new T.SphereGeometry(150,32,16),new T.MeshBasicMaterial({map:tex(16,512,(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#2f6fc4');g.addColorStop(.38,'#6fa8e6');g.addColorStop(.5,'#cfe3f4');g.addColorStop(1,'#cfe3f4');x.fillStyle=g;x.fillRect(0,0,w,h)}),side:T.BackSide,fog:false,depthWrite:false,toneMapped:false}));skyD.renderOrder=-1;scene.add(skyD);
+scene.background=new T.Color(0xd8dfe2);scene.fog=new T.Fog(0xd8dfe2,38,125);cam.far=220;cam.updateProjectionMatrix();
+const skyD=new T.Mesh(new T.SphereGeometry(150,32,16),new T.MeshBasicMaterial({map:tex(16,512,(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#4f78a8');g.addColorStop(.3,'#7f9fbf');g.addColorStop(.46,'#b9c9d6');g.addColorStop(.5,'#d8dfe2');g.addColorStop(1,'#d8dfe2');x.fillStyle=g;x.fillRect(0,0,w,h)}),side:T.BackSide,fog:false,depthWrite:false,toneMapped:false}));skyD.renderOrder=-1;scene.add(skyD);
 const clT=tex(256,128,(x,w,h)=>{for(let i=0;i<14;i++){const cx=40+rnd()*176,cy2=50+rnd()*30,rr=24+rnd()*30,g=x.createRadialGradient(cx,cy2,0,cx,cy2,rr);g.addColorStop(0,'rgba(255,255,255,.55)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,w,h)}});
-for(let i=0;i<11;i++){const s=new T.Sprite(new T.SpriteMaterial({map:clT,transparent:true,depthWrite:false,fog:false,opacity:.9})),a=rnd()*6.28;s.position.set(Math.cos(a)*(70+rnd()*40),38+rnd()*30,Math.sin(a)*(70+rnd()*40));s.scale.set(70,35,1);scene.add(s)}
-const gT=tex(256,256,(x,w,h)=>{x.fillStyle='#3f6b2c';x.fillRect(0,0,w,h);for(let i=0;i<9000;i++){x.fillStyle=`hsla(${85+rnd()*35},${40+rnd()*25}%,${18+rnd()*22}%,.5)`;x.fillRect(rnd()*w,rnd()*h,1+rnd(),2+rnd()*3)}},true,[140,140]);
+for(let i=0;i<11;i++){const s=new T.Sprite(new T.SpriteMaterial({map:clT,transparent:true,depthWrite:false,fog:false,opacity:.55})),a=rnd()*6.28;s.position.set(Math.cos(a)*(70+rnd()*40),38+rnd()*30,Math.sin(a)*(70+rnd()*40));s.scale.set(70,35,1);scene.add(s)}
+const gT=tex(256,256,(x,w,h)=>{x.fillStyle='#4a5a30';x.fillRect(0,0,w,h);for(let i=0;i<9000;i++){x.fillStyle=`hsla(${62+rnd()*40},${20+rnd()*20}%,${16+rnd()*20}%,.5)`;x.fillRect(rnd()*w,rnd()*h,1+rnd(),2+rnd()*3)}},true,[140,140]);
 const gnd=new T.Mesh(new T.PlaneGeometry(700,700),new T.MeshStandardMaterial({map:gT,bumpMap:gT,bumpScale:.8,roughness:1,envMapIntensity:.3}));gnd.rotation.x=-Math.PI/2;gnd.position.y=-.02;gnd.receiveShadow=true;scene.add(gnd);
 const rdT=tex(512,256,(x,w,h)=>{x.fillStyle='#34373c';x.fillRect(0,0,w,h);for(let i=0;i<6000;i++){x.fillStyle=`rgba(${rnd()>.5?255:0},${rnd()>.5?255:0},0,.05)`;x.fillRect(rnd()*w,rnd()*h,2,2)}x.fillStyle='#e8e2b8';for(let i=0;i<4;i++)x.fillRect(i*128+20,h/2-3,70,6)},true,[30,1]);
 const road=new T.Mesh(new T.PlaneGeometry(300,10),new T.MeshStandardMaterial({map:rdT,roughness:.9}));road.rotation.x=-Math.PI/2;road.position.set(0,.005,33);road.receiveShadow=true;scene.add(road);
@@ -265,20 +265,38 @@ function glass(x,z,ry,w){const g=new T.Group();g.position.set(x,1.75,z);g.rotati
  [[w+.2,.1,0,.8],[w+.2,.1,0,-.8],[.1,1.7,-w/2-.05,0],[.1,1.7,w/2+.05,0],[.06,1.5,0,0],[w,.05,0,0]].forEach(([a,b,c,d])=>{const o=BX(a,b,.1,trim);o.position.set(c,d,.03);g.add(o)});const s=BX(w+.3,.06,.3,stoneM);s.position.set(0,-.87,.12);g.add(s)}
 [-11,-2.5,2.5].forEach(x=>glass(x,9.12,0,2.4));[-4.5,5.2].forEach(z=>glass(13.62,z,Math.PI/2,1.9));[-4.5,5].forEach(z=>glass(-13.62,z,-Math.PI/2,1.9));[-9,0,9].forEach(x=>glass(x,-9.12,Math.PI,2.4));
 // garden
-const gr=[M(0x2f5a2a,0,1,{bumpMap:concT,bumpScale:2}),M(0x3d7035,0,1,{bumpMap:concT,bumpScale:2}),M(0x25492a,0,1,{bumpMap:concT,bumpScale:2})];
+const gr=[M(0x3a4d2b,0,1,{bumpMap:concT,bumpScale:2}),M(0x4a5c33,0,1,{bumpMap:concT,bumpScale:2}),M(0x2b3b25,0,1,{bumpMap:concT,bumpScale:2})];const LM=[leafCardM,Object.assign(leafCardM.clone(),{color:new T.Color(0xd6d79a)}),Object.assign(leafCardM.clone(),{color:new T.Color(0xa3b88a)})];
 function tree(x,z,s){const g=new T.Group();g.position.set(x,0,z);scene.add(g);const t=new T.Mesh(new T.CylinderGeometry(.16*s,.3*s,2.8*s,10),M(0x4a3524,0,1,{bumpMap:concT,bumpScale:2}));t.position.y=1.4*s;g.add(t);
  for(let i=0;i<4;i++){const f=new T.Mesh(new T.IcosahedronGeometry((1+rnd()*.5)*s,1),gr[2]);f.position.set((rnd()-.5)*1.4*s,(3.2+rnd()*1.4)*s,(rnd()-.5)*1.4*s);g.add(f)}
- for(let i=0;i<36;i++){const c=new T.Mesh(new T.PlaneGeometry(2.2*s,2.2*s),leafCardM),a=rnd()*6.28,rr=rnd()*1.7*s;c.position.set(Math.cos(a)*rr,(2.9+rnd()*2.4)*s,Math.sin(a)*rr);c.rotation.set((rnd()-.5)*1.4,rnd()*6.28,(rnd()-.5)*1.4);g.add(c)}
- g.traverse(o=>{if(o.isMesh&&o.material!==leafCardM)o.castShadow=true})}
+ for(let i=0;i<(coarse?36:60);i++){const c=new T.Mesh(new T.PlaneGeometry(2.2*s,2.2*s),LM[(rnd()*3)|0]),a=rnd()*6.28,rr=rnd()*1.7*s;c.position.set(Math.cos(a)*rr,(2.9+rnd()*2.4)*s,Math.sin(a)*rr);c.rotation.set((rnd()-.5)*1.4,rnd()*6.28,(rnd()-.5)*1.4);g.add(c)}
+ g.traverse(o=>{if(o.isMesh&&!LM.includes(o.material))o.castShadow=true})}
 [[-20,15,1.2],[-26,3,1.4],[-22,-10,1.3],[22,14,1.2],[27,2,1.5],[21,-12,1.3],[-10,-17,1.2],[2,-19,1.4],[15,-17,1.2],[-32,20,1.5],[31,21,1.4],[10,19,1],[-14.5,17,.9]].forEach(a=>tree(...a));
 [[-11,10.8,5],[.5,10.8,5],[10.5,10.8,5]].forEach(([x,z,w])=>{const h=MS(w,.9,.7,x,.45,z,gr[1])});
 const lampG=new T.MeshBasicMaterial({color:new T.Color(3,2.5,1.7)});[14,20,26].forEach(z=>{cy(.04,.05,1.2,-5.2,0,z,dark,8);sp(.1,lampG,-5.2,1.3,z)});
 if(!coarse){const dl2=new T.PointLight(0xffd9a0,.9,7);dl2.position.set(-6.4,2.5,10.6);scene.add(dl2)}
 // sun + daylight (ramps off indoors)
-const sun=new T.DirectionalLight(0xfff0d6,coarse?0:1.4);sun.position.set(-26,38,34);scene.add(sun,sun.target);
+const sun=new T.DirectionalLight(0xffe4bf,coarse?0:1.9);sun.position.set(-36,27,30);scene.add(sun,sun.target);
 if(!coarse){sun.castShadow=true;sun.shadow.mapSize.set(4096,4096);const c=sun.shadow.camera;c.left=-34;c.right=34;c.top=30;c.bottom=-30;c.near=5;c.far=120;sun.shadow.bias=-.0004;sun.shadow.normalBias=.04}
-const outH=new T.HemisphereLight(0xcfe3ff,0x56683f,0);scene.add(outH);ANIM.push(()=>{outH.intensity=(coarse?1.3:.6)*cl((cam.position.z-8.4)/2,0,1)});
+const outH=new T.HemisphereLight(0xc4d4e6,0x5b5a44,0);scene.add(outH);ANIM.push(()=>{outH.intensity=(coarse?1.3:.75)*cl((cam.position.z-8.4)/2,0,1)});
 
+
+// ===== OUTDOOR REALISM v2: hills, grass tufts, shrubs, rocks =====
+(function(){
+ const hm=M(0x69775f,0,1);for(let i=0;i<18;i++){const a=i/18*6.283+rnd()*.2,d=100+rnd()*12,h=new T.Mesh(new T.SphereGeometry(1,16,10),hm);h.scale.set(26+rnd()*20,8+rnd()*10,20+rnd()*10);h.position.set(Math.cos(a)*d,-1.5,Math.sin(a)*d);scene.add(h)}
+ const gt=tex(128,128,(x,w,h)=>{for(let i=0;i<46;i++){const bx0=w*.1+rnd()*w*.8,hh=h*(.45+rnd()*.5),bend=(rnd()-.5)*34;x.strokeStyle=`hsl(${66+rnd()*34},${26+rnd()*22}%,${22+rnd()*26}%)`;x.lineWidth=1.4+rnd()*1.6;x.lineCap='round';x.beginPath();x.moveTo(bx0,h);x.quadraticCurveTo(bx0+bend*.3,h-hh*.5,bx0+bend,h-hh);x.stroke()}});
+ const gm=new T.MeshStandardMaterial({map:gt,alphaTest:.4,side:T.DoubleSide,roughness:1,envMapIntensity:.2});
+ const N=coarse?500:1700,im=[new T.InstancedMesh(new T.PlaneGeometry(.75,.6),gm,N),new T.InstancedMesh(new T.PlaneGeometry(.75,.6),gm,N)],o=new T.Object3D(),col=new T.Color();
+ let k=0;while(k<N){const x=(rnd()-.5)*84,z=(rnd()-.5)*84+8;
+  if(Math.abs(x)<16&&z>-12&&z<12.6)continue;      // house footprint
+  if(z>26.2&&z<39)continue;                       // sidewalk + road
+  if(Math.abs(x+6.4)<1.6&&z>10&&z<28.5)continue;  // front path
+  const sc=.8+rnd()*1.1,ry=rnd()*3.14;
+  [0,1].forEach(q=>{o.position.set(x,.2*sc,z);o.rotation.set(0,ry+q*1.5708,0);o.scale.set(sc,sc,sc);o.updateMatrix();im[q].setMatrixAt(k,o.matrix);col.setHSL(.2+rnd()*.07,.25+rnd()*.15,.55+rnd()*.35);im[q].setColorAt(k,col)});k++}
+ im.forEach(m=>{m.receiveShadow=true;m.frustumCulled=false;scene.add(m)});
+ // shrubs hugging the plinth + natural rocks
+ [[-12.5,10.2],[-9.6,10.2],[-3.3,10.2],[-.8,10.2],[3,10.2],[7.6,10.2],[12.8,10.2],[14.2,5],[14.4,-3],[-14.4,6],[-14.5,-2]].forEach(([x,z])=>{const g=gr[(rnd()*3)|0];for(let i=0;i<4;i++){const b=new T.Mesh(new T.IcosahedronGeometry(.3+rnd()*.28,1),g);b.position.set(x+(rnd()-.5)*1.1,.3+rnd()*.25,z+(rnd()-.5)*.5);b.scale.y=.8;b.castShadow=true;scene.add(b)}});
+ const rk=M(0x7b7870,0,.95,{bumpMap:concT,bumpScale:1.5});for(let i=0;i<16;i++){const r2=new T.Mesh(new T.DodecahedronGeometry(.25+rnd()*.5,0),rk),a=rnd()*6.28,d=17+rnd()*20;r2.position.set(Math.cos(a)*d,.1,Math.sin(a)*d*.8);if(Math.abs(r2.position.z-33)<7){r2.position.z=14+rnd()*8}r2.rotation.set(rnd(),rnd(),rnd());r2.scale.y=.6;r2.castShadow=r2.receiveShadow=true;scene.add(r2)}
+})();
 // ================= REALISM PASS: real wood floors, normal maps, contact shadows =================
 const woodF=tex(1024,1024,(x,w,h)=>{for(let i=0;i<16;i++){const y0=i*64;x.fillStyle=`hsl(${26+rnd()*8},${40+rnd()*12}%,${26+rnd()*10}%)`;x.fillRect(0,y0,w,64);for(let k=0;k<90;k++){const yy=y0+rnd()*64,l=rnd()>.5;x.strokeStyle=`rgba(${l?255:30},${l?220:12},${l?180:4},${.04+rnd()*.1})`;x.lineWidth=.6+rnd()*1.6;x.beginPath();const ph=rnd()*6;for(let xx=0;xx<=w;xx+=32){const yv=yy+Math.sin(xx*.01+ph)*2.2;xx?x.lineTo(xx,yv):x.moveTo(xx,yv)}x.stroke()}x.fillStyle='rgba(8,4,2,.75)';x.fillRect(0,y0,w,2.5);x.fillRect(rnd()*w,y0,2.5,64)}},true,[3,3]);
 const nmCache=new Map();
