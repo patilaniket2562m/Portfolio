@@ -277,3 +277,109 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,#panel::-webkit-scrollbar,#site:
 #s-about .s-me img{position:absolute;top:0;left:50%;width:auto;height:100%;max-width:none;object-fit:contain;filter:brightness(1.04);border-radius:0;box-shadow:none;clip-path:none!important;transform:translateX(-50%)!important}
 #s-about .s-me figcaption{display:none}
 @media(max-width:800px){#s-about{padding-top:5.5rem;padding-bottom:6rem!important}#s-about .s-ab{grid-template-columns:1fr;gap:1.5rem}#s-about .ab-facts{grid-template-columns:1fr}#s-about .s-me{height:auto;width:min(100%,320px)}}
+/* ================= MOBILE / RESPONSIVE PASS ================= */
+html{-webkit-text-size-adjust:100%}
+body{touch-action:manipulation}
+#site{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.s-hero{min-height:100vh;min-height:100svh}
+
+/* ---------- website: phones ---------- */
+@media (max-width:800px){
+ .s-nav{padding:calc(8px + env(safe-area-inset-top,0px)) 8px 0}
+ .s-nav .s-bar{padding:.5rem .5rem .5rem 1rem;gap:.4rem;border-radius:18px}
+ .s-nav.open .s-bar{border-radius:18px 18px 0 0}
+ .s-logo{font-size:.95rem}
+ .s-nav nav{font-size:.72rem}
+ .s-nav nav .s-tg{padding:.6rem .7rem}
+ .s-nav .s-pri{padding:.65rem .95rem;font-size:.72rem}
+ .s-mega{grid-template-columns:repeat(2,1fr);gap:.5rem;border-radius:0 0 18px 18px}
+ .s-nav.open .s-mega{padding:.2rem .5rem .6rem;max-height:70vh;overflow-y:auto}
+ .s-mc{padding:1rem .5rem}.s-mc i{margin-bottom:.5rem}
+
+ .s-hero{padding:6.5rem 1.2rem 2.5rem;gap:1.5rem;align-items:flex-start}
+ .s-hero h1{font-size:clamp(3rem,16vw,4.6rem)}
+ .s-lead{font-size:1.08rem;margin:1.1rem 0 1.4rem}
+ .s-btn{font-size:.9rem}.s-cta{gap:.6rem}
+ .s-stats{margin-top:1.8rem;max-width:none}
+ .s-stats b{font-size:1.9rem}.s-stats span{display:block;font-size:.72rem;line-height:1.25}
+ .s-stats div{padding:.9rem .6rem 0 0;margin-right:.6rem}.s-stats div+div{padding-left:.7rem}
+ .s-hme{width:min(62vw,260px)}
+ .s-ring em{font-size:.58rem;padding:.3rem .55rem}
+ .s-badge{font-size:.62rem;padding:.5rem .8rem}
+ .s-bg i{filter:blur(60px)}
+ .s-mq{font-size:2rem;padding-bottom:calc(1.1rem + 28px)}
+
+ .s-sec{border-radius:28px 28px 0 0;margin-top:-28px;padding:3.2rem 1.2rem 4.5rem}
+ #s-about{padding-top:5rem}
+ .s-row{grid-template-columns:auto 1fr;gap:.5rem 1rem;margin-bottom:1.8rem;font-size:.68rem}
+ .s-row span:nth-child(2){display:none}.s-row span:last-child{text-align:right}
+ .s-h,#s-about .s-h{font-size:clamp(2.2rem,11vw,3.2rem);margin-bottom:1.4rem}
+ .s-p,#s-about .s-p{font-size:1rem}#s-about .s-p:first-child{font-size:1.08rem}
+ #s-about .ab-btns .s-btn{flex:1 1 auto}
+
+ .s-cards{grid-template-columns:1fr}
+ .s-card{padding:1.4rem;border-radius:22px;min-height:0}
+ .s-n{left:1.4rem;top:1.3rem}
+ .s-card h3{margin:2.6rem 0 .8rem;font-size:1.7rem}
+ /* project cards: plain stacked list (sticky stacking is awkward on small screens) */
+ #s-work .s-card{position:relative;top:auto!important;min-height:0;margin-bottom:.9rem;transform:none!important;filter:none!important;display:flex;flex-direction:column;box-shadow:0 0 0 1px #e8e8e4}
+ #s-work .s-n{position:static}
+ #s-work .s-card h3{font-size:1.9rem;margin:1.6rem 0 .8rem}
+ #s-work .s-card p{font-size:1rem}
+ #s-work .s-lnk{margin-top:auto;padding-top:.8rem}
+ #s-skills .s-card{padding:1.1rem 0;grid-template-columns:36px 1fr}
+ #s-skills .s-card h3{font-size:1.4rem;margin:0}
+ .s-two{gap:1.2rem}
+ .s-ti{grid-template-columns:1fr;gap:.4rem}.s-ti p{text-align:left}.s-ti h3{font-size:1.35rem}
+ .s-rooms{grid-template-columns:1fr 1fr;gap:.6rem}
+ .s-room{min-height:120px;padding:1rem;border-radius:20px}.s-room b{font-size:1.15rem;margin-top:1rem}
+ .s-mail{font-size:clamp(1.1rem,6vw,1.8rem);word-break:normal;overflow-wrap:anywhere}
+ .s-soc a{padding:.7rem 1.1rem}
+}
+/* phones in landscape */
+@media (max-height:500px) and (orientation:landscape){
+ .s-hero{flex-direction:row;align-items:center;padding:5.5rem 1.5rem 2rem;min-height:0}
+ .s-hero h1{font-size:3rem}.s-hme{width:min(30vw,240px)}
+}
+/* no "stuck" hover state after a tap */
+@media (hover:none){
+ .s-card:hover{background:var(--soft);color:var(--ink)}
+ .s-sec.alt .s-card:hover{background:#fff;color:var(--ink)}
+ .s-card:hover p{color:#55554f}.s-card:hover .s-chip,.s-sec.alt .s-card:hover .s-chip{background:#fff;color:var(--ink)}
+ .s-card:hover .s-lnk{color:var(--ink)}.s-room:hover{transform:none}
+}
+
+/* ---------- 3D house HUD: phones & tablets ---------- */
+@media (pointer:coarse),(max-width:700px){
+ #tele{left:calc(.5rem + env(safe-area-inset-left,0px));right:calc(.5rem + env(safe-area-inset-right,0px));top:calc(.5rem + env(safe-area-inset-top,0px));max-width:none;flex-wrap:nowrap;overflow-x:auto;gap:6px;scrollbar-width:none}
+ #tele::-webkit-scrollbar{display:none}
+ #tele button{flex:0 0 auto;min-height:38px;padding:.45rem .85rem;font-size:.68rem;white-space:nowrap}
+ #mm{width:96px;height:64px;right:calc(.6rem + env(safe-area-inset-right,0px));top:calc(3.6rem + env(safe-area-inset-top,0px))}
+ #room{left:calc(.7rem + env(safe-area-inset-left,0px));top:calc(3.6rem + env(safe-area-inset-top,0px));bottom:auto;font-size:.72rem}
+ #tb{right:calc(.8rem + env(safe-area-inset-right,0px));bottom:calc(1rem + env(safe-area-inset-bottom,0px));gap:.5rem}
+ #tb button{width:52px;height:52px;font-size:.66rem;-webkit-tap-highlight-color:transparent}
+ #joy{left:calc(1.2rem + env(safe-area-inset-left,0px));bottom:calc(1.6rem + env(safe-area-inset-bottom,0px));opacity:.45;transition:opacity .15s}
+ #joy.act{opacity:1}
+ #joy i{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px;border-radius:50%;background:rgba(255,255,255,.28);border:1px solid var(--line)}
+ #tip{white-space:normal;max-width:86vw;width:max-content;text-align:center;top:calc(50% + 30px)}
+ #keys{display:none}
+}
+/* info panel: bottom sheet on phones, also in landscape; follows the on-screen keyboard */
+@media (max-width:700px),(pointer:coarse) and (max-height:520px){
+ #panel{left:calc(.6rem + env(safe-area-inset-left,0px));right:calc(.6rem + env(safe-area-inset-right,0px));width:auto;top:auto;bottom:calc(.6rem + env(safe-area-inset-bottom,0px) + var(--kb,0px));transform:none;max-height:calc(100vh - 6rem - var(--kb,0px));max-height:calc(100dvh - 6rem - var(--kb,0px));padding:1.2rem 1.1rem 1.3rem;border-radius:20px;animation:none;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+ #panel h2{font-size:1.5rem;padding-right:2.2rem}
+ #panel p{font-size:.92rem}
+ #panel input,#panel textarea{font-size:16px}
+ #px{position:sticky;float:right;top:0;right:0;width:40px;height:40px;margin:-.3rem -.2rem 0 .5rem;background:var(--glass);z-index:2}
+}
+
+/* ===== hero portrait: centering + ring labels fix ===== */
+/* the labels' counter-spin used to overwrite their translate(-50%,-50%), so they sat off-centre and sideways */
+@keyframes unspin{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(-360deg)}}
+.s-ring em{animation:unspin 40s linear infinite}
+@media(prefers-reduced-motion:reduce){.s-ring em{animation:none}}
+@media (max-width:900px){
+ .s-hme{align-self:center;margin:.6rem auto 0;width:min(66vw,280px)}
+ .s-hme .s-badge{left:50%;bottom:-4%;transform:translateX(-50%);white-space:nowrap}
+}
+.s-hme .s-badge{--pb:0}
