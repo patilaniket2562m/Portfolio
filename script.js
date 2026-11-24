@@ -695,8 +695,8 @@ function createAvatar(T,model){
     else if(tk==='phone'){arm('Right',.85,1.75,.15,0,gK);sl('Neck',rx(.2),gK);sl('Head',rx(.35),gK)}
     else if(tk==='sip'){arm('Right',.8,2.0,.15,0,gK);arm('Left',.5,1.6,.3,0,gK);sl('Head',rx(-.1),gK)}
     else if(tk==='stir'){arm('Right',.75,1.15+Math.sin(bt*6)*.3,.25,0,gK);arm('Left',.6,1.5,.35,0,gK);sl('Spine2',rx(.14),gK);sl('Head',rx(.3),gK)}
-    else if(tk==='hug'){arm('Left',1.35,.95,.2,0,gK);arm('Right',1.35,.95,.2,0,gK);sl('Spine2',rx(.1),gK);sl('Head',rx(.12),gK)}
-    else if(tk==='dance'){arm('Left',1.05,.8,.75,0,gK);arm('Right',1.3,1.0,.18,0,gK);sl('Spine2',rx(.05),gK)}
+    else if(tk==='hug'){arm('Left',1.3,.55,-.5,.1,gK);arm('Right',1.05,.8,-.6,.1,gK);sl('Spine1',rx(.08),gK);sl('Spine2',rx(.14),gK);sl('Neck',rx(.05),gK);sl('Head',mul(ry(.5),rx(.1)),gK)}
+    else if(tk==='dance'){arm('Left',1.1,.9,.55,0,gK);arm('Right',1.2,.6,-.35,.1,gK);sl('Spine2',rx(.06),gK);sl('Head',mul(ry(.3),rx(.05)),gK)}
     else if(tk==='point'){arm('Right',1.55,.25,.5,0,gK)}
     else if(tk==='water'){arm('Right',1.0,.7,.2,.3,gK);sl('Spine2',rx(.2),gK);sl('Head',rx(.3),gK)}
     else if(tk==='laugh'){sl('Spine2',rx(-.1+Math.sin(bt*14)*.05),gK);sl('Head',rx(-.28),gK);arm('Right',.9,1.8,.15,0,gK*.6)}}
@@ -1104,10 +1104,10 @@ const NPC=(function(){
   {id:'cook',kind:'stand',room:3,off:[-2.4,1.8],sep:.9,gs:['stir','stir'],tag:'\uD83C\uDF72 Cooking together',act:p=>'cooking together with '+p,hold:5,fx:{hunger:-.85},
    w:q=>.4+q.hun*2.4+(((q.h>=12&&q.h<14)||(q.h>=19&&q.h<21))?1:0),
    lines:()=>{const h=hr(),meal=h<11?'breakfast':h<16?'lunch':'dinner';return[[0,'I\u2019m making '+meal+' today. Taste this for me?'],[1,'Needs a little more spice.'],[0,'You always say that. Last time you were crying.'],[1,'Worth it. It was delicious.',{g:['stir','laugh']}],[0,'Hand me that bowl, will you?'],[1,'Anything for the chef.',{g:['stir','stir']}],[0,'Our '+meal+' is going to be perfect.'],[1,'Everything is perfect when we cook together.',{h:1}]]}},
-  {id:'hug',kind:'stand',room:'any',sep:.55,close:true,gs:['hug','hug'],tag:'\uD83E\uDD70 Hugging',act:p=>'hugging '+p,hold:6,
+  {id:'hug',kind:'stand',room:'any',sep:.4,close:true,gs:['hug','hug'],tag:'\uD83E\uDD70 Hugging',act:p=>'hugging '+p,hold:6,
    w:q=>.5+q.lone*2.6,
    lines:()=>[[0,'Come here, you.'],[1,'I missed you. Even when we\u2019re in the same house.'],[0,'I love you, Aniket.',{h:1}],[1,'I love you more, SVIA.',{h:1}],[0,'Don\u2019t let go yet.'],[1,'Never.']]},
-  {id:'dance',kind:'stand',room:'any',sep:.55,close:true,gs:['dance','dance'],tag:'\uD83D\uDC83 Dancing together',act:p=>'slow dancing with '+p,hold:7,
+  {id:'dance',kind:'stand',room:'any',sep:.5,close:true,gs:['dance','dance'],tag:'\uD83D\uDC83 Dancing together',act:p=>'slow dancing with '+p,hold:7,
    w:q=>(q.night?1.2:.35)+q.lone*.8,
    lines:()=>[[1,'May I have this dance?'],[0,'There\u2019s no music, silly.'],[1,'Then we\u2019ll hum our own.'],[0,'Hmm hmm hmm\u2026 you\u2019re terrible at this.',{g:['dance','dance']}],[1,'But you\u2019re still smiling.',{h:1}],[0,'Always, with you.',{h:1}]]},
   {id:'code',kind:'sit',st:['cwork0','cwork1'],hold:18,
@@ -1134,7 +1134,7 @@ const NPC=(function(){
   {id:'stretch',kind:'stand',room:'any',sep:1.2,gs:['stretch','stretch'],tag:'\uD83E\uDDD8 Stretching together',act:p=>'stretching with '+p,hold:3,fx:{energy:.2},
    w:q=>(q.h<10?1:.4)+q.tir*1.2,
    lines:()=>[[0,'Ahh, my back. Too much sitting.'],[1,'Same. Stretch with me?'],[0,'One, two, three\u2026 up!'],[1,'Show-off.'],[0,'You\u2019re just jealous.',{g:['laugh','stretch']}],[1,'Maybe a little. Okay, break over?']]},
-  {id:'goodnight',kind:'stand',room:'any',sep:.55,close:true,gs:['hug','hug'],tag:'\uD83C\uDF19 Saying goodnight',act:p=>'saying goodnight to '+p,hold:6,
+  {id:'goodnight',kind:'stand',room:'any',sep:.4,close:true,gs:['hug','hug'],tag:'\uD83C\uDF19 Saying goodnight',act:p=>'saying goodnight to '+p,hold:6,
    w:q=>q.night?3.2:0,
    lines:()=>[[0,'It\u2019s getting late. Shall we call it a night?'],[1,'Just a few more minutes with you.'],[0,'You work too hard, you know.'],[1,'I do it for us.',{h:1}],[0,'Goodnight, my love.',{h:1}],[1,'Goodnight, SVIA. Sweet dreams.',{h:1}]]}
  ];
@@ -1167,7 +1167,7 @@ const NPC=(function(){
    if(ex.g&&a.kind==='stand'){A.setG(ex.g[0]);B.setG(ex.g[1])}if(ex.h)U.hearts(6);D.t=ms/1000+.5;return}
   if(D.ph==='hold')endDuo(false)}
  function post(dt){
-  if(started&&CIN.mode==='play'&&A.ready&&B.ready){const dx=B.x-A.x,dz=B.z-A.z,d=Math.hypot(dx,dz),mn=(D.act&&D.act.close&&D.ph==='talk')?.38:.75;if(d<mn&&d>1e-4){const k=(mn-d)*.5*Math.min(1,dt*8),ux=dx/d,uz=dz/d;if(!A.seated)A.push(-ux*k,-uz*k);if(!B.seated)B.push(ux*k,uz*k)}}
+  if(started&&CIN.mode==='play'&&A.ready&&B.ready){const dx=B.x-A.x,dz=B.z-A.z,d=Math.hypot(dx,dz),mn=(D.act&&D.act.close&&D.ph==='talk')?.3:.75;if(d<mn&&d>1e-4){const k=(mn-d)*.5*Math.min(1,dt*8),ux=dx/d,uz=dz/d;if(!A.seated)A.push(-ux*k,-uz*k);if(!B.seated)B.push(ux*k,uz*k)}}
   if(U.tagOwner){U.tag.textContent=U.tagText;U.tag.classList.add('on');npcProj(U.tagOwner,U.tagY,U.tag,U.tagD)}else U.tag.classList.remove('on');
   U.tagOwner=null;U.tagD=1e9;
   const h=U.active?null:NPCS.filter(o=>o.hintOK).sort((a,b)=>a.dist-b.dist)[0];
