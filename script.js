@@ -584,7 +584,7 @@ function createAvatar(T,model){
   bind[sd]={ts:Math.atan2(t.z,-t.y),tl:Math.atan2(t.x,-t.y),ss:Math.atan2(k.z,-k.y),sl:Math.atan2(k.x,-k.y),
    aDrop:Math.atan2(-a.y,Math.abs(a.x)),aSag:Math.atan2(a.z,Math.hypot(a.x,a.y)),fSag:Math.atan2(f.z,Math.hypot(f.x,f.y)),hSag:Math.atan2(h.z,Math.hypot(h.x,h.y))}});
  // ---- animation state
- const st={ph:0,walk:0,run:0,air:0,hold:0,thr:0,bt:0,v:0,sit:0,gs:0,sh:.6,tk:''};
+ const st={ph:0,walk:0,run:0,air:0,hold:0,thr:0,bt:0,v:0,sit:0,gs:0,sh:.6,tk:'',gc:0,pt:''};
  const ease=(v,t,k,dt)=>v+(t-v)*(1-Math.exp(-k*dt));
  const lerp=(a,b,k)=>a+(b-a)*k,sat=(x,a,b)=>Math.max(a,Math.min(b,x));
  let pose={},memo={};
@@ -620,6 +620,8 @@ function createAvatar(T,model){
   st.hold=ease(st.hold,s.hold?1:0,9,dt);
   st.thr=Math.max(0,st.thr-dt*3.2);
   st.bt+=dt;
+  // gesture clock: restarts whenever a (new) gesture begins, so hugs / dances play as timed sequences
+  if(s.task&&!s.sit){if(st.gs<.08||s.task!==st.pt)st.gc=0;st.gc+=dt;st.pt=s.task}else if(st.gs<.02)st.pt='';
   st.sit=ease(st.sit,s.sit?1:0,7,dt);st.gs=ease(st.gs,(s.task&&!s.sit)?1:0,7,dt);if(s.sit)st.sh=s.sit;if(s.task)st.tk=s.task;
   if(mv)st.v=ease(st.v,vT,9,dt);
   const w=st.walk,rn=st.run,ar=st.air,hd=st.hold,idle=1-w;
@@ -633,23 +635,27 @@ function createAvatar(T,model){
   const aA=lerp(.57*v/cW,sat(.21*v,.4,.75),rn),mA=lerp(.12,.2,rn),sh=lerp(.03,.1,rn),kS=lerp(.8+.2*sat(v/1.5,0,1),1,rn);
   const gL=legPose(tL,rn,aA,mA,sh,kS),gR=legPose(tR,rn,aA,mA,sh,kS);
   const sL=Math.sin(TAU*tL),cL=Math.cos(TAU*tL);
+  // ---- couple motion (hug / slow dance): a slow weight shift from foot to foot. The follower / second hugger sways with the
+  // opposite local sign, so that both bodies move in the same direction in the room (they face each other)
+  const dk=st.tk,isD=dk==='dance'||dk==='dancef',isH=dk==='hug'||dk==='hugb',dn=(isD||isH)?st.gs*(1-w):0,gc=st.gc,
+   dsg=(dk==='hugb'||dk==='dancef')?-1:1,dsn=dsg*(isD?Math.sin(TAU*gc*.5):isH?.5*Math.sin(TAU*gc*.2):0),dsw=dsn*(isD?.055:.016)*dn,dg=[];
   // ---- pelvis: yaw with the stride, drops on the swinging side, and shifts over the standing leg
-  const hy=-cL*(.075+.03*rn)*ks*w,hr=sL*(.045+.01*rn)*ks*w,sway=sL*.022*ks*w,tilt=.04+.05*rn*w;
+  const hy=-cL*(.075+.03*rn)*ks*w,hr=sL*(.045+.01*rn)*ks*w+(isD?dsn*.05*dn:0),sway=sL*.022*ks*w+dsw,tilt=.04+.05*rn*w;
   pose.Hips=mul(ry(hy),rz(hr),rx(tilt*w));
   // ---- legs
   const legs=[['Left',-1,gL,tL],['Right',1,gR,tR]],tuckV=s.vy>0?1:.55;
   legs.forEach(([side,sg,g,t],i)=>{
    const bd=bind[side],e=-sg,airS=i?-.15:.55*tuckV,airK=i?.5*tuckV:1.1*tuckV;
-   const swg=lerp(g.th*w,airS,ar),k=lerp(g.k*w+.03*idle,airK,ar),ths=swg-k;
+   const swg0=lerp(g.th*w,airS,ar),k0=lerp(g.k*w+.03*idle,airK,ar),fr=Math.max(0,side==='Left'?-dsn:dsn),kd=isD?dn*(.3+.5*fr):dn*.08,swg=swg0+kd*.5,k=k0+kd,ths=swg-k;
    // lateral: feet land close to the midline (step width ~10 cm) and the leg angles in under the shifted pelvis
    const footX=e*(.09-.025*w*(1-ar)),phi=(footX-(e*hipW+sway))/(L1+L2);
    const yawT=hy,yawS=hy*.6;
    pose[side+'UpLeg']=mul(ry(yawT),rz(phi-bd.tl),rx(-(swg-bd.ts)));
    pose[side+'Leg']=mul(ry(yawS),rz(phi-bd.sl),rx(-(ths-bd.ss)));
-   const p=lerp(g.p*w,-.4,ar),yawF=e*(lerp(.17,.12,w)-FOOT_OUT)+hy*.3,tt=((t%1)+1)%1;
+   const p=lerp(g.p*w,-.4,ar)-(isD?fr*.3*dn:0),yawF=e*(lerp(.17,.12,w)-FOOT_OUT)+hy*.3,tt=((t%1)+1)%1;
    const tp=tt<.62?Math.max(p,0):p*sat((tt-.62)/.1,0,1);                       // toes stay on the floor while the heel lifts
    pose[side+'Foot']=mul(ry(yawF),rx(-p));
-   pose[side+'ToeBase']=mul(ry(yawF),rx(-lerp(tp,p,ar)))});
+   pose[side+'ToeBase']=mul(ry(yawF),rx(-lerp(tp,p,ar)));dg[i]={th:swg,ths,p}});
   // ---- spine / head: shoulders counter-rotate against the pelvis, trunk leans slightly, head stays steady
   const lean=(.02+.1*rn)*w+(.05*ar)+breath*.012*idle,ys=cL*(.09+.04*rn)*ks*w;
   pose.Spine=mul(ry(ys*.35),rz(-.006*sL*ks*w),rx(lean*.35));
@@ -681,6 +687,9 @@ function createAvatar(T,model){
    const sK=st.sit,gK=st.gs,tk=st.tk,SG={Left:-1,Right:1},sl=(k,q,a)=>{pose[k]=(pose[k]||I).clone().slerp(q,a)};
    const arm=(side,fw,bend,ab,wr,k)=>{const sg=SG[side],bd=bind[side],A=mul(rx(-(fw-bd.aSag)),rz(sg*(Math.PI/2-ab-bd.aDrop))),F=mul(rx(-(bend+(bd.aSag-bd.fSag))),A),H=mul(F,rx(-(bd.fSag-bd.hSag)+wr),rz(sg*.06));
     sl(side+'Arm',A,k);sl(side+'ForeArm',F,k);pose[side+'Hand']=(pose[side+'Hand']||pose[side+'ForeArm']).clone().slerp(H,k);hand(side,pose[side+'Hand'],1,sg)};
+   // arm2: like arm() but the forearm can also swing inward (yaw) - this is what lets an arm reach around a person's back
+   const sm=x=>x*x*(3-2*x),arm2=(side,fw,ab,bend,yaw,wr,k,g)=>{const sg=SG[side],bd=bind[side],A=mul(rx(-(fw-bd.aSag)),rz(sg*(Math.PI/2-ab-bd.aDrop))),F=mul(ry(sg*yaw),rx(-(bend+(bd.aSag-bd.fSag))),A),H=mul(F,rx(-(bd.fSag-bd.hSag)+wr),rz(sg*.06));
+    sl(side+'Arm',A,k);sl(side+'ForeArm',F,k);pose[side+'Hand']=(pose[side+'Hand']||pose[side+'ForeArm']).clone().slerp(H,k);hand(side,pose[side+'Hand'],g||1,sg)};
    if(sK>.002){const d=Math.asin(sat((st.sh-aH-L2)/L1,-.4,.95)),th=Math.PI/2-d,rd=tk==='read',ln=tk==='type'?.26:rd?.12:.08;
     ['Left','Right'].forEach(side=>{const bd=bind[side],e=side==='Left'?1:-1;
      sl(side+'UpLeg',mul(rz(-bd.tl+e*.05),rx(-(th-bd.ts))),sK);sl(side+'Leg',mul(rz(-bd.sl-e*.03),rx(bd.ss)),sK);
@@ -695,8 +704,22 @@ function createAvatar(T,model){
     else if(tk==='phone'){arm('Right',.85,1.75,.15,0,gK);sl('Neck',rx(.2),gK);sl('Head',rx(.35),gK)}
     else if(tk==='sip'){arm('Right',.8,2.0,.15,0,gK);arm('Left',.5,1.6,.3,0,gK);sl('Head',rx(-.1),gK)}
     else if(tk==='stir'){arm('Right',.75,1.15+Math.sin(bt*6)*.3,.25,0,gK);arm('Left',.6,1.5,.35,0,gK);sl('Spine2',rx(.14),gK);sl('Head',rx(.3),gK)}
-    else if(tk==='hug'){arm('Left',1.3,.55,-.5,.1,gK);arm('Right',1.05,.8,-.6,.1,gK);sl('Spine1',rx(.08),gK);sl('Spine2',rx(.14),gK);sl('Neck',rx(.05),gK);sl('Head',mul(ry(.5),rx(.1)),gK)}
-    else if(tk==='dance'){arm('Left',1.1,.9,.55,0,gK);arm('Right',1.2,.6,-.35,.1,gK);sl('Spine2',rx(.06),gK);sl('Head',mul(ry(.3),rx(.05)),gK)}
+    else if(tk==='hug'||tk==='hugb'){
+     // 1) arms open wide, 2) they wrap round the partner (left arm high over the shoulder blade, right arm low round the waist),
+     // 3) the chest leans in and the head rests on the shoulder, 4) every few seconds a squeeze, a back stroke and a slow breath
+     const u=sm(sat((gc-.5)/1.4,0,1)),pl=Math.pow(Math.max(0,Math.sin(gc*1.1-1.2)),6),br=Math.sin(gc*1.7)*.012,st1=Math.sin(gc*1.4)*.05*u;
+     arm2('Left',lerp(.95,1.35,u)+st1,lerp(.8,.1,u),lerp(.4,.12,u),lerp(.05,.7,u)+.1*pl,0,gK,.7+.35*pl);
+     arm2('Right',lerp(.9,1.1,u),lerp(.7,0,u),lerp(.4,.2,u),lerp(.05,.85,u)+.1*pl,0,gK,.7+.35*pl);
+     sl('Spine',rx(.05*u),gK);sl('Spine1',mul(rz(-dsn*.02),rx(.1*u+br)),gK);sl('Spine2',mul(rz(-dsn*.025),rx(.14*u+br)),gK);
+     sl('Neck',mul(ry(.2*u),rz(-.05*u)),gK);sl('Head',mul(ry(.45*u),rz(-.14*u),rx(.08*u-br)),gK)}
+    else if(tk==='dance'||tk==='dancef'){
+     // slow couple dance. Leader: both hands on the partner's waist. Follower: arms up round the leader's neck.
+     // The body sways with the weight shift, the head rests close, the free foot lifts a little with every sway.
+     const u=sm(sat((gc-.3)/1.0,0,1)),fol=tk==='dancef',br=Math.sin(gc*1.7)*.01,sw=dsn*dn;
+     if(fol){arm2('Left',lerp(.9,1.45,u),lerp(.5,.12,u),lerp(.5,.3,u),lerp(.1,.75,u)+sw*.06,0,gK,.75);arm2('Right',lerp(.9,1.45,u),lerp(.5,.12,u),lerp(.5,.3,u),lerp(.1,.75,u)-sw*.06,0,gK,.75)}
+     else{arm2('Left',lerp(.9,.88,u),lerp(.5,.02,u),lerp(.5,.3,u),lerp(.1,.5,u)+sw*.05,0,gK,.8);arm2('Right',lerp(.9,.8,u),lerp(.5,.04,u),lerp(.5,.33,u),lerp(.1,.45,u)-sw*.05,0,gK,.8)}
+     sl('Spine',rx(.03*u),gK);sl('Spine1',mul(rz(-dsn*.03),rx(.05*u+br)),gK);sl('Spine2',mul(rz(-dsn*.04),rx(.07*u+br)),gK);
+     sl('Neck',mul(ry((fol?.2:-.12)*u),rz((fol?-.06:.05)*u)),gK);sl('Head',mul(ry((fol?.35:-.22)*u+dsn*.04),rz((fol?-.13:.07)*u),rx((fol?.05:.1)*u-br)),gK)}
     else if(tk==='point'){arm('Right',1.55,.25,.5,0,gK)}
     else if(tk==='water'){arm('Right',1.0,.7,.2,.3,gK);sl('Spine2',rx(.2),gK);sl('Head',rx(.3),gK)}
     else if(tk==='laugh'){sl('Spine2',rx(-.1+Math.sin(bt*14)*.05),gK);sl('Head',rx(-.28),gK);arm('Right',.9,1.8,.15,0,gK*.6)}}
@@ -708,7 +731,7 @@ function createAvatar(T,model){
    // so ease the bob toward the stride's mean height. Feet stay within ~1-2 cm of the floor.
    let Hm=0;for(let q=0;q<6;q++){const u=q/12;Hm+=Math.max(reach(legPose(u,rn,aA,mA,sh,kS)),reach(legPose(u+.5,rn,aA,mA,sh,kS)))/6}
    const H=Math.max(reach(gL),reach(gR)),flight=rn*.04*(.5+.5*Math.cos(TAU*2*(tL-.43))),stand=L1+L2+aH;
-   const walkH=Hm+lerp(.62,.8,rn)*(H-Hm)+flight,hj=lerp(stand,walkH,w),jump=hj-.05*(s.vy>0?0:1);
+   const walkH=Hm+lerp(.62,.8,rn)*(H-Hm)+flight,hj=lerp(lerp(stand,walkH,w),dn>.002?Math.max(reach(dg[0]),reach(dg[1])):stand,dn),jump=hj-.05*(s.vy>0?0:1);
    hips.position.y=lerp(hj,jump,ar)-hipOff+(breath*.004*idle);
    hips.position.x=(hips.userData.x0||0)+sway;
    if(st.sit>.002)hips.position.y=lerp(hips.position.y,st.sh-hipOff,st.sit)}
@@ -1024,7 +1047,7 @@ function makeNPC(CFG){
   else if(engaged){n.path.length=0;n.onArrive=null;if(n.mode==='walk'){n.mode='idle';n.stk=''}th=Math.atan2(dx,dz);n.wait=Math.max(n.wait,2);if(n.gT>0){n.gT-=dt;task=n.gest}}
   else if(n.duo&&n.duo.k==='stand'){const D=n.duo,pr=other();
    if(D.s==='go'){if(Math.hypot(n.x-D.x,n.z-D.z)<.4)D.s='at';else{if(!n.path.length){const p=astar(n.x,n.z,D.x,D.z);if(p&&p.length)n.path=p;else{D.fl+=dt;if(D.fl>2)D.s='at'}}const r=follow();if(r===3)n.path.length=0}}
-   else{if(pr&&pr.ready)th=Math.atan2(pr.x-n.x,pr.z-n.z);if(D.g==='dance')th+=Math.sin(D.t*1.6)*.55;task=D.g||'';n.tag=D.tag||'';D.t+=dt}}
+   else{if(pr&&pr.ready)th=Math.atan2(pr.x-n.x,pr.z-n.z);task=D.g||'';n.tag=D.tag||'';D.t+=dt}}
   else if(m==='walk'){const r=follow();if(r===2){const f=n.onArrive;n.onArrive=null;if(f)f();else n.mode='idle'}else if(r===3){n.mode='idle';n.stk='';n.wait=1;n.onArrive=null}}
   else{const pr=other();if(pr&&pr.ready&&!pr.seated&&Math.hypot(pr.x-n.x,pr.z-n.z)<2.4){th=Math.atan2(pr.x-n.x,pr.z-n.z);n.pc-=dt;if(n.pc<=0){n.pc=28+rnd()*35;if(d<9&&!U.active&&U.bubT<=0)say(pick(CFG.pair),4800,true)}}
    if(n.gT>0){n.gT-=dt;task=n.gest;n.tag=GT[n.gest]||''}else{n.wait-=dt;if(n.wait<=0)plan()}}
@@ -1104,12 +1127,12 @@ const NPC=(function(){
   {id:'cook',kind:'stand',room:3,off:[-2.4,1.8],sep:.9,gs:['stir','stir'],tag:'\uD83C\uDF72 Cooking together',act:p=>'cooking together with '+p,hold:5,fx:{hunger:-.85},
    w:q=>.4+q.hun*2.4+(((q.h>=12&&q.h<14)||(q.h>=19&&q.h<21))?1:0),
    lines:()=>{const h=hr(),meal=h<11?'breakfast':h<16?'lunch':'dinner';return[[0,'I\u2019m making '+meal+' today. Taste this for me?'],[1,'Needs a little more spice.'],[0,'You always say that. Last time you were crying.'],[1,'Worth it. It was delicious.',{g:['stir','laugh']}],[0,'Hand me that bowl, will you?'],[1,'Anything for the chef.',{g:['stir','stir']}],[0,'Our '+meal+' is going to be perfect.'],[1,'Everything is perfect when we cook together.',{h:1}]]}},
-  {id:'hug',kind:'stand',room:'any',sep:.4,close:true,gs:['hug','hug'],tag:'\uD83E\uDD70 Hugging',act:p=>'hugging '+p,hold:6,
+  {id:'hug',kind:'stand',room:'any',sep:.4,close:true,gs:['hug','hugb'],tag:'\uD83E\uDD70 Hugging',act:p=>'hugging '+p,hold:6,
    w:q=>.5+q.lone*2.6,
    lines:()=>[[0,'Come here, you.'],[1,'I missed you. Even when we\u2019re in the same house.'],[0,'I love you, Aniket.',{h:1}],[1,'I love you more, SVIA.',{h:1}],[0,'Don\u2019t let go yet.'],[1,'Never.']]},
-  {id:'dance',kind:'stand',room:'any',sep:.5,close:true,gs:['dance','dance'],tag:'\uD83D\uDC83 Dancing together',act:p=>'slow dancing with '+p,hold:7,
+  {id:'dance',kind:'stand',room:'any',sep:.5,close:true,gs:['dancef','dance'],tag:'\uD83D\uDC83 Dancing together',act:p=>'slow dancing with '+p,hold:7,
    w:q=>(q.night?1.2:.35)+q.lone*.8,
-   lines:()=>[[1,'May I have this dance?'],[0,'There\u2019s no music, silly.'],[1,'Then we\u2019ll hum our own.'],[0,'Hmm hmm hmm\u2026 you\u2019re terrible at this.',{g:['dance','dance']}],[1,'But you\u2019re still smiling.',{h:1}],[0,'Always, with you.',{h:1}]]},
+   lines:()=>[[1,'May I have this dance?'],[0,'There\u2019s no music, silly.'],[1,'Then we\u2019ll hum our own.'],[0,'Hmm hmm hmm\u2026 you\u2019re terrible at this.',{g:['dancef','dance']}],[1,'But you\u2019re still smiling.',{h:1}],[0,'Always, with you.',{h:1}]]},
   {id:'code',kind:'sit',st:['cwork0','cwork1'],hold:18,
    w:q=>(q.h>=9&&q.h<20)?1.1:.3,
    lines:()=>[[1,'This bug makes no sense. The API returns 200 but the page is empty.'],[0,'Did you check the state update? It\u2019s usually that.'],[1,'\u2026Of course. A missing dependency. How do you always see it?'],[0,'Because I know your code better than you do.'],[1,'Fine, then you review the pull request too.'],[0,'Deal. And you make the chai.'],[1,'Deal. Commit, push, break!'],[0,'Proud of you. Always.',{h:1}]]},
@@ -1134,7 +1157,7 @@ const NPC=(function(){
   {id:'stretch',kind:'stand',room:'any',sep:1.2,gs:['stretch','stretch'],tag:'\uD83E\uDDD8 Stretching together',act:p=>'stretching with '+p,hold:3,fx:{energy:.2},
    w:q=>(q.h<10?1:.4)+q.tir*1.2,
    lines:()=>[[0,'Ahh, my back. Too much sitting.'],[1,'Same. Stretch with me?'],[0,'One, two, three\u2026 up!'],[1,'Show-off.'],[0,'You\u2019re just jealous.',{g:['laugh','stretch']}],[1,'Maybe a little. Okay, break over?']]},
-  {id:'goodnight',kind:'stand',room:'any',sep:.4,close:true,gs:['hug','hug'],tag:'\uD83C\uDF19 Saying goodnight',act:p=>'saying goodnight to '+p,hold:6,
+  {id:'goodnight',kind:'stand',room:'any',sep:.4,close:true,gs:['hug','hugb'],tag:'\uD83C\uDF19 Saying goodnight',act:p=>'saying goodnight to '+p,hold:6,
    w:q=>q.night?3.2:0,
    lines:()=>[[0,'It\u2019s getting late. Shall we call it a night?'],[1,'Just a few more minutes with you.'],[0,'You work too hard, you know.'],[1,'I do it for us.',{h:1}],[0,'Goodnight, my love.',{h:1}],[1,'Goodnight, SVIA. Sweet dreams.',{h:1}]]}
  ];
@@ -1167,6 +1190,8 @@ const NPC=(function(){
    if(ex.g&&a.kind==='stand'){A.setG(ex.g[0]);B.setG(ex.g[1])}if(ex.h)U.hearts(6);D.t=ms/1000+.5;return}
   if(D.ph==='hold')endDuo(false)}
  function post(dt){
+  // slow dance: the couple turns gently round their common centre (the pelvis sway and foot lifts come from the avatar rig)
+  if(started&&CIN.mode==='play'&&A.ready&&B.ready&&D.act&&D.act.id==='dance'&&(D.ph==='talk'||D.ph==='hold')&&A.duo&&B.duo&&A.duo.s==='at'&&B.duo.s==='at'){const mx=(A.x+B.x)/2,mz=(A.z+B.z)/2,wv=.14*dt,c=Math.cos(wv),sn=Math.sin(wv);[A,B].forEach(o=>{const ox=o.x-mx,oz=o.z-mz;o.push(ox*c-oz*sn-ox,ox*sn+oz*c-oz)})}
   if(started&&CIN.mode==='play'&&A.ready&&B.ready){const dx=B.x-A.x,dz=B.z-A.z,d=Math.hypot(dx,dz),mn=(D.act&&D.act.close&&D.ph==='talk')?.3:.75;if(d<mn&&d>1e-4){const k=(mn-d)*.5*Math.min(1,dt*8),ux=dx/d,uz=dz/d;if(!A.seated)A.push(-ux*k,-uz*k);if(!B.seated)B.push(ux*k,uz*k)}}
   if(U.tagOwner){U.tag.textContent=U.tagText;U.tag.classList.add('on');npcProj(U.tagOwner,U.tagY,U.tag,U.tagD)}else U.tag.classList.remove('on');
   U.tagOwner=null;U.tagD=1e9;
