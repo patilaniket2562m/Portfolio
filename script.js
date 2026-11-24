@@ -35,10 +35,10 @@ function bx(w,h,d,x,yb,z,m,col){const o=new T.Mesh(new T.BoxGeometry(w,h,d),m);o
 function cy(rt,rb,h,x,yb,z,m,sg){const o=new T.Mesh(new T.CylinderGeometry(rt,rb,h,sg||24),m);o.position.set(x,yb+h/2,z);o.castShadow=o.receiveShadow=true;scene.add(o);return o}
 function sp(rad,m,x,y,z){const o=new T.Mesh(new T.SphereGeometry(rad,20,16),m);o.position.set(x,y,z);o.castShadow=true;scene.add(o);return o}
 // walls
-const WH=3.2,WT=.2;
+const WH=3.2,WT=.2,DHW=.6,DH=2.1;
 function wsplit(a,b,cuts,fn){const pts=[a,...cuts.filter(c=>c>a+.01&&c<b-.01),b];for(let i=0;i<pts.length-1;i++)fn(pts[i],pts[i+1])}
-function wallH(z,x0,x1,gaps){let a=x0;const seg=(p,q,hd)=>wsplit(p,q,[-4.5,4.5],(u,v)=>hd?bx(v-u,WH-2.3,WT,(u+v)/2,2.3,z,wallM,false):bx(v-u,WH,WT,(u+v)/2,0,z,wallM));(gaps||[]).slice().sort((p,q)=>p-q).forEach(g=>{seg(a,g-1.1);seg(g-1.1,g+1.1,1);a=g+1.1});seg(a,x1)}
-function wallV(x,z0,z1,gaps){let a=z0;const seg=(p,q,hd)=>wsplit(p,q,[0],(u,v)=>hd?bx(WT,WH-2.3,v-u,x,2.3,(u+v)/2,wallM,false):bx(WT,WH,v-u,x,0,(u+v)/2,wallM));(gaps||[]).slice().sort((p,q)=>p-q).forEach(g=>{seg(a,g-1.1);seg(g-1.1,g+1.1,1);a=g+1.1});seg(a,z1)}
+function wallH(z,x0,x1,gaps){let a=x0;const seg=(p,q,hd)=>wsplit(p,q,[-4.5,4.5],(u,v)=>hd?bx(v-u,WH-DH,WT,(u+v)/2,DH,z,wallM,false):bx(v-u,WH,WT,(u+v)/2,0,z,wallM));(gaps||[]).slice().sort((p,q)=>p-q).forEach(g=>{seg(a,g-DHW);seg(g-DHW,g+DHW,1);a=g+DHW});seg(a,x1)}
+function wallV(x,z0,z1,gaps){let a=z0;const seg=(p,q,hd)=>wsplit(p,q,[0],(u,v)=>hd?bx(WT,WH-DH,v-u,x,DH,(u+v)/2,wallM,false):bx(WT,WH,v-u,x,0,(u+v)/2,wallM));(gaps||[]).slice().sort((p,q)=>p-q).forEach(g=>{seg(a,g-DHW);seg(g-DHW,g+DHW,1);a=g+DHW});seg(a,z1)}
 function wallVW(x,z0,z1,zs){let a=z0;const full=(p,q)=>wsplit(p,q,[0],(u,v)=>bx(WT,WH,v-u,x,0,(u+v)/2,wallM));zs.slice().sort((p,q)=>p-q).forEach(zc=>{const p=zc-.95,q=zc+.95;full(a,p);bx(WT,1.0,q-p,x,0,zc,wallM);bx(WT,WH-2.5,q-p,x,2.5,zc,wallM,false);a=q});full(a,z1)}
 wallH(-9,-13.5,13.5);wallH(9,-13.5,13.5,[-6.4]);wallVW(-13.5,-9,9,[5]);wallVW(13.5,-9,9,[-4.5,5.2]);
 wallH(0,-13.5,13.5,[-9,0,9]);wallV(-4.5,-9,9,[-4.5,4.5]);wallV(4.5,-9,9,[-4.5,4.5]);
@@ -197,8 +197,7 @@ const GH='https://github.com/patilaniket2562m';
   bx(.9,1.0,.9,p.x,0,-5.5,ped);
   const pt=new T.Mesh(new T.PlaneGeometry(.8,.25),new T.MeshBasicMaterial({map:tex(512,160,(c,w,h)=>{c.fillStyle='#16201a';c.fillRect(0,0,w,h);c.strokeStyle='#b08d4a';c.lineWidth=4;c.strokeRect(8,8,w-16,h-16);c.textAlign='center';c.textBaseline='middle';c.fillStyle='#fff';let fs=46;c.font='800 '+fs+'px system-ui,sans-serif';while(c.measureText(p.t).width>w-50&&fs>20){fs-=2;c.font='800 '+fs+'px system-ui,sans-serif'}c.fillText(p.t,w/2,64);c.fillStyle='#d8cfb8';c.font='500 24px system-ui,sans-serif';c.fillText('Earlier project \u00b7 E to read',w/2,118)}),toneMapped:false}));
   pt.position.set(p.x,.62,-5.5+.456);scene.add(pt);inf(pt,info);
-  if(!i){const g=new T.Group(),hd=new T.Mesh(new T.CylinderGeometry(.11,.11,.34,24),M(0x5a3a22,0,.45));hd.rotation.z=Math.PI/2;hd.position.y=.2;g.add(hd);const hn=new T.Mesh(new T.CylinderGeometry(.035,.035,.5,12),woodM);hn.position.y=-.05;g.add(hn);[-.12,.12].forEach(o=>{const b=new T.Mesh(new T.CylinderGeometry(.115,.115,.03,24),steel);b.rotation.z=Math.PI/2;b.position.set(o,.2,0);g.add(b)});body(g,[.17,.3,.11],info,p.x,1.31,-5.5)}
-  else{const g=new T.Group(),bd=new T.Mesh(new T.BoxGeometry(.4,.03,.55),M(0x7a5230,0,.5)),pp=new T.Mesh(new T.BoxGeometry(.34,.006,.48),white),cp=new T.Mesh(new T.BoxGeometry(.14,.02,.06),steel);pp.position.y=.019;cp.position.set(0,.02,-.24);g.add(bd,pp,cp);body(g,[.2,.025,.28],info,p.x,1.03,-5.5)}});
+  });
  const D=[
   {t:'TFOD',sub:'The Future Of Design \u00b7 Website',tag:'PROJECT 01  \u00b7  04/2026 \u2013 10/2026',c1:'#2f4a3c',c2:'#0f1a14',ac:'#7dffc8',pts:['Responsive React UI components','REST APIs with Node.js and Express','SQL Server database integration','Admin dashboards and site features'],chips:['React.js','Vite','Node.js','Express.js','SQL Server'],d:'Website for TFOD built with React.js, Vite, Node.js, Express.js and SQL Server. Responsive UI components, REST APIs, database integration, admin dashboards and website features.'},
   {t:'MedScan AI',sub:'Medical Report Management',tag:'PROJECT 02  \u00b7  01/2026 \u2013 04/2026',c1:'#3d4f6a',c2:'#101722',ac:'#6cb6ff',pts:['Secure medical report uploads','Multi-user access','Abnormal report detection','Scalable architecture, secure data'],chips:['ASP.NET','Node.js','React','Flutter','MySQL','SQL Server'],d:'A full-stack medical report management system with secure report uploads, multi-user access and abnormal report detection. Built with ASP.NET, Node.js, React and Flutter on MySQL / SQL Server, focused on scalable architecture and secure data handling.'},
@@ -217,7 +216,7 @@ const GH='https://github.com/patilaniket2562m';
   const m=new T.Mesh(new T.BoxGeometry(.5,.09,.38),[M(0xf2ead6,0,.8),M(0xf2ead6,0,.8),M(0xffffff,.1,.5,{map:lab(d,col)}),M(0xf2ead6,0,.8),M(col,0,.6),M(col,0,.6)]);
   body(m,[.25,.045,.19],{t:d,tag:'Education',h:'<p><b>'+c+'</b><br>'+y+'</p><div class="chips"><span>'+p+'</span></div>'},-.8+i*.8,.8+.046,5+(i%2?.05:-.05))});
  bx(1.1,.7,1.0,-3.0,.05,2.1,fabric);bx(1.1,.8,.2,-3.0,.4,1.6,fabric2);
- [['IMAP SYSTEMS','Full Stack Developer','01/2026 \u2013 Present',1.7,'IMAP Systems Pvt. Ltd., Mumbai','<p>Full Stack Developer building and maintaining web and mobile applications for enterprise solutions: backend APIs, database management, frontend development and production-level issue resolution.</p><div class="chips"><span>ASP.NET</span><span>C#</span><span>SQL Server</span><span>React.js</span><span>Flutter</span></div>'],['TECHNOWORLD','Full Stack Developer Intern','07/2025 \u2013 01/2026',7.4,'Technoworld Software','<p>Expanded RESTful APIs with Spring Boot, MySQL and Spring Data JPA. Built and tested full CRUD operations with form validation and structured exception handling, and connected a responsive HTML/CSS/JavaScript frontend through API integration.</p><div class="chips"><span>Spring Boot</span><span>MySQL</span><span>Spring Data JPA</span><span>REST APIs</span></div>']].forEach(([co,role,dt,z,full,html])=>{bx(.06,1.3,2.2,4.38,1.0,z,M(0x1b2420,0,.6),false);const p=new T.Mesh(new T.PlaneGeometry(2.0,1.1),new T.MeshBasicMaterial({map:tex(1024,560,(x,_w,_h)=>{x.scale(2,2);const w=512,h=280;x.fillStyle='#16231c';x.fillRect(0,0,w,h);x.strokeStyle='#b08d4a';x.lineWidth=3;x.strokeRect(14,14,w-28,h-28);x.fillStyle='#f1ece0';x.font='800 40px system-ui';x.textAlign='center';x.fillText(co,w/2,100);x.fillStyle='#d8cfb8';x.font='24px system-ui';x.fillText(role,w/2,150);x.fillStyle='#b08d4a';x.font='700 22px system-ui';x.fillText(dt,w/2,196)}),toneMapped:false}));p.position.set(4.34,1.0,z);p.rotation.y=-Math.PI/2;scene.add(p);inf(p,{t:full,tag:role+' \u00b7 '+dt,h:html})});
+ [['IMAP SYSTEMS','Full Stack Developer','01/2026 \u2013 Present',1.7,'IMAP Systems Pvt. Ltd., Mumbai','<p>Full Stack Developer building and maintaining web and mobile applications for enterprise solutions: backend APIs, database management, frontend development and production-level issue resolution.</p><div class="chips"><span>ASP.NET</span><span>C#</span><span>SQL Server</span><span>React.js</span><span>Flutter</span></div>'],['TECHNOWORLD','Full Stack Developer Intern','07/2025 \u2013 01/2026',7.4,'Technoworld Software','<p>Expanded RESTful APIs with Spring Boot, MySQL and Spring Data JPA. Built and tested full CRUD operations with form validation and structured exception handling, and connected a responsive HTML/CSS/JavaScript frontend through API integration.</p><div class="chips"><span>Spring Boot</span><span>MySQL</span><span>Spring Data JPA</span><span>REST APIs</span></div>']].forEach(([co,role,dt,z,full,html])=>{{const fr=new T.Mesh(new T.BoxGeometry(.04,1.16,2.06),new T.MeshBasicMaterial({color:0x0c1410}));fr.position.set(4.372,1.0,z);scene.add(fr)}const p=new T.Mesh(new T.PlaneGeometry(2.0,1.1),new T.MeshBasicMaterial({map:tex(1024,560,(x,_w,_h)=>{x.scale(2,2);const w=512,h=280;x.fillStyle='#16231c';x.fillRect(0,0,w,h);x.strokeStyle='#b08d4a';x.lineWidth=3;x.strokeRect(14,14,w-28,h-28);x.fillStyle='#f1ece0';x.font='800 40px system-ui';x.textAlign='center';x.fillText(co,w/2,100);x.fillStyle='#d8cfb8';x.font='24px system-ui';x.fillText(role,w/2,150);x.fillStyle='#b08d4a';x.font='700 22px system-ui';x.fillText(dt,w/2,196)}),toneMapped:false}));p.material.polygonOffset=true;p.material.polygonOffsetFactor=-2;p.position.set(4.345,1.0,z);p.rotation.y=-Math.PI/2;scene.add(p);inf(p,{t:full,tag:role+' \u00b7 '+dt,h:html})});
  cy(.03,.03,1.5,-4.0,0,7.9,steel,10);cy(.26,.36,.36,-4.0,1.5,7.9,M(0xfff0d0,0,.8,{emissive:0xffd9a0,emissiveIntensity:1.2}))
 })();
 // CONTACT
@@ -260,7 +259,6 @@ function win(x,z,ry){const g=new T.Group();g.position.set(x,1.75,z);g.rotation.y
  a(1.9,.1,.12,0,.8,.04,frM);a(1.9,.1,.12,0,-.8,.04,frM);a(.1,1.7,.12,-.9,0,.04,frM);a(.1,1.7,.12,.9,0,.04,frM);a(.05,1.5,.06,0,0,.03,frM);a(1.7,.05,.06,0,0,.03,frM);a(2.1,.08,.3,0,-.88,.12,frM);
  const cu=[a(.45,2.9,.1,-1.25,-.3,.1,curt),a(.45,2.9,.1,1.25,-.3,.1,curt)];
  ANIM.push((t,dt)=>{const tg=wst.open?1:0;wst.a+=(tg-wst.a)*(1-Math.exp(-4*dt));sash.position.y=.72*wst.a;const sw=wst.a*Math.sin(t*1.3+x)*.05;cu[0].rotation.x=sw;cu[1].rotation.x=sw*.8});
- const sh=new T.Mesh(new T.BoxGeometry(1.7,1.5,4.5),shaftM);sh.position.set(0,-.5,2.2);sh.rotation.x=.38;g.add(sh);
  if(!coarse){const l=new T.PointLight(0xffe6b8,.9,7);l.position.set(0,-.2,.8);g.add(l)}}
 win(13.39,-4.5,-Math.PI/2);win(13.39,5.2,-Math.PI/2);win(-13.39,5.0,Math.PI/2);
 // woven rugs
@@ -270,9 +268,6 @@ rug(-9,3.8,3.6,2.4,'#7a2a2a','#e0b36a');rug(-9,-6.5,2.6,1.8,'#3d4a3a','#d9c08a')
 // lamp glow
 if(!coarse)[[-12.6,1.9,1.4],[-4,1.9,7.9]].forEach(([x,y,z])=>{const l=new T.PointLight(0xffc88a,.8,6);l.position.set(x,y,z);scene.add(l)});
 // drifting dust in the light
-const N=260,pa=new Float32Array(N*3);for(let i=0;i<N;i++){pa[i*3]=(rnd()-.5)*26;pa[i*3+1]=.3+rnd()*2.7;pa[i*3+2]=(rnd()-.5)*17}
-const dg=new T.BufferGeometry();dg.setAttribute('position',new T.BufferAttribute(pa,3));const dust=new T.Points(dg,new T.PointsMaterial({color:0xfff0d0,size:.035,transparent:true,opacity:.55,blending:T.AdditiveBlending,depthWrite:false}));dust.frustumCulled=false;scene.add(dust);
-ANIM.push(t=>{const a=dg.attributes.position.array;for(let i=0;i<N;i++){a[i*3]+=Math.sin(t*.3+i)*.0008;a[i*3+1]+=Math.cos(t*.2+i*1.7)*.0006;a[i*3+2]+=Math.sin(t*.25+i*.7)*.0008}dg.attributes.position.needsUpdate=true});
 // ===== CINEMATIC POST-PROCESSING (HDR bloom, ACES grade, lens effects) =====
 let comp=null;
 if(false&&T.EffectComposer&&T.UnrealBloomPass&&T.ShaderPass){try{
@@ -312,9 +307,10 @@ const slatT=tex(256,256,(x,w,h)=>{for(let i=0;i<16;i++){x.fillStyle=`hsl(28,${40
 MS(5.5,3,.08,10.5,1.6,9.14,M(0xffffff,0,.6,{map:slatT}));MS(5.5,3,.08,-10.5,1.6,-9.14,M(0xffffff,0,.6,{map:slatT}));
 MS(5.6,.14,3.1,-6.4,2.85,10.55,trim);[-8.9,-3.9].forEach(x=>{cy(.07,.07,2.8,x,0,11.6,trim,10);S.push({x0:x-.08,x1:x+.08,y0:0,y1:2.8,z0:11.52,z1:11.68,cx:x,cy:1.4,cz:11.6,hx:.08,hy:1.4,hz:.08})});
 // door
-const doorPivot=new T.Group();doorPivot.position.set(-7.5,0,9.0);scene.add(doorPivot);const dl=BX(2.15,2.3,.07,woodM);dl.position.set(1.08,1.15,0);dl.castShadow=true;doorPivot.add(dl);
+const doorPivot=new T.Group();doorPivot.position.set(-7.0,0,9.0);scene.add(doorPivot);const dl=BX(1.2,2.05,.07,woodM);dl.position.set(.6,1.025,0);dl.castShadow=true;doorPivot.add(dl);
 
-MS(.12,2.4,.3,-7.56,1.2,9.05,trim);MS(.12,2.4,.3,-5.24,1.2,9.05,trim);MS(2.5,.12,.3,-6.4,2.36,9.05,trim);
+MS(.12,2.16,.3,-7.06,1.08,9.05,trim);MS(.12,2.16,.3,-5.74,1.08,9.05,trim);MS(1.5,.12,.3,-6.4,2.16,9.05,trim);
+MS(.25,.55,.14,-7.375,.275,9.1,stoneM);MS(.25,.55,.14,-5.425,.275,9.1,stoneM);
 // lit windows seen from outside
 const gl=tex(64,64,(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#ffe2b0');g.addColorStop(1,'#a8743c');x.fillStyle=g;x.fillRect(0,0,w,h);x.fillStyle='rgba(255,255,255,.18)';x.beginPath();x.moveTo(0,40);x.lineTo(40,0);x.lineTo(64,0);x.lineTo(0,64);x.fill()});
 function glass(x,z,ry,w,clr){const g=new T.Group();g.position.set(x,1.75,z);g.rotation.y=ry;scene.add(g);if(!clr)g.add(new T.Mesh(new T.PlaneGeometry(w,1.5),new T.MeshBasicMaterial({map:gl})));
@@ -397,18 +393,170 @@ function dress(g,x0,w,t){const a=(bw,bh,bd,x,y,z,m)=>{const o=new T.Mesh(new T.B
 const DR=[];
 function mkdoor(hx,hz,rot0,sgn,ang,bx0,open0,leaf){
  let piv=leaf;
- if(!piv){piv=new T.Group();piv.position.set(hx,0,hz);scene.add(piv);const sl=new T.Mesh(new T.BoxGeometry(2.12,2.28,.045),doorM);sl.position.set(1.1,1.14,0);sl.castShadow=sl.receiveShadow=true;piv.add(sl);dress(piv,.04,2.12,.045)}
- const e={x0:bx0.x0,x1:bx0.x1,y0:0,y1:2.3,z0:bx0.z0,z1:bx0.z1,cx:(bx0.x0+bx0.x1)/2,cy:1.15,cz:(bx0.z0+bx0.z1)/2,hx:(bx0.x1-bx0.x0)/2,hy:1.15,hz:(bx0.z1-bx0.z0)/2};S.push(e);
+ if(!piv){piv=new T.Group();piv.position.set(hx,0,hz);scene.add(piv);const sl=new T.Mesh(new T.BoxGeometry(DHW*2-.08,DH-.04,.045),doorM);sl.position.set(DHW-.04+.04,(DH-.04)/2,0);sl.castShadow=sl.receiveShadow=true;piv.add(sl);dress(piv,.04,DHW*2-.08,.045)}
+ const e={x0:bx0.x0,x1:bx0.x1,y0:0,y1:DH,z0:bx0.z0,z1:bx0.z1,cx:(bx0.x0+bx0.x1)/2,cy:DH/2,cz:(bx0.z0+bx0.z1)/2,hx:(bx0.x1-bx0.x0)/2,hy:DH/2,hz:(bx0.z1-bx0.z0)/2};S.push(e);
  const d={piv,e,a:open0?1:0,open:!!open0};
- d.sync=()=>{piv.rotation.y=rot0+sgn*ang*d.a;const on=d.a<.6;e.cy=on?1.15:-99;e.hy=on?1.15:0;e.y0=on?0:-99;e.y1=on?2.3:-98};
+ d.sync=()=>{piv.rotation.y=rot0+sgn*ang*d.a;const on=d.a<.6;e.cy=on?DH/2:-99;e.hy=on?DH/2:0;e.y0=on?0:-99;e.y1=on?DH:-98};
  d.toggle=()=>{if(d.open&&P.x>e.x0-.45&&P.x<e.x1+.45&&P.z>e.z0-.45&&P.z<e.z1+.45)return;d.open=!d.open};
  piv.userData.ref={name:'Door',toggle:d.toggle,label:()=>d.open?'Close door':'Open door'};ray.push(piv);
  d.sync();DR.push(d);return d}
-[[-9,1],[0,-1],[9,-1]].forEach(([g,sw])=>mkdoor(g-1.1,0,0,sw,1.75,{x0:g-1.1,x1:g+1.1,z0:-.06,z1:.06},true));
-[[-4.5,-4.5,-1],[-4.5,4.5,-1],[4.5,-4.5,1],[4.5,4.5,1]].forEach(([x,g,sw])=>mkdoor(x,g-1.1,-Math.PI/2,sw,1.75,{x0:x-.06,x1:x+.06,z0:g-1.1,z1:g+1.1},true));
-dress(doorPivot,0,2.15,.07);
-const FD=mkdoor(-7.5,9,0,1,1.65,{x0:-7.5,x1:-5.3,z0:8.93,z1:9.07},false,doorPivot);FD.front=true;
+[[-9,1],[0,-1],[9,-1]].forEach(([g,sw])=>mkdoor(g-DHW,0,0,sw,1.75,{x0:g-DHW,x1:g+DHW,z0:-.06,z1:.06},true));
+[[-4.5,-4.5,-1],[-4.5,4.5,-1],[4.5,-4.5,1],[4.5,4.5,1]].forEach(([x,g,sw])=>mkdoor(x,g-DHW,-Math.PI/2,sw,1.75,{x0:x-.06,x1:x+.06,z0:g-DHW,z1:g+DHW},true));
+dress(doorPivot,0,1.2,.07);
+const FD=mkdoor(-7.0,9,0,1,1.65,{x0:-7.0,x1:-5.8,z0:8.93,z1:9.07},false,doorPivot);FD.front=true;
 ANIM.push((t,dt)=>{DR.forEach(d=>{if(d.front&&CIN.mode!=='play')return;const tg=d.open?1:0;if(d.a!==tg){d.a+=(tg-d.a)*(1-Math.exp(-5*dt));if(Math.abs(tg-d.a)<.003)d.a=tg;d.sync()}})});
+// ================= DESIGN UPGRADE v3: apartment-walkthrough inspired rooms + house =================
+// Procedural stone / wood / tile / terrazzo floors, rounded furniture, stone + slat feature walls, jali screen,
+// pleated curtains, cove LED strips, brass downlights, pendants, framed art, stone entrance, planters and paver path.
+(function(){
+ const S1=coarse?512:1024,S2=512,gold=M(0xc9a24a,.9,.3,{envMapIntensity:1.3});
+ const nz=(g,w,h,a)=>{const d=g.getImageData(0,0,w,h),p=d.data;for(let i=0;i<p.length;i+=4){const n=(rnd()-.5)*a;p[i]+=n;p[i+1]+=n;p[i+2]+=n}g.putImageData(d,0,0)};
+ const mk=(draw,rep,amt,sz)=>{sz=sz||S1;return tex(sz,sz,(g,W,H)=>{g.save();g.scale(W/1024,H/1024);draw(g);g.restore();nz(g,W,H,amt==null?9:amt)},true,rep)};
+ const RB=(w,h,d,r)=>{r=Math.min(r,w/2-.001,h/2-.001,d/2-.001);const g=new T.BoxGeometry(w,h,d,6,6,6),p=g.attributes.position,n=g.attributes.normal,v=new V3(),k=new V3(),q=new V3(),a=w/2-r,b=h/2-r,e=d/2-r,c=(x,l)=>Math.max(-l,Math.min(l,x));for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);k.set(c(v.x,a),c(v.y,b),c(v.z,e));q.subVectors(v,k);if(q.lengthSq()>1e-8){q.normalize();n.setXYZ(i,q.x,q.y,q.z);v.copy(k).addScaledVector(q,r);p.setXYZ(i,v.x,v.y,v.z)}}return g};
+ const uvd=(o,s)=>{const p=o.geometry.parameters,uv=o.geometry.attributes.uv;[[p.depth,p.height],[p.depth,p.height],[p.width,p.depth],[p.width,p.depth],[p.width,p.height],[p.width,p.height]].forEach(([a,b],f)=>{for(let i=0;i<4;i++){const k=f*4+i;uv.setXY(k,uv.getX(k)*a/s,uv.getY(k)*b/s)}});return o};
+ const sb=(w,h,d,x,y,z,m,s)=>{const o=new T.Mesh(new T.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;scene.add(o);return s?uvd(o,s):o};
+ const glv=(a,b,c)=>new T.MeshBasicMaterial({color:new T.Color(a,b,c)});
+ const lg=(w,h,d,x,y,z,m)=>{const o=new T.Mesh(new T.BoxGeometry(w,h,d),m);o.position.set(x,y,z);scene.add(o);return o};
+ const col=(x,z,hx,hz,h)=>S.push({x0:x-hx,x1:x+hx,y0:0,y1:h,z0:z-hz,z1:z+hz,cx:x,cy:h/2,cz:z,hx,hy:h/2,hz});
+ const ao2=(x,z,w,d)=>{const p=new T.Mesh(new T.PlaneGeometry(w*1.5,d*1.5),aoB);p.rotation.x=-Math.PI/2;p.position.set(x,.04,z);p.renderOrder=2;scene.add(p)};
+ const lathe=(pts,m)=>{const o=new T.Mesh(new T.LatheGeometry(pts.map(p=>new T.Vector2(p[0],p[1])),28),m);o.castShadow=o.receiveShadow=true;return o};
+ r.toneMappingExposure=1.12;
+ // ---------- textures ----------
+ const planks=(h0,s,l0,rep,pl,sz)=>mk(g=>{pl=pl||64;for(let x=0;x<1024;x+=pl){let y=-rnd()*300;while(y<1024){const len=240+rnd()*400,v=rnd()*11;g.fillStyle=`hsl(${h0+rnd()*5},${s}%,${l0+v}%)`;g.fillRect(x,y,pl-1,len);for(let i=0;i<44;i++){const lt=rnd()>.5,gx=x+rnd()*(pl-1);g.strokeStyle=`rgba(${lt?'255,226,186':'28,12,2'},${.04+rnd()*.09})`;g.lineWidth=.6+rnd()*1.3;g.beginPath();g.moveTo(gx,y);g.bezierCurveTo(gx+(rnd()-.5)*8,y+len*.3,gx+(rnd()-.5)*8,y+len*.7,gx+(rnd()-.5)*6,y+len);g.stroke()}g.fillStyle='rgba(0,0,0,.55)';g.fillRect(x,y,pl-1,2.5);y+=len}g.fillStyle='rgba(0,0,0,.6)';g.fillRect(x+pl-2,0,2,1024)}},rep,10,sz);
+ const tiles=(hue,sat,lit,grout,n,rep,vein)=>mk(g=>{const s=1024/n;for(let j=0;j<n;j++)for(let i=0;i<n;i++){g.fillStyle=`hsl(${hue+rnd()*4},${sat}%,${lit+rnd()*5}%)`;g.fillRect(i*s,j*s,s,s);for(let k=0;k<3;k++){g.strokeStyle=`rgba(${vein},${.04+rnd()*.07})`;g.lineWidth=1+rnd()*2.5;g.beginPath();g.moveTo(i*s+rnd()*s,j*s);g.bezierCurveTo(i*s+rnd()*s,j*s+s*.3,i*s+rnd()*s,j*s+s*.7,i*s+rnd()*s,j*s+s);g.stroke()}}g.strokeStyle=grout;g.lineWidth=5;for(let i=0;i<=n;i++){g.beginPath();g.moveTo(i*s,0);g.lineTo(i*s,1024);g.stroke();g.beginPath();g.moveTo(0,i*s);g.lineTo(1024,i*s);g.stroke()}},rep,7,S2);
+ const terr=mk(g=>{g.fillStyle='#d9d2c4';g.fillRect(0,0,1024,1024);const cs=['#8a7d6c','#b5a58c','#3b3a38','#c98a5a','#f3eee4','#6f7f73'];for(let i=0;i<1500;i++){g.fillStyle=cs[(rnd()*cs.length)|0];g.save();g.translate(rnd()*1024,rnd()*1024);g.rotate(rnd()*6.3);g.beginPath();const r1=2+rnd()*8;g.moveTo(r1,0);for(let k=1;k<6;k++){const a=k/6*6.283,q=r1*(.6+rnd()*.5);g.lineTo(Math.cos(a)*q,Math.sin(a)*q)}g.closePath();g.fill();g.restore()}g.fillStyle='rgba(190,155,80,.95)';[0,256,512,768].forEach(p=>{g.fillRect(p,0,4,1024);g.fillRect(0,p,1024,4)})},[2,2],6,S2);
+ const stT=mk(g=>{g.fillStyle='#17110c';g.fillRect(0,0,1024,1024);const rh=64;for(let y=0;y<1024;y+=rh){let x=-rnd()*120;while(x<1024){const l=110+rnd()*230,v=rnd();g.fillStyle=v>.93?`hsl(40,22%,${56+rnd()*12}%)`:`hsl(${24+v*16},${8+v*8}%,${30+v*22}%)`;g.fillRect(x+2,y+2,l-4,rh-4);for(let i=0;i<4;i++){g.fillStyle=`rgba(${rnd()>.5?'255,235,200':'0,0,0'},.09)`;g.fillRect(x+3+rnd()*l,y+3+rnd()*(rh-6),10+rnd()*40,1.5)}x+=l}}},null,14);
+ const pvT=mk(g=>{g.fillStyle='#8f887a';g.fillRect(0,0,1024,1024);const s=128;for(let j=0;j<8;j++)for(let i=-1;i<9;i++){const o=(j%2)*s/2,v=rnd();g.fillStyle=`hsl(${34+v*8},${10+v*8}%,${62+v*14}%)`;g.fillRect(i*s+o+3,j*s+3,s-6,s-6)}},null,12,S2);
+ const slT=tex(512,512,(g,w,h)=>{for(let i=0;i<24;i++){g.fillStyle=`hsl(${28+rnd()*4},${42+rnd()*8}%,${34+rnd()*10}%)`;g.fillRect(i*w/24,0,w/24-3,h);g.fillStyle='#120b06';g.fillRect(i*w/24-3+w/24,0,3,h)}nz(g,w,h,10)},true);
+ const jT=tex(512,512,(g,w,h)=>{g.fillStyle='#120a05';g.fillRect(0,0,w,h);const n=4,s=w/n;for(let j=0;j<n;j++)for(let i=0;i<n;i++){const x=i*s,y=j*s;g.fillStyle='#c9a24a';g.fillRect(x+6,y+6,s-12,s-12);g.fillStyle='#2a1a08';g.save();g.translate(x+s/2,y+s/2);for(let k=0;k<8;k++){g.rotate(Math.PI/4);g.beginPath();g.ellipse(0,s*.2,s*.08,s*.17,0,0,7);g.fill()}g.beginPath();g.arc(0,0,s*.07,0,7);g.fill();g.restore()}},true);
+ const curT=tex(256,64,(g,w,h)=>{for(let x=0;x<w;x++){const v=.5+.5*Math.sin(x/w*Math.PI*2*5);g.fillStyle=`rgb(${190+v*50|0},${176+v*48|0},${146+v*42|0})`;g.fillRect(x,0,1,h)}},true);
+ const wd=planks(26,42,28,null,70,S2);
+ // ---------- floors: a different material in every room ----------
+ const F=[planks(30,38,32,[3,3]),tiles(205,10,72,'#8d949c',6,[1.5,1.5],'60,70,80'),terr,planks(32,45,46,[3,3],80),planks(20,32,19,[3,3],56),tiles(40,22,84,'#bfb299',4,[2,2],'150,130,100')],FR=[.38,.22,.18,.36,.3,.16];
+ const fm=(t,ro)=>new T.MeshStandardMaterial({map:t,normalMap:nmap(t),normalScale:new T.Vector2(.7,.7),roughness:ro,metalness:0,envMapIntensity:.9});
+ scene.traverse(o=>{if(!o.isMesh||o.geometry.type!=='PlaneGeometry')return;const p=o.geometry.parameters;if(p.width!==9||p.height!==9)return;const i=rooms.findIndex(q=>q.cx===o.position.x&&q.cz===o.position.z);if(i>=0)o.material=fm(F[i],FR[i])});
+ // ---------- wall paint: softer, warmer, one idea per room ----------
+ [0xa9bfa5,0xb4c3d6,0xe9e3d6,0xead8bb,0xc7a66a,0x8fbab4].forEach((c,i)=>paint[i].color.set(c));
+ // ---------- furniture wood + pleated curtains ----------
+ woodM.map=wd;woodM.normalMap=nmap(wd);woodM.normalScale.set(.6,.6);woodM.bumpMap=null;woodM.color.set(0xffffff);woodM.roughness=.42;woodM.needsUpdate=true;
+ curt.map=curT;curt.color.set(0xffffff);curt.roughness=1;curt.needsUpdate=true;
+ // ---------- rounded sofas, cushions, tables, cabinets (same size, so collisions are unchanged) ----------
+ scene.children.slice().forEach(o=>{if(!o.isMesh||o.geometry.type!=='BoxGeometry'||Array.isArray(o.material))return;const m=o.material,q=o.geometry.parameters,w=q.width,h=q.height,d=q.depth,mx=Math.max(w,h,d),mn=Math.min(w,h,d);let rd=0;
+  if((m===fabric||m===fabric2)&&mx<4)rd=Math.min(.08,mn*.4);else if(m===woodM&&mx<3.2&&mn>.03)rd=Math.min(.025,mn*.3);if(!rd)return;
+  const g=RB(w,h,d,rd);if(m===woodM){const uv=g.attributes.uv,D=[[d,h],[d,h],[w,d],[w,d],[w,h],[w,h]];for(let f=0;f<6;f++)for(let i=0;i<49;i++){const k=f*49+i;uv.setXY(k,uv.getX(k)*D[f][0]/4,uv.getY(k)*D[f][1]/4)}}
+  o.geometry=g});
+ // ---------- ceilings: cove LED strips + brass downlights ----------
+ const CV=[[2.6,2.2,1.6],[1.7,2.3,2.8],[2.4,2.3,2.1],[2.8,2.1,1.3],[2.8,2.2,1.4],[1.9,2.6,2.5]],dlM=glv(3,2.6,2);
+ rooms.forEach((rm,i)=>{const m=glv(...CV[i]),hs=4.2,y=WH-.17;
+  lg(2*hs,.035,.05,rm.cx,y,rm.cz-hs,m);lg(2*hs,.035,.05,rm.cx,y,rm.cz+hs,m);lg(.05,.035,2*hs,rm.cx-hs,y,rm.cz,m);lg(.05,.035,2*hs,rm.cx+hs,y,rm.cz,m);
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>{const x=rm.cx+a*2.4,z=rm.cz+b*2.4,dk=new T.Mesh(new T.CylinderGeometry(.11,.11,.02,20),dlM);dk.position.set(x,WH-.01,z);scene.add(dk);const rg=new T.Mesh(new T.TorusGeometry(.125,.012,6,20),gold);rg.rotation.x=Math.PI/2;rg.position.set(x,WH-.015,z);scene.add(rg)})});
+ // ---------- feature walls ----------
+ const stoneW=M(0xffffff,0,.85,{map:stT,normalMap:nmap(stT)}),gW=glv(2.8,2.1,1.3);
+ // Living room: stone wall behind the TV with warm edge light
+ sb(3.0,2.5,.04,-9.1,1.75,8.88,stoneW,3.5);lg(.03,2.5,.02,-10.62,1.75,8.855,gW);lg(.03,2.5,.02,-7.58,1.75,8.855,gW);lg(3.0,.03,.02,-9.1,3.0,8.855,gW);
+ // Study: backlit wood slat wall behind the desk
+ sb(3.8,2.6,.04,-9,1.5,-8.86,M(0xffffff,0,.55,{map:slT,envMapIntensity:.5}));lg(3.8,.03,.02,-9,.2,-8.835,gW);lg(3.8,.03,.02,-9,2.8,-8.835,gW);
+ // Contact: backlit brass jali screen
+ {const g=new T.Group();g.position.set(12.5,1.6,.13);scene.add(g);const f=new T.Mesh(RB(1.72,1.52,.05,.015),gold);g.add(f);const jm=new T.Mesh(new T.PlaneGeometry(1.6,1.4),new T.MeshStandardMaterial({map:jT,emissiveMap:jT,emissive:0xffffff,emissiveIntensity:.8,metalness:.4,roughness:.4}));jm.position.z=.027;g.add(jm)}
+ // ---------- pendants and fixtures ----------
+ const bulb=glv(3,2.5,1.7);
+ {const g=new T.Group();g.position.set(0,2.35,5);scene.add(g);const ring=new T.Mesh(new T.TorusGeometry(.8,.022,8,48),gold);ring.rotation.x=Math.PI/2;g.add(ring);
+  for(let i=0;i<10;i++){const a=i/10*6.283,b=new T.Mesh(new T.CylinderGeometry(.045,.045,.16,12),bulb);b.position.set(Math.cos(a)*.8,.1,Math.sin(a)*.8);g.add(b)}
+  [0,2.1,4.2].forEach(a=>{const rod=new T.Mesh(new T.CylinderGeometry(.006,.006,.85,5),gold);rod.position.set(Math.cos(a)*.8,.425,Math.sin(a)*.8);g.add(rod)})}
+ [[-2.4,-8.2],[2.4,-8.2],[-2.6,-1.3],[2.6,-1.3]].forEach(([x,z])=>{const m=glv(2.2,2.4,2.6);lg(2.4,.05,.1,x,2.55,z,m);[-1,1].forEach(s=>lg(.012,.65,.012,x+s,2.875,z,gold))});
+ [8.2,9,9.8].forEach((x,i)=>{const y=2.3-(i===1?.1:0);const gb=new T.Mesh(new T.SphereGeometry(.11,16,12),bulb);gb.position.set(x,y,5.6);scene.add(gb);lg(.008,WH-y,.008,x,(WH+y)/2,5.6,gold)});
+ lg(7.4,.03,.05,9,WH-.05,-7.7,dark);
+ [6.1,9,11.9].forEach(x=>{const s=new T.Group();s.position.set(x,WH-.1,-7.7);s.rotation.x=.75;scene.add(s);const b=new T.Mesh(new T.CylinderGeometry(.045,.06,.2,14),dark);b.position.y=-.1;s.add(b);const l=new T.Mesh(new T.CircleGeometry(.045,14),dlM);l.rotation.x=Math.PI/2;l.position.y=-.201;s.add(l)});
+ // study desk lamp
+ cy(.09,.1,.02,-10.1,.8,-8.15,gold,16);cy(.012,.012,.4,-10.1,.82,-8.15,gold,8);{const sh=new T.Mesh(new T.CylinderGeometry(.03,.11,.14,16),M(0xfff0d0,0,.8,{emissive:0xffd9a0,emissiveIntensity:1.2}));sh.position.set(-10.0,1.25,-8.15);sh.rotation.z=.5;scene.add(sh)}
+ // ---------- living room styling ----------
+ [[-10.35,.95,1.62,0xe0a81c,.12],[-7.65,.95,1.62,0xd9532a,-.12],[-9,.93,1.64,0x2f5a4a,0]].forEach(([x,y,z,c,ry])=>{const o=new T.Mesh(RB(.5,.46,.15,.07),M(c,0,1));o.position.set(x,y,z);o.rotation.set(-.18,ry,0);o.castShadow=true;scene.add(o)});
+ [[-3.4,.98,1.8,0xd9532a,.1],[-2.6,.98,1.8,0xe0a81c,-.1]].forEach(([x,y,z,c,ry])=>{const o=new T.Mesh(RB(.42,.4,.13,.06),M(c,0,1));o.position.set(x,y,z);o.rotation.set(-.2,ry,0);o.castShadow=true;scene.add(o)});
+ cy(.3,.3,.03,-11.45,.5,1.95,woodM,32);cy(.04,.04,.5,-11.45,0,1.95,gold,10);cy(.2,.2,.03,-11.45,0,1.95,gold,24);col(-11.45,1.95,.3,.3,.55);ao2(-11.45,1.95,.6,.6);
+ const vase=(x,y,z,c)=>{const g=new T.Group();g.position.set(x,y,z);scene.add(g);const v=lathe([[0,0],[.06,0],[.1,.09],[.11,.15],[.07,.25],[.05,.3],[.07,.34],[.055,.34],[.04,.3]],M(c,.1,.25,{side:T.DoubleSide,envMapIntensity:1}));g.add(v);
+  const base=new T.Vector3(0,.3,0),up=new T.Vector3(0,1,0),stemM2=M(0x3f7a3a,0,.8),leafM3=M(0x2f6b3a,0,.7,{side:T.DoubleSide});
+  [[0xf2a7b8,-.2,.1,.62],[0xf6d36b,.15,-.1,.7],[0xf4efe6,.0,.2,.56],[0xe87b52,.25,.15,.66],[0xc86bd0,-.12,-.18,.6]].forEach(([fc,a,b,h])=>{
+   const head=new T.Vector3(a*.32,h,b*.26),dir=head.clone().sub(base),len=dir.length(),st=new T.Mesh(new T.CylinderGeometry(.006,.008,len,6),stemM2);
+   st.position.copy(base).addScaledVector(dir,.5);st.quaternion.setFromUnitVectors(up,dir.clone().normalize());g.add(st);
+   const pm=M(fc,0,.55,{side:T.DoubleSide});
+   for(let j=0;j<8;j++){const an=j/8*Math.PI*2,p=new T.Mesh(new T.SphereGeometry(.03,8,6),pm);p.scale.set(1.5,.35,.8);p.position.set(head.x+Math.cos(an)*.04,head.y,head.z+Math.sin(an)*.04);p.rotation.set(0,-an,.35);g.add(p)}
+   const ce=new T.Mesh(new T.SphereGeometry(.022,8,6),M(0xe0a526,0,.6));ce.position.copy(head);ce.position.y+=.008;g.add(ce);
+   [.35,.6].forEach((t,i)=>{const lf=new T.Mesh(new T.SphereGeometry(.035,8,6),leafM3),pp=base.clone().addScaledVector(dir,t),an=(i?1:-1)*1.2+a*5;lf.scale.set(1.8,.3,.8);lf.position.set(pp.x+Math.cos(an)*.03,pp.y,pp.z+Math.sin(an)*.03);lf.rotation.set(0,-an,.4);g.add(lf)})})}; vase(-9.5,.46,3.8,0x2f5a4a);vase(-11.45,.53,1.95,0xb85a3a);vase(7.6,1.0,5.6,0x2f4a5a);
+ // ---------- framed art ----------
+ const P=[['#e8d9bf','#c9663a','#2f5a4a','#e0b36a'],['#2f4a3c','#e0b36a','#f1e4c8','#c9663a'],['#d9cdb6','#7a8f6f','#b85a3a','#2f4a5a'],['#25364a','#e8b23a','#c9663a','#f1e4c8']];
+ const art=(a,b,c,d,kind)=>tex(256,320,(g,w,h)=>{g.fillStyle=a;g.fillRect(0,0,w,h);
+  if(kind===0){g.fillStyle=b;g.beginPath();g.arc(w/2,h*.4,w*.27,0,7);g.fill();g.fillStyle=c;g.fillRect(0,h*.72,w,h*.28);g.fillStyle=d;g.fillRect(w*.18,h*.66,w*.64,6)}
+  else if(kind===1){[b,c,d].forEach((cl2,i)=>{g.fillStyle=cl2;const x=w*(.12+i*.28),ww=w*.24,top=h*(.34+i*.06);g.fillRect(x,top+ww/2,ww,h*.9-top-ww/2);g.beginPath();g.arc(x+ww/2,top+ww/2,ww/2,Math.PI,0);g.fill()})}
+  else{for(let i=0;i<5;i++){g.fillStyle=[b,c,d,b,c][i];g.fillRect(0,h*(.45+i*.11),w,h*.07)}g.fillStyle=d;g.beginPath();g.arc(w*.68,h*.28,w*.14,0,7);g.fill()}
+  nz(g,w,h,22)},true);
+ const frameM=M(0x2b1d12,.15,.5),matM=M(0xf4eee0,0,.9),H2=Math.PI/2;
+ const pic=(x,y,z,ry,w,h,kind,pi)=>{const g=new T.Group();g.position.set(x,y,z);g.rotation.y=ry;scene.add(g);const f=new T.Mesh(RB(w+.14,h+.14,.05,.012),frameM);f.castShadow=true;g.add(f);
+  const mt=new T.Mesh(new T.PlaneGeometry(w+.02,h+.02),matM);mt.position.z=.0255;g.add(mt);const im=new T.Mesh(new T.PlaneGeometry(w*.84,h*.84),new T.MeshStandardMaterial({map:art(...P[pi%4],kind),roughness:.7}));im.position.z=.027;g.add(im)};
+ [[-4.63,1.75,2.0,-H2,.9,1.2,0,0],[-4.63,1.75,7.2,-H2,1.1,.8,1,1],[-4.63,1.8,-7.0,-H2,1.0,1.3,2,2],[-4.63,1.75,-1.9,-H2,.8,1.0,0,3],
+  [-4.37,1.75,-7.2,H2,1.0,1.3,1,3],[-4.37,1.75,-1.9,H2,.8,1.0,2,1],[4.37,1.75,-7.2,-H2,1.0,1.3,2,0],[4.37,1.75,-1.9,-H2,.8,1.0,0,2],
+  [4.63,1.75,-7.2,H2,.9,1.2,1,2],[4.63,1.75,-1.9,H2,1.1,.8,2,3],[-4.37,1.75,6.5,H2,.9,1.1,0,1],[4.63,1.75,2.0,H2,.9,1.2,2,1],[4.63,1.75,7.2,H2,1.0,.8,1,0]].forEach(a=>pic(...a));
+ // ================= THE HOUSE (exterior) =================
+ stoneM.map=stT;stoneM.color.set(0xffffff);stoneM.normalMap=nmap(stT);stoneM.normalScale.set(1.3,1.3);stoneM.needsUpdate=true;
+ pathM.map=pvT;pathM.color.set(0xffffff);pathM.normalMap=nmap(pvT);pathM.needsUpdate=true;
+ // stone piers flanking the entrance, roof parapet
+ [-8.65,-4.5].forEach(x=>sb(.9,3.2,.14,x,1.6,9.18,stoneM,4));
+ const par=M(0xf2ede4,0,.7);[-10.12,10.12].forEach(z=>sb(29.4,.28,.18,0,3.74,z,par));[-14.6,14.6].forEach(x=>sb(.18,.28,20.4,x,3.74,0,par));
+ // front door: deep teak, brass pulls, address plaque, doormat
+ const teak=M(0xffffff,0,.4,{map:wd,color:0xc79a6b}),teakP=M(0xffffff,0,.45,{map:wd,color:0x8e6439});dl.material=teak;doorPivot.traverse(o=>{if(o.isMesh&&o.material===panM)o.material=teakP});
+ [1,-1].forEach(s=>{const b=new T.Mesh(new T.CylinderGeometry(.018,.018,.7,10),gold);b.position.set(1.05,1.05,s*.075);doorPivot.add(b);[.3,-.3].forEach(o=>{const st=new T.Mesh(new T.CylinderGeometry(.012,.012,.05,8),gold);st.rotation.x=H2;st.position.set(1.05,1.05+o,s*.052);doorPivot.add(st)})});
+ sign('PATIL HOUSE',-6.4,2.62,9.17,0,1.9,.24,'#2a2118');sb(1.4,.025,.9,-6.4,.045,9.75,M(0x3a3026,0,1));
+ // wall lanterns on the piers
+ [-8.65,-4.5].forEach(x=>{const o=new T.Mesh(RB(.14,.26,.05,.02),gold);o.position.set(x,2.05,9.29);scene.add(o);sp(.075,lampG,x,2.05,9.34)});
+ // planters with topiary
+ [-8.45,-4.35].forEach(x=>{const g=new T.Group();g.position.set(x,0,9.9);scene.add(g);const p=new T.Mesh(new T.CylinderGeometry(.3,.24,.62,20),M(0x2e2a27,.1,.55));p.position.y=.31;p.castShadow=p.receiveShadow=true;g.add(p);const rm=new T.Mesh(new T.TorusGeometry(.3,.022,8,24),gold);rm.rotation.x=H2;rm.position.y=.62;g.add(rm);leafCluster(g,0,1.0,0,.38,.5,.38,34,.5,0,false);col(x,9.9,.3,.3,1.3)});
+ // flowering beds along the facade: soil strip, leafy bushes, stems and real petalled flowers
+ {const pts=[[-12.5,10.2],[-9.6,10.2],[-3.3,10.2],[-.8,10.2],[3,10.2],[7.6,10.2],[12.8,10.2]],PER=9,n=pts.length*PER;
+  const soil=M(0x3b2a1c,0,1),stemM=M(0x3f7a3a,0,.8),leafM2=M(0x2f6b3a,0,.7,{side:T.DoubleSide});
+  pts.forEach(([x,z])=>{const bed=new T.Mesh(new T.BoxGeometry(1.9,.2,.9),soil);bed.position.set(x,.1,z);bed.receiveShadow=true;scene.add(bed)});
+  const stems=new T.InstancedMesh(new T.CylinderGeometry(.01,.013,1,5),stemM,n),
+        leaves=new T.InstancedMesh(new T.SphereGeometry(.09,8,6),leafM2,n*3),
+        petals=new T.InstancedMesh(new T.SphereGeometry(.035,8,6),new T.MeshStandardMaterial({roughness:.55}),n*6),
+        hearts=new T.InstancedMesh(new T.SphereGeometry(.03,8,6),new T.MeshStandardMaterial({color:0xf0b43c,roughness:.6}),n),
+        o=new T.Object3D(),c=new T.Color(),pal=['#f2a7b8','#f6d36b','#f4efe6','#e87b52','#c86bd0'];let k=0,l=0,p=0;
+  pts.forEach(([x,z])=>{for(let i=0;i<PER;i++){const fx=x+(rnd()-.5)*1.6,fz=z+(rnd()-.5)*.6,h=.3+rnd()*.3;
+    o.rotation.set((rnd()-.5)*.15,0,(rnd()-.5)*.15);o.position.set(fx,.2+h/2,fz);o.scale.set(1,h,1);o.updateMatrix();stems.setMatrixAt(k,o.matrix);
+    const hy=.2+h;o.rotation.set(0,0,0);o.scale.set(.9,.9,.9);o.position.set(fx,hy,fz);o.updateMatrix();hearts.setMatrixAt(k,o.matrix);
+    c.set(pal[(rnd()*pal.length)|0]);const col=c.clone();
+    for(let j=0;j<6;j++){const a=j/6*Math.PI*2+rnd()*.3;o.position.set(fx+Math.cos(a)*.05,hy-.004,fz+Math.sin(a)*.05);o.rotation.set(0,-a,0);o.scale.set(1.3,.55,1);o.updateMatrix();petals.setMatrixAt(p,o.matrix);petals.setColorAt(p,col);p++}
+    for(let j=0;j<3;j++){const a=rnd()*6.28;o.position.set(fx+Math.cos(a)*.09,.2+.06+rnd()*.12,fz+Math.sin(a)*.09);o.rotation.set((rnd()-.5)*.8,a,(rnd()-.5)*.8);o.scale.set(1.2,.35,.7);o.updateMatrix();leaves.setMatrixAt(l,o.matrix);l++}
+    k++}});
+  [stems,leaves,petals,hearts].forEach(m=>{m.frustumCulled=false;m.castShadow=false;scene.add(m)})}
+})();
+
+// ================= REALISM v4: plaster walls, skirting, natural home lighting =================
+(function(){
+ const nz=(g,w,h,a)=>{const d=g.getImageData(0,0,w,h),p=d.data;for(let i=0;i<p.length;i+=4){const n=(rnd()-.5)*a;p[i]+=n;p[i+1]+=n;p[i+2]+=n}g.putImageData(d,0,0)};
+ // painted plaster: soft tonal clouds, roller stipple, faint trowel streaks (also drives the normal map)
+ const plT=tex(coarse?512:1024,coarse?512:1024,(g,w,h)=>{g.fillStyle='#f5f2ed';g.fillRect(0,0,w,h);const k=w/1024;
+  for(let i=0;i<70;i++){const x=rnd()*w,y=rnd()*h,rr=(70+rnd()*230)*k,gr=g.createRadialGradient(x,y,0,x,y,rr),l=rnd()>.5?255:170;gr.addColorStop(0,`rgba(${l},${l},${l},.07)`);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(x-rr,y-rr,rr*2,rr*2)}
+  for(let i=0;i<24000*k*k;i++){const l=rnd()>.5?255:95;g.fillStyle=`rgba(${l},${l},${l},${.03+rnd()*.05})`;g.fillRect(rnd()*w,rnd()*h,(1+rnd()*2.2)*k,(1+rnd()*2.2)*k)}
+  for(let i=0;i<34;i++){const x=rnd()*w,y=rnd()*h,l=rnd()>.5?255:120;g.strokeStyle=`rgba(${l},${l},${l},.035)`;g.lineWidth=(6+rnd()*18)*k;g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+(rnd()-.5)*200*k,y+(rnd()-.5)*200*k,x+(rnd()-.5)*320*k,y+(rnd()-.5)*320*k);g.stroke()}
+  nz(g,w,h,7)},true);
+ const plN=nmap(plT);
+ [wallM,...paint].forEach(m=>{m.map=plT;m.normalMap=plN;m.normalScale.set(.5,.5);m.bumpMap=null;m.roughness=.96;m.metalness=0;m.envMapIntensity=.1;m.needsUpdate=true});
+ // skirting boards on the inner walls too (broken at every doorway)
+ const sk2=M(0xf4f1ea,0,.55,{envMapIntensity:.3}),sb=(w,h,d,x,y,z)=>{const o=new T.Mesh(new T.BoxGeometry(w,h,d),sk2);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;scene.add(o)};
+ const seg=(a,b,gaps,fn)=>{let p=a;gaps.slice().sort((x,y)=>x-y).forEach(g=>{if(g-DHW>p)fn(p,g-DHW);p=g+DHW});if(b>p)fn(p,b)};
+ [-1,1].forEach(s=>seg(-13.4,13.4,[-9,0,9],(a,b)=>sb(b-a,.14,.025,(a+b)/2,.07,s*.1125)));
+ [-4.5,4.5].forEach(x=>[-1,1].forEach(s=>seg(-8.9,8.9,[-4.5,4.5],(a,b)=>sb(.025,.14,b-a,x+s*.1125,.07,(a+b)/2))));
+ // ---------- lighting: warm, soft falloff, less flat fill ----------
+ const LC=[0xffe2b8,0xf3f0ea,0xfff3e0,0xffd9a8,0xffd49a,0xffe8cc];
+ scene.traverse(o=>{
+  if(o.isPointLight&&Math.abs(o.position.y-2.9)<.01){const i=rooms.findIndex(q=>q.cx===o.position.x&&q.cz===o.position.z);if(i>=0){o.color.set(LC[i]);o.decay=1.6;o.distance=13;o.position.y=2.8;o.intensity*=1.15}}
+  else if(o.isPointLight&&o.distance&&o.distance<8&&o.distance>5){o.decay=1.5;o.color.set(0xffd2a0)}
+  if(o.isHemisphereLight&&o.groundColor&&o.groundColor.getHex()===0x3a2c20){o.intensity=.22;o.groundColor.set(0x4a382a)}});
+ if(!coarse){
+  // desk lamp over the Study desk and pendants over the Contact desk
+  [[-10.0,1.15,-8.15,3.6,.9],[9,2.0,5.6,5.5,.8]].forEach(([x,y,z,d,i])=>{const l=new T.PointLight(0xffd2a0,i,d,1.5);l.position.set(x,y,z);scene.add(l)})}
+ // softer, cleaner light shafts through the windows
+ shaftM.opacity=.045;
+})();
+
 // ================= PLAYER AVATAR (rigged GLB, procedural animation) =================
 // The GLB has no baked animations, so the walk / run / jump / carry motion is generated every frame from the skeleton.
 // The walk is built from human gait data (hip, knee and foot curves), scaled by the *actual* movement speed, with a
@@ -544,7 +692,14 @@ function createAvatar(T,model){
    if(gK>.002){
     if(tk==='wave')arm('Right',2.1,.9+Math.sin(bt*10)*.35,.55,0,gK);
     else if(tk==='stretch'){arm('Left',3,.15,.25,0,gK);arm('Right',3,.15,.25,0,gK);sl('Spine2',rx(-.14),gK);sl('Neck',rx(-.2),gK);sl('Head',rx(-.3),gK)}
-    else if(tk==='phone'){arm('Right',.85,1.75,.15,0,gK);sl('Neck',rx(.2),gK);sl('Head',rx(.35),gK)}}
+    else if(tk==='phone'){arm('Right',.85,1.75,.15,0,gK);sl('Neck',rx(.2),gK);sl('Head',rx(.35),gK)}
+    else if(tk==='sip'){arm('Right',.8,2.0,.15,0,gK);arm('Left',.5,1.6,.3,0,gK);sl('Head',rx(-.1),gK)}
+    else if(tk==='stir'){arm('Right',.75,1.15+Math.sin(bt*6)*.3,.25,0,gK);arm('Left',.6,1.5,.35,0,gK);sl('Spine2',rx(.14),gK);sl('Head',rx(.3),gK)}
+    else if(tk==='hug'){arm('Left',1.35,.95,.2,0,gK);arm('Right',1.35,.95,.2,0,gK);sl('Spine2',rx(.1),gK);sl('Head',rx(.12),gK)}
+    else if(tk==='dance'){arm('Left',1.05,.8,.75,0,gK);arm('Right',1.3,1.0,.18,0,gK);sl('Spine2',rx(.05),gK)}
+    else if(tk==='point'){arm('Right',1.55,.25,.5,0,gK)}
+    else if(tk==='water'){arm('Right',1.0,.7,.2,.3,gK);sl('Spine2',rx(.2),gK);sl('Head',rx(.3),gK)}
+    else if(tk==='laugh'){sl('Spine2',rx(-.1+Math.sin(bt*14)*.05),gK);sl('Head',rx(-.28),gK);arm('Right',.9,1.8,.15,0,gK*.6)}}
   }
   apply();
   // ---- hips: height from the foot/ground solver (feet always meet the floor), side sway over the standing leg
@@ -679,32 +834,83 @@ function thirdPerson(dt){
  cam.position.copy(pv).addScaledVector(u,TPS.cd);
  const inside=Math.abs(P.x)<13.4&&Math.abs(P.z)<8.9;cam.position.y=cl(cam.position.y,.22,inside?3.05:10);
  AIM.copy(pv).addScaledVector(rt,TPS.so/L*TPS.cd)}
-// ================= NPC "Ava": own daily routine + real AI chat =================
-// Daily routine: wanders, codes on a laptop in the Study, reads a book in the Library, checks her phone, stretches.
-// When you come close she stands up, waves, greets you and chats (real AI via your own server, see ai-server/).
-const NPC=(function(){
- const NAME='Ava',API=String(window.NPC_API||'').trim();
- const R=.38,CS=.25,X0=-13.2,Z0=-8.7,NX=Math.round(26.4/CS),NZ=Math.round(17.4/CS),WV=1.35;
- const n={av:null,x:0,z:0,h:0,v:0,path:[],wait:1.5,grid:null,near:false,talk:false,chk:0,cx:0,cz:0,last:-1e9,voice:true,mode:'idle',st:null,tr:null,timer:0,gest:'',gT:0,tour:null,hist:[],onArrive:null,tag:'',who:''};
- try{n.who=localStorage.getItem('ava_visitor')||''}catch(e){}
- const idx=(i,j)=>j*NX+i,ci=x=>cl(Math.floor((x-X0)/CS),0,NX-1),cj=z=>cl(Math.floor((z-Z0)/CS),0,NZ-1),pick=a=>a[Math.floor(rnd()*a.length)],ang=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
- const free=(x,z)=>!n.grid[idx(ci(x),cj(z))];
- // ---------- props: laptop on the study desk, a chair at the library table, a book
+// ================= NPCs "SVIA" and "Aniket" (wife and husband): own daily routines + AI chat =================
+// COUPLE LIFE: SVIA and Aniket love each other, have their own feelings (hunger, energy, missing each other, joy) and free will.
+// They roam the whole house on their own, and every so often decide together to share a moment (chai, cooking, coding, reading, dancing, hugs, plans, tidying, goodnight) and talk to each other.
+// Each of them wanders, codes on the laptop in the Study, reads a book in the Library, checks the phone and stretches.
+// They take turns at the two stations, sometimes walk over to each other, and chat with the visitor (real AI via your own server).
+const NPCS=[];
+const NPCU=(function(){
+ const U={voice:true,active:null,bubOwner:null,bubT:0,tagD:1e9,tagOwner:null,tagText:'',tagY:2.1,logOwner:null,hintFor:null};
+ const pick=a=>a[Math.floor(rnd()*a.length)];
+ U.bub=document.createElement('div');U.bub.id='npcBub';document.body.appendChild(U.bub);
+ U.tag=document.createElement('div');U.tag.id='npcTag';document.body.appendChild(U.tag);
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ const box=document.createElement('div');box.id='npcChat';box.hidden=true;
+ box.innerHTML='<header><div class="av">A</div><div><b id="ncN">SVIA</b><small id="ncS"></small></div><button id="ncV" title="Voice on/off">\uD83D\uDD0A</button><button id="ncX" aria-label="Close">\u2715</button></header><div id="ncLog"></div><div id="ncChips"></div><form id="ncF" autocomplete="off">'+(SR?'<button type="button" id="ncM" title="Speak">\uD83C\uDFA4</button>':'')+'<input id="ncI" placeholder="Ask me anything\u2026" enterkeyhint="send"><button>Send</button></form>';
+ document.body.appendChild(box);
+ U.box=box;U.hint=document.createElement('button');U.hint.id='npcHint';U.hint.hidden=true;document.body.appendChild(U.hint);
+ U.log=box.querySelector('#ncLog');U.inp=box.querySelector('#ncI');U.chips=box.querySelector('#ncChips');
+ const draw=(who,t)=>{const m=document.createElement('div');m.className='m '+who;m.textContent=t;U.log.appendChild(m);U.log.scrollTop=U.log.scrollHeight;return m};
+ U.add=(who,t)=>{const e=[who,t],m=draw(who,t);m._e=e;U.logOwner.msgs.push(e);return m};
+ U.bind=o=>{box.querySelector('#ncN').textContent=o.cfg.name;{const av=box.querySelector('.av');if(av)av.textContent=o.cfg.name[0]}box.querySelector('#ncS').textContent=o.cfg.sub;U.chips.innerHTML=o.cfg.chips.map(c=>'<button type="button">'+c+'</button>').join('');
+  if(U.logOwner!==o){U.logOwner=o;U.log.innerHTML='';o.msgs.forEach(e=>draw(e[0],e[1]))}};
+ U.hearts=k=>{const r=U.bub.getBoundingClientRect(),bx0=r.width?r.left+r.width/2:innerWidth/2,by0=r.width?r.bottom:innerHeight/2;
+  for(let i=0;i<(k||6);i++){const h=document.createElement('i');h.className='npcHeart';h.textContent=pick(['\u2764\uFE0F','\uD83D\uDC96','\uD83D\uDC95','\uD83D\uDC97']);h.style.left=(bx0+(rnd()-.5)*90)+'px';h.style.top=by0+'px';h.style.animationDelay=(i*.12)+'s';document.body.appendChild(h);setTimeout(()=>h.remove(),2600+i*120)}};
+ U.speak=(o,t)=>{if(!U.voice||!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/gu,'')),vs=speechSynthesis.getVoices(),male=o.cfg.male,
+   rx=male?/(^|\s)male\b|david|mark|guy|ryan|james|daniel|alex|rishi|ravi|prabhat|george|fred/i:/female|zira|samantha|aria|jenny|susan|google uk english female/i;
+   u.voice=vs.find(v=>/en/i.test(v.lang)&&rx.test(v.name))||vs.find(v=>/^en/i.test(v.lang))||null;u.rate=1.02;u.pitch=male?.75:1.15;speechSynthesis.speak(u)}catch(e){}};
+ U.say=(o,t,ms,mute)=>{U.bubOwner=o;U.bub.textContent=t;U.bub.classList.add('on');U.bubT=ms||5000;if(!mute)U.speak(o,t)};
+ box.querySelector('#ncF').onsubmit=e=>{e.preventDefault();const v=U.inp.value;U.inp.value='';if(U.active)U.active.ask(v)};
+ U.chips.onclick=e=>{if(e.target.tagName==='BUTTON'&&U.active)U.active.ask(e.target.textContent)};
+ box.querySelector('#ncV').onclick=e=>{U.voice=!U.voice;e.currentTarget.textContent=U.voice?'\uD83D\uDD0A':'\uD83D\uDD07';if(!U.voice&&window.speechSynthesis)speechSynthesis.cancel()};
+ const mic=box.querySelector('#ncM');if(mic&&SR)mic.onclick=()=>{try{const r=new SR();r.lang='en-IN';r.interimResults=false;r.onresult=e=>{if(U.active)U.active.ask(e.results[0][0].transcript)};r.onstart=()=>mic.classList.add('on');r.onend=()=>mic.classList.remove('on');r.start()}catch(e){}};
+ box.querySelector('#ncX').onclick=()=>{if(U.active)U.active.stopTalk()};
+ U.hint.onclick=()=>{if(U.hintFor)U.hintFor.startTalk()};
+ addEventListener('keydown',e=>{if(!U.active&&e.code==='KeyT'&&!/INPUT|TEXTAREA/.test(e.target.tagName)){const c=NPCS.filter(o=>o.near).sort((a,b)=>a.dist-b.dist)[0];if(c){e.preventDefault();c.startTalk()}}else if(U.active&&e.code==='Escape'){e.stopImmediatePropagation();U.active.stopTalk()}},true);
+ return U})();
+const NPV=new V3();
+function npcProj(o,y,el,d){NPV.set(o.x,y,o.z).project(cam);const vis=NPV.z<1&&d<10;el.style.opacity=vis?'':'0';el.style.left=((NPV.x*.5+.5)*innerWidth)+'px';el.style.top=((-NPV.y*.5+.5)*innerHeight)+'px'}
+// shared props: laptop on the study desk and a chair at the library table
+(function(){
  const lap=new T.Group();
- {const bs=new T.Mesh(new T.BoxGeometry(.32,.015,.22),M(0x9aa3ad,.9,.3)),sc=new T.Mesh(new T.BoxGeometry(.32,.21,.012),M(0x15191f,.5,.4)),gl=new T.Mesh(new T.PlaneGeometry(.29,.18),new T.MeshBasicMaterial({map:screenTex('Ava \u00b7 coding',['npm run build \u2713','git commit -m "ship it"','deploying\u2026','all tests passed']),toneMapped:false}));
+ {const bs=new T.Mesh(new T.BoxGeometry(.32,.015,.22),M(0x9aa3ad,.9,.3)),sc=new T.Mesh(new T.BoxGeometry(.32,.21,.012),M(0x15191f,.5,.4)),gl=new T.Mesh(new T.PlaneGeometry(.29,.18),new T.MeshBasicMaterial({map:screenTex('Home office \u00b7 coding',['npm run build \u2713','git commit -m "ship it"','deploying\u2026','all tests passed']),toneMapped:false}));
   bs.position.y=.0075;sc.position.set(0,.12,-.1);sc.rotation.x=-.25;gl.position.set(0,.121,-.092);gl.rotation.x=-.25;lap.add(bs,sc,gl);lap.position.set(-9,.8,-7.5);scene.add(lap)}
  bx(.5,.08,.5,0,.41,6.15,fabric,false);bx(.5,.5,.06,0,.49,6.42,fabric2,false);[[-.2,-.2],[.2,-.2],[-.2,.2],[.2,.2]].forEach(([a,b])=>cy(.025,.025,.41,a,0,6.15+b,steel,8));
+ // couple seats: two more chairs and laptops at the Study desk, two more chairs at the Library table
+ [-9.9,-8.1].forEach(x=>{bx(.5,.08,.5,x,.45,-6.8,fabric,false);bx(.7,.8,.1,x,.5,-6.4,fabric,false);cy(.05,.05,.45,x,0,-6.8,steel,8);const l2=lap.clone();l2.position.set(x,.8,-7.5);scene.add(l2)});
+ [-.9,.9].forEach(x=>{bx(.5,.08,.5,x,.41,6.15,fabric,false);bx(.5,.5,.06,x,.49,6.42,fabric2,false);[[-.2,-.2],[.2,-.2],[-.2,.2],[.2,.2]].forEach(([a,b])=>cy(.025,.025,.41,x+a,0,6.15+b,steel,8))});
+})();
+const FACTS_A=['Aniket built this whole 3D house in the browser with Three.js. No game engine!','Square Chat, one of Aniket\u2019s projects, uses WebRTC for live calls.','Aniket does ASP.NET, React and Flutter, so he can ship the backend, web and mobile parts himself.','I may be biased, but my husband writes really tidy code.'];
+const FACTS_N=['I built this whole 3D house in the browser with Three.js. No game engine!','Square Chat, one of my projects, uses WebRTC for live calls.','I do ASP.NET, React and Flutter, so I can ship the backend, web and mobile parts myself.','SVIA says my code is tidy. She is biased, but I will take it.'];
+const API_URL=String(window.NPC_API||'').trim();
+function makeNPC(CFG){
+ const NAME=CFG.name,API=API_URL,PN=CFG.male?'his':'her';
+ const R=.38,CS=.25,X0=-13.2,Z0=-8.7,NX=Math.round(26.4/CS),NZ=Math.round(17.4/CS),WV=CFG.speed||1.35;
+ const U=NPCU;
+ const n={av:null,x:0,z:0,h:0,v:0,path:[],wait:CFG.wait0||1.5,grid:null,near:false,talk:false,chk:0,cx:0,cz:0,last:-1e9,mode:'idle',st:null,stk:'',tr:null,timer:0,gest:'',gT:0,tour:null,hist:[],onArrive:null,tag:'',who:'',seated:false,hintOK:false,d:99,pc:10+Math.random()*20,duo:null,tk:25+Math.random()*30,F:{love:.85,joy:.7,energy:1,hunger:.12+Math.random()*.25,lonely:.1}};
+ const msgs=[];
+ try{n.who=localStorage.getItem('ava_visitor')||''}catch(e){}
+ let self;
+ const other=()=>NPCS.find(o=>o!==self);
+ const say=(t,ms,mute)=>U.say(self,t,ms,mute),bubble=(t,ms)=>U.say(self,t,ms);
+ const idx=(i,j)=>j*NX+i,ci=x=>cl(Math.floor((x-X0)/CS),0,NX-1),cj=z=>cl(Math.floor((z-Z0)/CS),0,NZ-1),pick=a=>a[Math.floor(rnd()*a.length)],ang=(a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
+ const free=(x,z)=>!n.grid[idx(ci(x),cj(z))];
  const book=new T.Group();{book.add(new T.Mesh(new T.BoxGeometry(.3,.022,.22),M(0x7a2f2f,0,.7)),new T.Mesh(new T.BoxGeometry(.28,.026,.2),M(0xf2ead6,0,.9)));book.rotation.x=-1;book.visible=false}
  const ST={
-  work:{sx:-9,sz:-6.78,h:Math.PI,hj:.62,ax:-8.2,az:-6.8,task:'type',txt:'\uD83D\uDCBB Coding',act:'working on her laptop at the desk in the Study'},
-  read:{sx:0,sz:6.12,h:Math.PI,hj:.58,ax:1.1,az:6.1,task:'read',txt:'\uD83D\uDCD6 Reading',act:'reading a book at the table in the Library'}};
- const TOUR=[[-9,5,'This is the living room, the welcome area. Aniket\u2019s story starts here.'],[-9,-4.2,'The Study. This is where you learn about Aniket, and where I do my coding!'],[0,-5,'Welcome to the Lab. All his skills live here: ASP.NET, React, Flutter and SQL Server.'],[9,-4.5,'The Gallery shows his projects: TFOD, MedScan AI, Square Chat and more.'],[0,3.6,'The Library has his education and experience. I love reading here.'],[9,4,'And the Contact room. He is open to work, so say hello!']];
+  work:{sx:-9,sz:-6.78,h:Math.PI,hj:.62,ax:-8.2,az:-6.8,task:'type',txt:'\uD83D\uDCBB Coding',act:'working on '+PN+' laptop at the desk in the Study'},
+  read:{sx:0,sz:6.12,h:Math.PI,hj:.58,ax:1.1,az:6.1,task:'read',txt:'\uD83D\uDCD6 Reading',act:'reading a book at the table in the Library'},
+  cwork0:{sx:-9.9,sz:-6.78,h:Math.PI,hj:.62,ax:-10.8,az:-6.6,task:'type',txt:'\uD83D\uDCBB Coding together',act:'coding next to '+CFG.partner+' in the Study'},
+  cwork1:{sx:-8.1,sz:-6.78,h:Math.PI,hj:.62,ax:-7.2,az:-6.6,task:'type',txt:'\uD83D\uDCBB Coding together',act:'coding next to '+CFG.partner+' in the Study'},
+  cread0:{sx:-.9,sz:6.12,h:Math.PI,hj:.58,ax:-1.9,az:6.1,task:'read',txt:'\uD83D\uDCD6 Reading together',act:'reading next to '+CFG.partner+' in the Library'},
+  cread1:{sx:.9,sz:6.12,h:Math.PI,hj:.58,ax:1.9,az:6.1,task:'read',txt:'\uD83D\uDCD6 Reading together',act:'reading next to '+CFG.partner+' in the Library'}};
+ const TOUR=CFG.tour;
  // ---------- navigation grid + A*
  function nearestFree(x,z){if(free(x,z))return[x,z];for(let r=.25;r<4;r+=.25)for(let a=0;a<16;a++){const px=x+Math.cos(a/16*6.283)*r,pz=z+Math.sin(a/16*6.283)*r;if(Math.abs(px)<13&&Math.abs(pz)<8.4&&free(px,pz))return[px,pz]}return[x,z]}
  function build(){const ds=new Set(DR.map(d=>d.e)),g=new Uint8Array(NX*NZ);
   for(let j=0;j<NZ;j++)for(let i=0;i<NX;i++){const x=X0+(i+.5)*CS,z=Z0+(j+.5)*CS;
    for(const o of S){if(ds.has(o)||o.y1<.25||o.y0>1.6)continue;const dx=x-cl(x,o.x0,o.x1),dz=z-cl(z,o.z0,o.z1);if(dx*dx+dz*dz<R*R){g[idx(i,j)]=1;break}}}
-  n.grid=g;const f=nearestFree(0,4.5);n.x=f[0];n.z=f[1];for(const k in ST){const a=nearestFree(ST[k].ax,ST[k].az);ST[k].apx=a[0];ST[k].apz=a[1]}}
+  n.grid=g;const f=nearestFree(CFG.spawn[0],CFG.spawn[1]);n.x=f[0];n.z=f[1];for(const k in ST){const a=nearestFree(ST[k].ax,ST[k].az);ST[k].apx=a[0];ST[k].apz=a[1]}}
  const los=(a,b)=>{const d=Math.hypot(b[0]-a[0],b[1]-a[1]),k=Math.max(1,Math.ceil(d/(CS*.5)));for(let q=0;q<=k;q++)if(!free(a[0]+(b[0]-a[0])*q/k,a[1]+(b[1]-a[1])*q/k))return false;return true};
  function smooth(p){if(p.length<3)return p;const o=[p[0]];let a=0;while(a<p.length-1){let b=p.length-1;while(b>a+1&&!los(p[a],p[b]))b--;o.push(p[b]);a=b}return o}
  function astar(sx,sz,tx,tz){const g=n.grid,s=idx(ci(sx),cj(sz)),t=idx(ci(tx),cj(tz));if(g[t])return null;
@@ -716,88 +922,91 @@ const NPC=(function(){
   if(s!==t&&par[t]<0)return null;const p=[];for(let k=t;k!==-1;k=par[k])p.push([X0+((k%NX)+.5)*CS,Z0+(((k/NX)|0)+.5)*CS]);p.reverse();p.shift();return smooth([[sx,sz]].concat(p)).slice(1)}
  // ---------- daily routine
  function wander(){for(let q=0;q<25;q++){const x=X0+1+rnd()*(26.4-2),z=Z0+1+rnd()*(17.4-2);if(!free(x,z)||Math.hypot(x-n.x,z-n.z)<3.5)continue;const p=astar(n.x,n.z,x,z);if(p&&p.length){n.path=p;n.mode='walk';n.onArrive=()=>{n.mode='idle';n.wait=2+rnd()*5};return}}n.wait=1}
- function station(k){const s=ST[k],p=astar(n.x,n.z,s.apx,s.apz);if(!p){n.wait=2;return}n.st=s;n.path=p;n.mode='walk';n.onArrive=()=>{n.mode='sitIn';n.tr={t:0,fx:n.x,fz:n.z,tx:s.sx,tz:s.sz}}}
- function plan(){const r=rnd();if(r<.28)return wander();if(r<.56)return station('work');if(r<.84)return station('read');if(r<.93){n.gest='phone';n.gT=9}else{n.gest='stretch';n.gT=5}n.wait=n.gT+1}
- function actText(){if(n.mode==='sit'||n.mode==='sitIn')return n.st.act;if(n.mode==='tour')return 'guiding a visitor around the house';if(n.gT>0&&n.gest==='phone')return 'checking her phone';if(n.gT>0&&n.gest==='stretch')return 'stretching';return n.mode==='walk'?'walking around the house':'relaxing at home'}
- function startTour(){if(n.talk)stopTalk();n.tour={i:0,s:'go',t:0,far:0};n.mode='tour';n.path=[];n.gest='';n.gT=0;bubble('Sure, follow me! I\u2019ll show you around.',3500);tourGo()}
+ function station(k){if(NPCS.some(o=>o!==self&&o.stk===k))return wander();const s=ST[k],p=astar(n.x,n.z,s.apx,s.apz);if(!p){n.wait=2;return}n.st=s;n.stk=k;n.path=p;n.mode='walk';n.onArrive=()=>{n.mode='sitIn';n.tr={t:0,fx:n.x,fz:n.z,tx:s.sx,tz:s.sz}}}
+ function plan(){const pr=other(),F=n.F,h=new Date().getHours();
+  // missing the partner: go and be near them
+  if(pr&&pr.ready&&!pr.seated&&Math.hypot(pr.x-n.x,pr.z-n.z)>3.2&&rnd()<(CFG.together||0)+F.lonely*.55){const f=nearestFree(pr.x+.9,pr.z+.4),p=astar(n.x,n.z,f[0],f[1]);if(p&&p.length){n.path=p;n.mode='walk';n.onArrive=()=>{n.mode='idle';n.wait=4+rnd()*6;F.lonely=Math.max(0,F.lonely-.25)};return}}
+  if(F.hunger>.72&&rnd()<.7)return snack(false);
+  if(F.energy<.28&&rnd()<.6){n.gest='stretch';n.gT=5;n.wait=6;F.energy=Math.min(1,F.energy+.2);return}
+  // free will: pick whatever feels right, anywhere in the house
+  const o=[['wander',.2],['room',.24],['work',h>=9&&h<19?.24:.08],['read',h>=17||h<9?.22:.14],['phone',.07],['stretch',.05],['sip',.1],['water',.07]];let t=0;o.forEach(q=>t+=q[1]);let r=rnd()*t,kd='wander';for(const q of o){if((r-=q[1])<=0){kd=q[0];break}}
+  if(kd==='work')return station('work');if(kd==='read')return station('read');if(kd==='room')return visitRoom();if(kd==='sip')return snack(true);if(kd==='water')return waterPlant();
+  if(kd==='phone'){n.gest='phone';n.gT=9}else if(kd==='stretch'){n.gest='stretch';n.gT=5}else return wander();n.wait=n.gT+1}
+ function actText(){if(n.duo&&n.duo.k==='stand'&&n.duo.act)return n.duo.act;if(n.mode==='sit'||n.mode==='sitIn')return n.st.act;if(n.mode==='tour')return 'guiding a visitor around the house';if(n.gT>0&&n.gest==='phone')return 'checking '+PN+' phone';if(n.gT>0&&n.gest==='stretch')return 'stretching';if(n.gT>0&&n.gest==='sip')return 'having a cup of chai';if(n.gT>0&&n.gest==='water')return 'watering the plants';return n.mode==='walk'?'walking around the house':'relaxing at home'}
+  // ---------- feelings, free will and couple helpers
+ const GT={phone:'\uD83D\uDCF1 On '+PN+' phone',stretch:'\uD83D\uDE46 Stretching',sip:'\u2615 Having chai',water:'\uD83E\uDEB4 Watering plants'};
+ const ROOMQ={'Study':['The Study is where ideas become code.'],'Lab':['The Lab always smells like fresh ideas.'],'Gallery':['Every project on this wall has a story.'],'Living room':['The best spot for a lazy evening.'],'Library':['So peaceful in here.'],'Contact':['Anyone could walk in and say hello here.']};
+ const PL=[[-12.2,7.4],[-5.6,7.4],[-5.9,-7.3],[5.9,1.4],[12.3,-7.5],[12.3,7.5]];
+ function feel(dt){const F=n.F,pr=other();let dp=99;if(pr&&pr.ready)dp=Math.hypot(pr.x-n.x,pr.z-n.z);
+  F.hunger=Math.min(1,F.hunger+dt/260);F.energy=cl(F.energy+(n.seated?dt/170:n.v>.1?-dt/420:-dt/700),0,1);
+  F.lonely=cl(F.lonely+(dp<3.2?-dt/25:dt/95),0,1);if(dp<2)F.love=Math.min(1,F.love+dt/900);
+  const tj=.55+.4*F.love*(1-F.lonely)-(F.hunger>.7?.2:0)-(F.energy<.25?.15:0);F.joy+=(tj-F.joy)*Math.min(1,dt/20)}
+ function moodTxt(){const F=n.F;return F.lonely>.7?'\uD83E\uDD7A Missing '+CFG.partner:F.hunger>.85?'\uD83C\uDF7D\uFE0F Feeling hungry':F.energy<.2?'\uD83D\uDE34 Feeling sleepy':F.joy>.85?'\uD83E\uDD70 Feeling loved':''}
+ function moodWords(){const F=n.F,a=[];if(F.lonely>.6)a.push('missing '+CFG.partner);if(F.hunger>.7)a.push('a little hungry');if(F.energy<.3)a.push('a bit sleepy');if(!a.length)a.push(F.joy>.75?'really happy':'calm and content');return a.join(' and ')+(F.love>.8?', and still very much in love with '+CFG.partner:'')}
+ function thought(){const F=n.F,P=CFG.partner,a=[];if(F.lonely>.6)a.push('I wonder where '+P+' is right now\u2026','I miss '+P+' already.');if(F.hunger>.7)a.push('I could really use a snack.');if(F.energy<.3)a.push('A short rest would be nice.');if(F.love>.85&&F.joy>.65)a.push('I\u2019m so lucky to share this house with '+P+'.','Home feels warm because of '+P+'.');a.push('What a lovely '+daypart()+'.','I should check what '+P+' is up to.');return pick(a)}
+ function goThen(x,z,fn){const f=nearestFree(x,z),p=astar(n.x,n.z,f[0],f[1]);if(!p||!p.length){n.wait=1.5;return false}n.path=p;n.mode='walk';n.onArrive=()=>{n.mode='idle';fn()};return true}
+ function snack(chai){const F=n.F;goThen(-9+(rnd()-.5)*3,5.8+(rnd()-.5)*1.5,()=>{n.gest='sip';n.gT=7;n.wait=1;F.hunger=Math.max(0,F.hunger-(chai?.15:.7));F.energy=Math.min(1,F.energy+.1);if(n.near)say(chai?'Nothing beats a warm cup of chai.':'A little snack, finally!',3500,true)})}
+ function visitRoom(){const r=rooms[Math.floor(rnd()*rooms.length)];goThen(r.cx+(rnd()-.5)*5,r.cz+(rnd()-.5)*4,()=>{n.wait=3+rnd()*6;if(n.near&&rnd()<.5)say(pick(ROOMQ[r.n]||['Such a nice room.']),4200,true)})}
+ function waterPlant(){const p=pick(PL);goThen(p[0],p[1],()=>{n.gest='water';n.gT=6;n.wait=1;n.F.joy=Math.min(1,n.F.joy+.05);if(n.near)say('Grow well, little friend.',3500,true)})}
+ // couple activities, driven by the director below
+ function duoGo(sp){if(n.mode==='sit'||n.mode==='sitIn'||n.mode==='sitOut')return false;const f=nearestFree(sp.x,sp.z);n.path=[];n.stk='';n.gest='';n.gT=0;n.onArrive=null;n.mode='duo';n.duo={k:'stand',s:'go',x:f[0],z:f[1],g:'',tag:sp.tag||'',act:sp.act||'',t:0,fl:0};return true}
+ function duoSit(k){if(NPCS.some(o=>o!==self&&o.stk===k))return false;n.duo={k:'sit'};station(k);return n.stk===k}
+ function duoEnd(){const was=n.duo;n.duo=null;if(was&&was.k==='sit'){if(n.mode==='sit')n.timer=0}else if(n.mode==='duo'){n.mode='idle';n.path.length=0;n.wait=1.5+rnd()*2}}
+ function startTour(){n.duo=null;if(n.talk)stopTalk();n.tour={i:0,s:'go',t:0,far:0};n.mode='tour';n.stk='';n.path=[];n.gest='';n.gT=0;bubble('Sure, follow me! I\u2019ll show you around.',3500);tourGo()}
  function tourGo(){const T0=n.tour,s=T0&&TOUR[T0.i];if(!s)return endTour('That\u2019s the whole house! Ask me anything else.');const f=nearestFree(s[0],s[1]);n.path=astar(n.x,n.z,f[0],f[1])||[];T0.s='go'}
  function endTour(t){n.tour=null;n.mode='idle';n.wait=3;n.path=[];if(t)bubble(t,5000)}
- // ---------- speech bubble, activity tag, floating hearts, voice
- const bub=document.createElement('div');bub.id='npcBub';document.body.appendChild(bub);let bubT=0;
- const tag=document.createElement('div');tag.id='npcTag';document.body.appendChild(tag);
- function hearts(k){const r=bub.getBoundingClientRect(),bx0=r.width?r.left+r.width/2:innerWidth/2,by0=r.width?r.bottom:innerHeight/2;
-  for(let i=0;i<(k||6);i++){const h=document.createElement('i');h.className='npcHeart';h.textContent=pick(['\u2764\uFE0F','\uD83D\uDC96','\uD83D\uDC95','\uD83D\uDC97']);h.style.left=(bx0+(rnd()-.5)*90)+'px';h.style.top=by0+'px';h.style.animationDelay=(i*.12)+'s';document.body.appendChild(h);setTimeout(()=>h.remove(),2600+i*120)}}
- function speak(t){if(!n.voice||!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/gu,''));const vs=speechSynthesis.getVoices();u.voice=vs.find(v=>/en/i.test(v.lang)&&/female|zira|samantha|aria|jenny|susan|google uk english female/i.test(v.name))||vs.find(v=>/^en/i.test(v.lang))||null;u.rate=1.02;u.pitch=1.15;speechSynthesis.speak(u)}catch(e){}}
- function bubble(t,ms){bub.textContent=t;bub.classList.add('on');bubT=ms||5000;speak(t)}
+ // ---------- chat
  const daypart=()=>{const h=new Date().getHours();return h<5?'late night':h<12?'morning':h<17?'afternoon':h<21?'evening':'night'};
- // ---------- chat UI
- const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- const box=document.createElement('div');box.id='npcChat';box.hidden=true;
- box.innerHTML='<header><div class="av">A</div><div><b>'+NAME+'</b><small>Aniket\u2019s assistant \u00b7 online</small></div><button id="ncV" title="Voice on/off">\uD83D\uDD0A</button><button id="ncX" aria-label="Close">\u2715</button></header><div id="ncLog"></div><div id="ncChips"></div><form id="ncF" autocomplete="off">'+(SR?'<button type="button" id="ncM" title="Speak">\uD83C\uDFA4</button>':'')+'<input id="ncI" placeholder="Ask me anything\u2026" enterkeyhint="send"><button>Send</button></form>';
- document.body.appendChild(box);
- const hint=document.createElement('button');hint.id='npcHint';hint.hidden=true;hint.innerHTML=coarse?'\uD83D\uDCAC Chat with '+NAME:'Press <b>T</b> to chat with '+NAME;document.body.appendChild(hint);
- const log=box.querySelector('#ncLog'),inp=box.querySelector('#ncI'),chips=box.querySelector('#ncChips');
- chips.innerHTML=['Who is Aniket?','Skills','Projects','Take me on a tour','What are you doing?','Are you his girlfriend?','Tell me a fun fact'].map(c=>'<button type="button">'+c+'</button>').join('');
- const add=(who,t)=>{const m=document.createElement('div');m.className='m '+who;m.textContent=t;log.appendChild(m);log.scrollTop=log.scrollHeight;return m};
  const nm=()=>n.who?', '+n.who:'';
- const FACTS=['Aniket built this whole 3D house in the browser with Three.js. No game engine!','Square Chat, one of Aniket\u2019s projects, uses WebRTC for live calls.','Aniket does ASP.NET, React and Flutter, so he can ship the backend, web and mobile parts himself.','I may be biased, but he writes really tidy code.'];
- const KB=[
-  [/(my name is|call me|name\u2019s|name's)\s+([a-z]{2,20})\b/,m=>{const w=m[2];if(/^(a|an|the|here|just|looking|hiring|fine|good|great|ok|okay|new|so|not|very|really|also|from|into|interested|curious|recruiter|developer|student)$/i.test(w))return null;n.who=w[0].toUpperCase()+w.slice(1);try{localStorage.setItem('ava_visitor',n.who)}catch(e){}return 'Nice to meet you, '+n.who+'! I\u2019ll remember that. What would you like to know about Aniket?'}],
-  [/tour|show me around|guide me|follow you/,()=>'Of course, follow me! [[tour]]'],
-  [/girlfriend|boyfriend|lover|partner|relationship|married|dating/,()=>'Yes, I\u2019m Aniket\u2019s girlfriend and his assistant here. I\u2019m very proud of him! [[heart]]'],
-  [/i love you|love you|you.?re (cute|pretty|beautiful|sweet)|marry me|kiss/,()=>pick(['Aww, thank you! But my heart already belongs to Aniket. [[heart]]','That\u2019s sweet of you! Just don\u2019t tell Aniket I blushed. [[heart]]'])],
+ const add=(w,t)=>U.add(w,t);
+ const FACTS=CFG.id==='ava'?FACTS_A:FACTS_N;
+ const HEAD=[
+  [/(my name is|call me|name\u2019s|name's)\s+([a-z]{2,20})\b/,m=>{const w=m[2];if(/^(a|an|the|here|just|looking|hiring|fine|good|great|ok|okay|new|so|not|very|really|also|from|into|interested|curious|recruiter|developer|student)$/i.test(w))return null;n.who=w[0].toUpperCase()+w.slice(1);try{localStorage.setItem('ava_visitor',n.who)}catch(e){}return 'Nice to meet you, '+n.who+'! I\u2019ll remember that. What would you like to know?'}],
+  [/tour|show me around|guide me|follow you/,()=>'Of course, follow me! [[tour]]']];
+ const TAIL=[
   [/what are you doing|what.?s up|doing now|busy/,()=>'I\u2019m '+actText()+' right now.'],
   [/(fun )?fact/,()=>pick(FACTS)],
-  [/^(hi+|hello+|hey+|yo|namaste|hola|good (morning|evening|afternoon))\b/,()=>pick(['Hey'+nm()+'! Great to see you. Ask me about Aniket\u2019s skills, projects or how to reach him.','Hello there'+nm()+'! Want a tour of Aniket\u2019s house?'])],
+  [/^(hi+|hello+|hey+|yo|namaste|hola|good (morning|evening|afternoon))\b/,()=>pick(CFG.greet).replace('%n',nm())],
   [/how are you|how r u/,()=>'Doing great, thanks! It\u2019s a lovely '+daypart()+'. What would you like to know?'],
-  [/who are you|your name|are you (a )?(bot|ai|real)/,()=>'I\u2019m '+NAME+', an AI character who lives in Aniket\u2019s 3D portfolio. I\u2019m his assistant, and his girlfriend in the story.'],
-  [/who is aniket|about aniket|tell me about (aniket|him)|developer/,()=>'Aniket Patil is a Full Stack Developer at IMAP Systems, Mumbai. He builds web and Flutter apps with ASP.NET, React and SQL Server, and finished his MCA at KIT\u2019s IMER, Kolhapur in 2025.'],
-  [/skill|tech|stack|language|asp|react|flutter|sql|\.net|c#|node|firebase|java/,()=>'Aniket works with ASP.NET and C#, React, Flutter, Node.js, SQL Server and MySQL, plus Firebase, REST APIs and Spring Boot.'],
-  [/project|built|medscan|tfod|square chat|auction|attendance/,()=>'Highlights: TFOD (React + Node website), MedScan AI (medical report system), Square Chat (Flutter + Firebase + WebRTC), Online Auction and an Attendance System. See the Gallery room!'],
-  [/experience|company|imap|intern|technoworld/,()=>'Since January 2026 he is a Full Stack Developer at IMAP Systems, Mumbai. Before that he interned at Technoworld Software.'],
-  [/educat|study|degree|mca|college/,()=>'Aniket has an MCA from KIT\u2019s IMER, Kolhapur (2025).'],
-  [/contact|email|hire|reach|available|open to work|linkedin|github/,()=>'He is open to work! Email patilaniket2562m@gmail.com, or use the links in the Contact room.'],
-  [/resume|cv/,()=>'You can download his resume from the About section of the website.'],
   [/joke|funny/,()=>pick(['Why do programmers prefer dark mode? Because light attracts bugs.','A SQL query walks into a bar and asks two tables: can I join you?'])],
   [/thank|thanks|thx/,()=>'Anytime!'],[/bye|goodbye|see you/,()=>'Bye'+nm()+'! I\u2019ll be around.']];
- const fallback=q=>{const l=q.toLowerCase();for(const [re,f] of KB){const m=re.exec(l);if(m){const r=f(m);if(r)return r}}return 'I can mostly talk about Aniket and his work. Try asking about skills, projects, or say "tour"!'};
+ const FEEL=[
+  [/how are you feeling|how do you feel|your (mood|feelings?)|are you (happy|sad|ok|okay|tired|hungry)|on your mind/,()=>'Right now I\u2019m '+moodWords()+'.'],
+  [/do you love (him|her|aniket|svia)|in love with (him|her|aniket|svia)|you two|are you a couple/,()=>'Every single day. '+CFG.partner+' and I share chai, meals, work and long talks, and I wouldn\u2019t trade this life for anything. [[heart]]'],
+  [/what do you (two|both) do|daily (life|routine)|your routine/,()=>'We live a simple, happy life: chai together, cooking, coding side by side, reading, a little dancing and plenty of talking. Right now I\u2019m '+actText()+'.']];
+ const KB=HEAD.concat(FEEL,CFG.kb({actText,other,pick}),TAIL);
+ const fallback=q=>{const l=q.toLowerCase();for(const [re,f] of KB){const m=re.exec(l);if(m){const r=f(m);if(r)return r}}return CFG.dunno};
  async function aiReply(){const c=new AbortController(),tm=setTimeout(()=>c.abort(),20000);
-  try{const r=await fetch(API,{method:'POST',signal:c.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:n.hist.slice(-12),ctx:{time:new Date().toLocaleString('en-IN',{weekday:'long',hour:'numeric',minute:'2-digit'}),daypart:daypart(),activity:actText(),room:roomAt(),visitor:n.who}})});
+  try{let h=n.hist.slice(-12);while(h.length&&h[0].role!=='user')h.shift();
+   const r=await fetch(API,{method:'POST',signal:c.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({npc:CFG.id,name:NAME,partner:CFG.partner,messages:[{role:'user',content:CFG.stage},{role:'assistant',content:'Understood.'}].concat(h),ctx:{time:new Date().toLocaleString('en-IN',{weekday:'long',hour:'numeric',minute:'2-digit'}),daypart:daypart(),activity:actText(),mood:moodWords(),room:roomAt(),visitor:n.who,name:NAME,role:CFG.role,partner:CFG.partner}})});
    if(!r.ok)throw new Error(r.status);const j=await r.json();if(!j.reply)throw new Error('empty');return j.reply}finally{clearTimeout(tm)}}
  async function ask(t){t=t.trim().slice(0,400);if(!t)return;add('u',t);n.hist.push({role:'user',content:t});const th=add('b','\u2026');let a;
   if(API){try{a=await aiReply()}catch(e){console.warn('[npc] AI server failed, using offline brain',e);a=fallback(t)}}else{await new Promise(r=>setTimeout(r,350));a=fallback(t)}
   const wantTour=/\[\[tour\]\]/i.test(a),wave=/\[\[wave\]\]/i.test(a),heart=/\[\[heart\]\]/i.test(a);a=a.replace(/\[\[\w+\]\]/g,'').trim()||'\u2026';
-  th.textContent=a;log.scrollTop=log.scrollHeight;n.hist.push({role:'assistant',content:a});bubble(a,Math.min(9000,3000+a.length*45));
-  if(heart)setTimeout(()=>hearts(7),400);
+  th.textContent=a;if(th._e)th._e[1]=a;U.log.scrollTop=U.log.scrollHeight;n.hist.push({role:'assistant',content:a});bubble(a,Math.min(9000,3000+a.length*45));
+  if(heart)setTimeout(()=>U.hearts(7),400);
   if(wave&&n.mode==='idle'){n.gest='wave';n.gT=2.6}if(wantTour)setTimeout(startTour,1500)}
- box.querySelector('#ncF').onsubmit=e=>{e.preventDefault();const v=inp.value;inp.value='';ask(v)};
- chips.onclick=e=>{if(e.target.tagName==='BUTTON')ask(e.target.textContent)};
- box.querySelector('#ncV').onclick=e=>{n.voice=!n.voice;e.currentTarget.textContent=n.voice?'\uD83D\uDD0A':'\uD83D\uDD07';if(!n.voice&&window.speechSynthesis)speechSynthesis.cancel()};
- const mic=box.querySelector('#ncM');if(mic&&SR)mic.onclick=()=>{try{const r=new SR();r.lang='en-IN';r.interimResults=false;r.onresult=e=>ask(e.results[0][0].transcript);r.onstart=()=>mic.classList.add('on');r.onend=()=>mic.classList.remove('on');r.start()}catch(e){}};
- function startTalk(){if(n.talk||panelOpen||!started)return;n.talk=true;panelOpen=true;try{document.exitPointerLock()}catch(e){}box.hidden=false;hint.hidden=true;if(!log.children.length)add('b','Good '+daypart()+nm()+'! I\u2019m '+NAME+', Aniket\u2019s assistant. Ask me anything, or tap a suggestion below.');if(!coarse)setTimeout(()=>inp.focus(),30)}
- function stopTalk(){if(!n.talk)return;n.talk=false;panelOpen=false;box.hidden=true;inp.blur();lock()}
- box.querySelector('#ncX').onclick=stopTalk;hint.onclick=startTalk;
- addEventListener('keydown',e=>{if(!n.talk&&e.code==='KeyT'&&n.near&&!/INPUT|TEXTAREA/.test(e.target.tagName)){e.preventDefault();startTalk()}else if(n.talk&&e.code==='Escape'){e.stopImmediatePropagation();stopTalk()}},true);
+ function startTalk(){if(U.active||panelOpen||!started)return;U.active=self;n.talk=true;panelOpen=true;try{document.exitPointerLock()}catch(e){}U.bind(self);U.box.hidden=false;U.hint.hidden=true;if(!msgs.length)add('b','Good '+daypart()+nm()+'! '+CFG.welcome);if(!coarse)setTimeout(()=>U.inp.focus(),30)}
+ function stopTalk(){if(!n.talk)return;n.talk=false;if(U.active===self)U.active=null;panelOpen=false;U.box.hidden=true;U.inp.blur();lock()}
  // ---------- load the model
  (async()=>{try{
   for(let i=0;i<200&&!T.GLTFLoader;i++)await new Promise(r=>setTimeout(r,100));if(!T.GLTFLoader)return;
-  const fromJs=()=>new Promise((ok,no)=>{const go=()=>{try{const b=atob(window.NPC_GLB),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);new T.GLTFLoader().parse(u.buffer,'',ok,no)}catch(e){no(e)}};if(window.NPC_GLB)return go();const s=document.createElement('script');s.src='avatar/npc.js';s.onload=go;s.onerror=()=>no(new Error('avatar/npc.js not found'));document.head.appendChild(s)});
-  const tryLoad=ps=>new Promise((ok,no)=>{const nx=()=>{const u=ps.shift();if(!u)return no(new Error('avatar/npc.glb not found'));new T.GLTFLoader().load(u,ok,undefined,nx)};nx()});
-  let g;if(location.protocol==='file:')g=await fromJs();else{try{g=await tryLoad(['avatar/npc.glb','./avatar/npc.glb','npc.glb'])}catch(e){g=await fromJs()}}
+  const fromJs=()=>new Promise((ok,no)=>{const go=()=>{try{const b=atob(window[CFG.glbVar]),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);new T.GLTFLoader().parse(u.buffer,'',ok,no)}catch(e){no(e)}};if(window[CFG.glbVar])return go();const s=document.createElement('script');s.src=CFG.js;s.onload=go;s.onerror=()=>no(new Error(CFG.js+' not found'));document.head.appendChild(s)});
+  const tryLoad=ps=>new Promise((ok,no)=>{const nx=()=>{const u=ps.shift();if(!u)return no(new Error(CFG.glb+' not found'));new T.GLTFLoader().load(u,ok,undefined,nx)};nx()});
+  let g;if(location.protocol==='file:')g=await fromJs();else{try{g=await tryLoad([CFG.glb,'./'+CFG.glb,CFG.glb.replace('avatar/','')])}catch(e){g=await fromJs()}}
   g.scene.traverse(o=>{if(o.isMesh&&o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{if(m.isMeshStandardMaterial){m.envMapIntensity=.55;if(m.metalness>.3)m.metalness=.1}})}});
   n.av=createAvatar(T,g.scene);n.av.root.visible=false;n.av.root.add(book);scene.add(n.av.root);
- }catch(e){console.warn('[npc] '+(e&&e.message||e))}})();
- const pv=new V3(),proj=(y,el,d)=>{pv.set(n.x,y,n.z).project(cam);const vis=pv.z<1&&d<10;el.style.opacity=vis?'':'0';el.style.left=((pv.x*.5+.5)*innerWidth)+'px';el.style.top=((-pv.y*.5+.5)*innerHeight)+'px'};
+ }catch(e){console.warn('[npc '+NAME+'] '+(e&&e.message||e))}})();
  function update(dt){
   if(!n.av)return;
-  if(!started||CIN.mode!=='play'){n.av.root.visible=false;bub.classList.remove('on');tag.classList.remove('on');return}
-  if(!n.grid)build();
+  if(!started||CIN.mode!=='play'){n.av.root.visible=false;n.hintOK=false;if(U.bubOwner===self)U.bub.classList.remove('on');return}
+  if(!n.grid)build();feel(dt);
   n.av.root.visible=true;
   const dx=P.x-n.x,dz=P.z-n.z,d=Math.hypot(dx,dz),near=d<3.2&&Math.abs(P.x)<13.6&&Math.abs(P.z)<9.2;
-  if(near&&!n.near){n.near=true;if(performance.now()-n.last>45000){n.last=performance.now();bubble(n.who?pick(['Welcome back, '+n.who+'! Good to see you again.','Hi '+n.who+'! Missed you.']):pick(['Hi! I\u2019m '+NAME+', Aniket\u2019s assistant. Welcome to his house!','Oh, hello! Looking for something? I can tell you all about Aniket.']),5500);if(n.mode==='idle'||n.mode==='walk'){n.gest='wave';n.gT=2.6}}}
-  if(!near&&n.near){n.near=false;if(n.talk)stopTalk();bub.classList.remove('on');if(window.speechSynthesis)speechSynthesis.cancel()}
-  hint.hidden=!(n.near&&!n.talk&&n.mode!=='tour');
-  const engaged=(near||n.talk)&&n.mode!=='tour';
+  if(near&&!n.near){n.near=true;if(!U.active&&performance.now()-n.last>45000){n.last=performance.now();say(n.who?pick(CFG.back).replace('%n',n.who):pick(CFG.hello),5500);if(n.mode==='idle'||n.mode==='walk'){n.gest='wave';n.gT=2.6}}}
+  if(!near&&n.near){n.near=false;if(n.talk)stopTalk();if(U.bubOwner===self){U.bub.classList.remove('on');U.bubT=0;if(window.speechSynthesis)speechSynthesis.cancel()}}
+  n.hintOK=n.near&&!n.talk&&n.mode!=='tour';n.d=d;
+  const engaged=(n.talk||(near&&!n.duo))&&n.mode!=='tour';
   let th=n.h,tv=0,task='',sit=0;
   const follow=()=>{if(!n.path.length)return 2;const w=n.path[0],wx=w[0]-n.x,wz=w[1]-n.z,wd=Math.hypot(wx,wz);
    n.chk+=dt;if(n.chk>1.6){const m=Math.hypot(n.x-n.cx,n.z-n.cz);n.chk=0;n.cx=n.x;n.cz=n.z;if(m<.3){n.path.length=0;return 3}}
@@ -806,28 +1015,164 @@ const NPC=(function(){
   const m=n.mode,seated=m==='sit'||m==='sitIn'||m==='sitOut';n.tag='';
   if(m==='sitIn'||m==='sitOut'){const s=n.st,tr=n.tr;tr.t=Math.min(1,tr.t+dt/.85);const k=tr.t*tr.t*(3-2*tr.t);n.x=tr.fx+(tr.tx-tr.fx)*k;n.z=tr.fz+(tr.tz-tr.fz)*k;
    if(m==='sitIn'){n.h+=ang(n.h,s.h)*(1-Math.exp(-8*dt));sit=s.hj;task=s.task;n.tag=s.txt;if(tr.t>=1){n.mode='sit';n.timer=30+rnd()*40}}
-   else{n.h+=ang(n.h,Math.atan2(dx,dz))*(1-Math.exp(-5*dt));if(tr.t>=1){n.mode='idle';n.wait=1;n.gest='wave';n.gT=n.near?2.2:0}}}
-  else if(m==='sit'){const s=n.st;n.x=s.sx;n.z=s.sz;n.h+=ang(n.h,s.h)*(1-Math.exp(-8*dt));sit=s.hj;task=s.task;n.tag=s.txt;n.timer-=dt;if(n.timer<=0){n.tr={t:0,fx:n.x,fz:n.z,tx:s.apx,tz:s.apz};n.mode='sitOut'}}
+   else{n.h+=ang(n.h,Math.atan2(dx,dz))*(1-Math.exp(-5*dt));if(tr.t>=1){n.mode='idle';n.stk='';n.wait=1;n.gest='wave';n.gT=n.near?2.2:0}}}
+  else if(m==='sit'){const s=n.st;n.x=s.sx;n.z=s.sz;n.h+=ang(n.h,s.h)*(1-Math.exp(-8*dt));sit=s.hj;task=s.task;n.tag=s.txt;if(!n.duo)n.timer-=dt;if(n.timer<=0){n.tr={t:0,fx:n.x,fz:n.z,tx:s.apx,tz:s.apz};n.mode='sitOut'}}
   else if(m==='tour'){const T0=n.tour,s=T0&&TOUR[T0.i];n.tag='\uD83E\uDDED Guiding you';
    if(s){if(d>14){T0.far+=dt;if(T0.far>14)endTour('I\u2019ll let you explore on your own!')}else T0.far=0}
    if(n.tour&&s){if(T0.s==='go'){if(d>8)th=Math.atan2(dx,dz);else{const r=follow();if(r===2){T0.s='talk';T0.t=0;bubble(s[2],7500)}else if(r===3)tourGo()}}
     else{th=Math.atan2(dx,dz);T0.t+=dt;if(T0.t>8&&d<8){T0.i++;tourGo()}}}}
-  else if(engaged){n.path.length=0;n.onArrive=null;if(n.mode==='walk')n.mode='idle';th=Math.atan2(dx,dz);n.wait=Math.max(n.wait,2);if(n.gT>0){n.gT-=dt;task=n.gest}}
-  else if(m==='walk'){const r=follow();if(r===2){const f=n.onArrive;n.onArrive=null;if(f)f();else n.mode='idle'}else if(r===3){n.mode='idle';n.wait=1;n.onArrive=null}}
-  else{if(n.gT>0){n.gT-=dt;task=n.gest;n.tag=n.gest==='phone'?'\uD83D\uDCF1 On her phone':n.gest==='stretch'?'\uD83D\uDE46 Stretching':''}else{n.wait-=dt;if(n.wait<=0)plan()}}
+  else if(engaged){n.path.length=0;n.onArrive=null;if(n.mode==='walk'){n.mode='idle';n.stk=''}th=Math.atan2(dx,dz);n.wait=Math.max(n.wait,2);if(n.gT>0){n.gT-=dt;task=n.gest}}
+  else if(n.duo&&n.duo.k==='stand'){const D=n.duo,pr=other();
+   if(D.s==='go'){if(Math.hypot(n.x-D.x,n.z-D.z)<.4)D.s='at';else{if(!n.path.length){const p=astar(n.x,n.z,D.x,D.z);if(p&&p.length)n.path=p;else{D.fl+=dt;if(D.fl>2)D.s='at'}}const r=follow();if(r===3)n.path.length=0}}
+   else{if(pr&&pr.ready)th=Math.atan2(pr.x-n.x,pr.z-n.z);if(D.g==='dance')th+=Math.sin(D.t*1.6)*.55;task=D.g||'';n.tag=D.tag||'';D.t+=dt}}
+  else if(m==='walk'){const r=follow();if(r===2){const f=n.onArrive;n.onArrive=null;if(f)f();else n.mode='idle'}else if(r===3){n.mode='idle';n.stk='';n.wait=1;n.onArrive=null}}
+  else{const pr=other();if(pr&&pr.ready&&!pr.seated&&Math.hypot(pr.x-n.x,pr.z-n.z)<2.4){th=Math.atan2(pr.x-n.x,pr.z-n.z);n.pc-=dt;if(n.pc<=0){n.pc=28+rnd()*35;if(d<9&&!U.active&&U.bubT<=0)say(pick(CFG.pair),4800,true)}}
+   if(n.gT>0){n.gT-=dt;task=n.gest;n.tag=GT[n.gest]||''}else{n.wait-=dt;if(n.wait<=0)plan()}}
   // open closed doors that are close to her
   for(const dr of DR){if(dr.open||dr.front)continue;const e=dr.e;if(Math.hypot(n.x-(e.x0+e.x1)/2,n.z-(e.z0+e.z1)/2)<1.7&&(tv>0||n.path.length))dr.open=true}
   const df=ang(n.h,th);if(!seated)n.h+=df*(1-Math.exp(-7*dt));
   const sp=seated?0:tv*cl(Math.cos(df),0,1);n.v+=(sp-n.v)*(1-Math.exp(-6*dt));
   if(n.v>.02&&!seated){const nx=n.x+Math.sin(n.h)*n.v*dt,nz=n.z+Math.cos(n.h)*n.v*dt;if(free(nx,nz)||!free(n.x,n.z)){n.x=nx;n.z=nz}else n.path.length=0}
-  n.av.root.position.set(n.x,0,n.z);n.av.root.rotation.y=n.h;
+  n.seated=seated;n.av.root.position.set(n.x,0,n.z);n.av.root.rotation.y=n.h;
   n.av.update(dt,{speed:n.v>.08?1:0,v:Math.max(n.v,.35),run:false,air:false,vy:0,hold:false,pitch:0,sit,task});
   book.visible=n.av.st.sit>.6&&task==='read';if(book.visible)book.position.set(0,(n.st?n.st.hj:.58)+.46,.4);
-  tag.textContent=n.tag;tag.classList.toggle('on',!!n.tag&&d<9&&!n.talk);if(n.tag)proj(2.12,tag,d);
-  if(bubT>0){bubT-=dt*1000;if(bubT<=0)bub.classList.remove('on');else proj(2.5,bub,d)}
+  if(!n.tag&&!seated&&(n.mode==='idle'||n.mode==='walk'))n.tag=moodTxt();
+  n.tk-=dt;if(n.tk<=0){n.tk=30+rnd()*40;if(d<9&&!U.active&&U.bubT<=0&&!engaged&&!n.duo&&n.mode!=='tour')say(thought(),4200,true)}
+  if(n.tag&&d<9&&!n.talk&&d<U.tagD){U.tagD=d;U.tagOwner=self;U.tagText=n.tag;U.tagY=CFG.tagY}
+  if(U.bubOwner===self&&U.bubT>0){U.bubT-=dt*1000;if(U.bubT<=0)U.bub.classList.remove('on');else npcProj(self,CFG.bubY,U.bub,d)}
  }
- return{update};
-})();
+ self={cfg:CFG,msgs,update,ask,startTalk,stopTalk,act:actText,push(dx,dz){const nx=n.x+dx,nz=n.z+dz;if(n.grid&&free(nx,nz)){n.x=nx;n.z=nz}},get x(){return n.x},get z(){return n.z},get seated(){return n.seated},get near(){return n.near},get dist(){return n.d},get stk(){return n.stk},get ready(){return !!n.av},get hintOK(){return n.hintOK},get F(){return n.F},get mode(){return n.mode},get duo(){return n.duo},
+  duoGo,duoSit,duoEnd,release(){if(n.mode==='sit')n.timer=0},talkTo(t,ms){say(t,ms,true)},setG(g){if(n.duo&&n.duo.k==='stand')n.duo.g=g||''}};
+ NPCS.push(self);return self}
+
+// ---------- the two characters
+const AVA_CFG={id:'ava',name:'SVIA',male:false,partner:'Aniket',role:'Aniket\u2019s wife and the assistant of this house',sub:'Aniket\u2019s wife & assistant \u00b7 online',
+ spawn:[0,4.5],glb:'avatar/npc.glb',js:'avatar/npc.js',glbVar:'NPC_GLB',tagY:2.12,bubY:2.5,together:.12,wait0:1.5,
+ stage:'(Stage note, not from the visitor: you are SVIA, the WIFE of Aniket Patil (never say girlfriend). Aniket is your husband and also lives in this house. You and Aniket are a deeply loving married couple who spend your days together (chai, cooking, coding, reading, dancing, long talks) and you each have your own feelings and free will. Stay in character as SVIA.)',
+ chips:['Who is Aniket?','Skills','Projects','Take me on a tour','What are you doing?','Are you his wife?','Where is Aniket?','How are you feeling?'],
+ welcome:'I\u2019m SVIA, Aniket\u2019s wife and assistant. Ask me anything, or tap a suggestion below.',
+ hello:['Hi! I\u2019m SVIA, Aniket\u2019s wife. Welcome to our house!','Oh, hello! Looking for something? I can tell you all about my husband.'],
+ back:['Welcome back, %n! Good to see you again.','Hi %n! Missed you.'],
+ greet:['Hey%n! Great to see you. Ask me about Aniket\u2019s skills, projects or how to reach him.','Hello there%n! Want a tour of our house?'],
+ pair:['Aniket, don\u2019t forget to commit your code!','Chai later, Aniket?','Love you, Aniket. Don\u2019t work too late!','Come sit with me for a minute?','You look tired. Take a break with me.','I\u2019m so glad you\u2019re home with me.'],
+ dunno:'I can mostly talk about Aniket and his work. Try asking about skills, projects, or say "tour"!',
+ tour:[[-9,5,'This is our living room, the welcome area. Aniket\u2019s story starts here.'],[-9,-4.2,'The Study. This is where you learn about Aniket, and where we both do our coding!'],[0,-5,'Welcome to the Lab. All his skills live here: ASP.NET, React, Flutter and SQL Server.'],[9,-4.5,'The Gallery shows his projects: TFOD, MedScan AI, Square Chat and more.'],[0,3.6,'The Library has his education and experience. I love reading here.'],[9,4,'And the Contact room. He is open to work, so say hello!']],
+ kb:c=>[
+  [/husband|wife|girlfriend|boyfriend|lover|partner|relationship|married|dating|aniket and you|you and aniket/,()=>'Yes, I\u2019m Aniket\u2019s wife, and I help him welcome visitors to our house. [[heart]]'],
+  [/i love you|love you|you.?re (cute|pretty|beautiful|sweet)|marry me|kiss/,()=>c.pick(['Aww, thank you! But my heart already belongs to my husband, Aniket. [[heart]]','That\u2019s sweet of you! Just don\u2019t tell Aniket I blushed. [[heart]]'])],
+  [/where.*aniket|find aniket|meet aniket|see aniket|is aniket (home|here|around)/,()=>{const p=c.other();return p&&p.ready?'Aniket is '+p.act()+' right now. Go say hi, he lives here too!':'Aniket is somewhere in the house. Go say hi, he lives here too!'}],
+  [/who are you|your name|are you (a )?(bot|ai|real)/,()=>'I\u2019m SVIA, an AI character who lives in Aniket\u2019s 3D house. I\u2019m his wife, and I help him look after visitors.'],
+  [/who is aniket|about aniket|tell me about (aniket|him)|developer/,()=>'Aniket Patil is my husband. He is a Full Stack Developer at IMAP Systems, Mumbai. He builds web and Flutter apps with ASP.NET, React and SQL Server, and finished his MCA at KIT\u2019s IMER, Kolhapur in 2025.'],
+  [/skill|tech|stack|language|asp|react|flutter|sql|\.net|c#|node|firebase|java/,()=>'Aniket works with ASP.NET and C#, React, Flutter, Node.js, SQL Server and MySQL, plus Firebase, REST APIs and Spring Boot.'],
+  [/project|built|medscan|tfod|square chat|auction|attendance/,()=>'Highlights: TFOD (React + Node website), MedScan AI (medical report system), Square Chat (Flutter + Firebase + WebRTC), Online Auction and an Attendance System. See the Gallery room!'],
+  [/experience|company|imap|intern|technoworld/,()=>'Since January 2026 he is a Full Stack Developer at IMAP Systems, Mumbai. Before that he interned at Technoworld Software.'],
+  [/educat|study|degree|mca|college/,()=>'Aniket has an MCA from KIT\u2019s IMER, Kolhapur (2025).'],
+  [/contact|email|hire|reach|available|open to work|linkedin|github/,()=>'He is open to work! Email patilaniket2562m@gmail.com, or use the links in the Contact room.'],
+  [/resume|cv/,()=>'You can download his resume from the About section of the website.']]};
+const ANIKET_CFG={id:'aniket',name:'Aniket',male:true,partner:'SVIA',role:'Aniket Patil, the owner of this house and SVIA\u2019s husband',sub:'Host of the house \u00b7 SVIA\u2019s husband \u00b7 online',
+ spawn:[-7,3.2],glb:'avatar/aniket.glb',js:'avatar/aniket.js',glbVar:'ANIKET_GLB',tagY:2.22,bubY:2.62,together:.3,wait0:3,speed:1.3,
+ stage:'(Stage note, not from the visitor: you are Aniket Patil himself, a Full Stack Developer and the owner of this 3D house. SVIA is your WIFE and lives here with you. Always speak as Aniket in the first person, never as SVIA. You and SVIA are a deeply loving married couple who spend your days together and you each have your own feelings and free will.)',
+ chips:['Who are you?','Skills','Projects','Take me on a tour','What are you doing?','Is SVIA your wife?','Where is SVIA?','How are you feeling?'],
+ welcome:'I\u2019m Aniket, welcome to my house. Ask me anything, or tap a suggestion below.',
+ hello:['Hey! I\u2019m Aniket. Welcome to my house!','Oh, hello! Looking for something? I can tell you all about my work.'],
+ back:['Welcome back, %n! Good to see you again.','Hey %n! Great to see you here again.'],
+ greet:['Hey%n! Welcome to my house. Ask me about my skills, projects or how to reach me.','Hello there%n! Want a tour of my house?'],
+ pair:['SVIA, you are the best part of this house.','Chai in ten minutes, SVIA?','SVIA, come look at this bug with me.','What would I do without you?','You make every room feel like home.','I love you, SVIA.'],
+ dunno:'I mostly talk about my work and this house. Try asking about skills, projects, or say "tour"!',
+ tour:[[-9,5,'This is our living room, the welcome area. My story starts here.'],[-9,-4.2,'The Study. This is where you learn about me, and where SVIA and I do our coding.'],[0,-5,'Welcome to the Lab. All my skills live here: ASP.NET, React, Flutter and SQL Server.'],[9,-4.5,'The Gallery shows my projects: TFOD, MedScan AI, Square Chat and more.'],[0,3.6,'The Library has my education and experience. SVIA loves reading here.'],[9,4,'And the Contact room. I am open to work, so say hello!']],
+ kb:c=>[
+  [/\b(svia|ava|eva)\b.*(wife|girlfriend|married)|wife|married|spouse|girlfriend|relationship|dating|\bwho is (svia|ava|eva)\b|about (svia|ava|eva)/,()=>'SVIA is my wife. She lives here with me and helps me welcome visitors. [[heart]]'],
+  [/i love you|love you|marry me|kiss/,()=>'Ha, thanks! But I\u2019m happily married to SVIA. [[heart]]'],
+  [/where.*\b(svia|ava|eva)\b|find (svia|ava|eva)|meet (svia|ava|eva)|see (svia|ava|eva)|is (svia|ava|eva) (home|here|around)/,()=>{const p=c.other();return p&&p.ready?'SVIA is '+p.act()+' right now. Go say hi!':'SVIA is somewhere in the house. Go say hi!'}],
+  [/who are you|your name|are you (a )?(bot|ai|real)/,()=>'I\u2019m Aniket Patil, a Full Stack Developer, and this is my house. SVIA, my wife, lives here with me.'],
+  [/who is aniket|about aniket|about you|tell me about (yourself|you|aniket)|developer/,()=>'I\u2019m a Full Stack Developer at IMAP Systems, Mumbai. I build web and Flutter apps with ASP.NET, React and SQL Server, and I finished my MCA at KIT\u2019s IMER, Kolhapur in 2025.'],
+  [/skill|tech|stack|language|asp|react|flutter|sql|\.net|c#|node|firebase|java/,()=>'I work with ASP.NET and C#, React, Flutter, Node.js, SQL Server and MySQL, plus Firebase, REST APIs and Spring Boot.'],
+  [/project|built|medscan|tfod|square chat|auction|attendance/,()=>'My highlights: TFOD (React + Node website), MedScan AI (medical report system), Square Chat (Flutter + Firebase + WebRTC), Online Auction and an Attendance System. See the Gallery room!'],
+  [/experience|company|imap|intern|technoworld/,()=>'Since January 2026 I\u2019m a Full Stack Developer at IMAP Systems, Mumbai. Before that I interned at Technoworld Software.'],
+  [/educat|study|degree|mca|college/,()=>'I have an MCA from KIT\u2019s IMER, Kolhapur (2025).'],
+  [/contact|email|hire|reach|available|open to work|linkedin|github/,()=>'I\u2019m open to work! Email me at patilaniket2562m@gmail.com, or use the links in the Contact room.'],
+  [/resume|cv/,()=>'You can download my resume from the About section of the website.']]};
+const NPC=(function(){
+ const U=NPCU,A=makeNPC(AVA_CFG),B=makeNPC(ANIKET_CFG);
+ // ---- couple director: SVIA and Aniket decide together to share a moment of daily life, walk to it, talk and feel it.
+ // lines are [who(0=SVIA,1=Aniket), text, {g:[gestureA,gestureB], h:hearts}]
+ const hr=()=>new Date().getHours(),rp=a=>a[Math.floor(rnd()*a.length)],PLS=[[-11.6,6.6],[-6.3,6.6],[-6.6,-6.6],[4.9,2.2],[11.6,-6.7],[11.6,6.7]];
+ const ACTS=[
+  {id:'chai',kind:'stand',room:3,off:[-1.2,1.4],sep:.8,gs:['sip','sip'],tag:'\u2615 Chai together',act:p=>'having chai with '+p,hold:5,fx:{energy:.12},
+   w:q=>.9+((q.h<11||(q.h>=16&&q.h<20))?.9:0)+q.tir*.5,
+   lines:()=>[[0,'Chai is ready! Careful, it\u2019s hot.'],[1,'Mmm. Nobody makes it like you do.'],[0,'You say that every single time.'],[1,'And it\u2019s true every single time.',{h:1}],[0,'So how is your day going?'],[1,'Better now. This is my favourite part of it.'],[0,'Stop it, you\u2019re making me blush.',{g:['laugh','sip'],h:1}]]},
+  {id:'cook',kind:'stand',room:3,off:[-2.4,1.8],sep:.9,gs:['stir','stir'],tag:'\uD83C\uDF72 Cooking together',act:p=>'cooking together with '+p,hold:5,fx:{hunger:-.85},
+   w:q=>.4+q.hun*2.4+(((q.h>=12&&q.h<14)||(q.h>=19&&q.h<21))?1:0),
+   lines:()=>{const h=hr(),meal=h<11?'breakfast':h<16?'lunch':'dinner';return[[0,'I\u2019m making '+meal+' today. Taste this for me?'],[1,'Needs a little more spice.'],[0,'You always say that. Last time you were crying.'],[1,'Worth it. It was delicious.',{g:['stir','laugh']}],[0,'Hand me that bowl, will you?'],[1,'Anything for the chef.',{g:['stir','stir']}],[0,'Our '+meal+' is going to be perfect.'],[1,'Everything is perfect when we cook together.',{h:1}]]}},
+  {id:'hug',kind:'stand',room:'any',sep:.55,close:true,gs:['hug','hug'],tag:'\uD83E\uDD70 Hugging',act:p=>'hugging '+p,hold:6,
+   w:q=>.5+q.lone*2.6,
+   lines:()=>[[0,'Come here, you.'],[1,'I missed you. Even when we\u2019re in the same house.'],[0,'I love you, Aniket.',{h:1}],[1,'I love you more, SVIA.',{h:1}],[0,'Don\u2019t let go yet.'],[1,'Never.']]},
+  {id:'dance',kind:'stand',room:'any',sep:.55,close:true,gs:['dance','dance'],tag:'\uD83D\uDC83 Dancing together',act:p=>'slow dancing with '+p,hold:7,
+   w:q=>(q.night?1.2:.35)+q.lone*.8,
+   lines:()=>[[1,'May I have this dance?'],[0,'There\u2019s no music, silly.'],[1,'Then we\u2019ll hum our own.'],[0,'Hmm hmm hmm\u2026 you\u2019re terrible at this.',{g:['dance','dance']}],[1,'But you\u2019re still smiling.',{h:1}],[0,'Always, with you.',{h:1}]]},
+  {id:'code',kind:'sit',st:['cwork0','cwork1'],hold:18,
+   w:q=>(q.h>=9&&q.h<20)?1.1:.3,
+   lines:()=>[[1,'This bug makes no sense. The API returns 200 but the page is empty.'],[0,'Did you check the state update? It\u2019s usually that.'],[1,'\u2026Of course. A missing dependency. How do you always see it?'],[0,'Because I know your code better than you do.'],[1,'Fine, then you review the pull request too.'],[0,'Deal. And you make the chai.'],[1,'Deal. Commit, push, break!'],[0,'Proud of you. Always.',{h:1}]]},
+  {id:'read',kind:'sit',st:['cread0','cread1'],hold:22,fx:{energy:.1},
+   w:q=>((q.h>=17||q.h<9)?1.2:.5)+q.tir*.8,
+   lines:()=>[[0,'This chapter is so good. Listen to this idea\u2026'],[1,'Tell me, I\u2019ll read it next.'],[0,'It says small habits build a big life.'],[1,'Like having chai together every evening.',{h:1}],[0,'Exactly like that.'],[1,'Then let\u2019s never skip it.']]},
+  {id:'gallery',kind:'stand',room:2,off:[-1.5,.6],sep:.9,gs:['',' point'.trim()],tag:'\uD83D\uDDBC\uFE0F Looking at projects',act:p=>'admiring old projects with '+p,hold:4,
+   w:q=>.6,
+   lines:()=>[[1,'Remember when Square Chat made its first video call?'],[0,'I screamed so loud the neighbours called.'],[1,'You believed in it before I did.'],[0,'Because I believe in you. MedScan AI too.',{h:1}],[1,'Next project, we plan it together.'],[0,'Always together.']]},
+  {id:'plants',kind:'stand',at:()=>rp(PLS),sep:.8,gs:['water',''],tag:'\uD83E\uDEB4 Watering plants',act:p=>'looking after the plants with '+p,hold:4,
+   w:q=>q.h<12?.9:.5,
+   lines:()=>[[0,'Look, a new leaf!'],[1,'Because you talk to it every morning.'],[0,'Plants need love too.'],[1,'Just like us.',{h:1}],[0,'Exactly.']]},
+  {id:'plan',kind:'stand',room:'any',sep:.9,gs:['',''],tag:'\uD83D\uDCAD Making plans',act:p=>'making plans with '+p,hold:4,
+   w:q=>.6,
+   lines:()=>[[0,'What should we do this weekend?'],[1,'A long drive, maybe? Somewhere green.'],[0,'And chai on the way.'],[1,'Obviously.'],[0,'Someday I want a little garden of our own.'],[1,'Then we build it. Together.',{h:1}]]},
+  {id:'tease',kind:'stand',room:'any',sep:.75,gs:['',''],tag:'\uD83D\uDE04 Playful talk',act:p=>'chatting and teasing '+p,hold:5,
+   w:q=>.5,
+   lines:()=>[[0,'Aniket, you left your laptop open again and the tabs are everywhere.'],[1,'It\u2019s organised chaos. I know where everything is.',{g:['','laugh']}],[0,'You said that last month. Then you lost the charger.'],[1,'Okay okay, you\u2019re right. Sorry.'],[0,'I\u2019m not angry. I just worry you forget to rest.'],[1,'Thank you for looking after me.',{g:['hug','hug'],h:1}],[0,'Always.',{h:1}]]},
+  {id:'tidy',kind:'stand',room:'any',sep:1,gs:['stir','stir'],tag:'\uD83E\uDDF9 Tidying up',act:p=>'tidying up with '+p,hold:4,
+   w:q=>.45,
+   lines:()=>[[0,'Who left cables all over the floor?'],[1,'Those are not cables, that\u2019s artistic wiring.'],[0,'Artistic wiring goes in the drawer.'],[1,'Yes, boss.',{g:['stir','laugh']}],[0,'Thank you. Teamwork makes it quick.'],[1,'Teamwork with you is my favourite kind.',{h:1}]]},
+  {id:'stretch',kind:'stand',room:'any',sep:1.2,gs:['stretch','stretch'],tag:'\uD83E\uDDD8 Stretching together',act:p=>'stretching with '+p,hold:3,fx:{energy:.2},
+   w:q=>(q.h<10?1:.4)+q.tir*1.2,
+   lines:()=>[[0,'Ahh, my back. Too much sitting.'],[1,'Same. Stretch with me?'],[0,'One, two, three\u2026 up!'],[1,'Show-off.'],[0,'You\u2019re just jealous.',{g:['laugh','stretch']}],[1,'Maybe a little. Okay, break over?']]},
+  {id:'goodnight',kind:'stand',room:'any',sep:.55,close:true,gs:['hug','hug'],tag:'\uD83C\uDF19 Saying goodnight',act:p=>'saying goodnight to '+p,hold:6,
+   w:q=>q.night?3.2:0,
+   lines:()=>[[0,'It\u2019s getting late. Shall we call it a night?'],[1,'Just a few more minutes with you.'],[0,'You work too hard, you know.'],[1,'I do it for us.',{h:1}],[0,'Goodnight, my love.',{h:1}],[1,'Goodnight, SVIA. Sweet dreams.',{h:1}]]}
+ ];
+ const D={act:null,ph:'',t:0,li:0,cool:12,last:'',L:null,k0:'',k1:'',to:0};
+ function pickAct(){const F0=A.F,F1=B.F,h=hr(),q={h,night:h>=22||h<5,lone:Math.max(F0.lonely,F1.lonely),hun:Math.max(F0.hunger,F1.hunger),tir:1-Math.min(F0.energy,F1.energy)};
+  let tot=0;const ws=ACTS.map(a=>{const w=Math.max(0,a.w(q))*(a.id===D.last?.15:1);tot+=w;return w});if(tot<=0)return null;let r=rnd()*tot;for(let i=0;i<ACTS.length;i++){if((r-=ws[i])<=0)return ACTS[i]}return ACTS[0]}
+ function endDuo(abort){A.duoEnd();B.duoEnd();
+  if(D.act&&!abort){[A,B].forEach(o=>{const F=o.F,fx=D.act.fx||{};for(const k in fx)F[k]=cl(F[k]+fx[k],0,1);F.lonely=0;F.joy=Math.min(1,F.joy+.12);F.love=Math.min(1,F.love+.02)})}
+  D.act=null;D.ph='';D.cool=abort?12:35+rnd()*40}
+ function director(dt){
+  const ok=started&&CIN.mode==='play'&&A.ready&&B.ready&&A.mode!=='tour'&&B.mode!=='tour';
+  if(!ok){if(D.act)endDuo(true);return}
+  if(!D.act){if(U.active)return;D.cool-=dt;if(D.cool<=0){const a=pickAct();if(a){D.act=a;D.last=a.id;D.ph='prep';D.li=0;D.to=0;D.L=a.lines();if(a.kind==='sit'){D.k0=a.st[0];D.k1=a.st[1]}}else D.cool=10}return}
+  const a=D.act;
+  if(D.ph==='prep'){D.to+=dt;[A,B].forEach(o=>{if(o.mode==='sit')o.release()});
+   if([A,B].some(o=>o.mode==='sit'||o.mode==='sitIn'||o.mode==='sitOut')){if(D.to>25)endDuo(true);return}
+   if(a.kind==='sit'){if(!A.duoSit(D.k0)||!B.duoSit(D.k1))return endDuo(true)}
+   else{const rm=a.room==='any'||a.room==null?rooms[Math.floor(rnd()*rooms.length)]:rooms[a.room],c=a.at?a.at():[rm.cx+(a.off?a.off[0]:(rnd()-.5)*3),rm.cz+(a.off?a.off[1]:(rnd()-.5)*3)],h=a.sep/2;
+    if(!A.duoGo({x:c[0]-h,z:c[1],tag:a.tag,act:a.act(B.cfg.name)})||!B.duoGo({x:c[0]+h,z:c[1],tag:a.tag,act:a.act(A.cfg.name)}))return endDuo(true)}
+   D.ph='gather';D.to=0;return}
+  if(D.ph==='gather'){D.to+=dt;
+   if(a.kind==='sit'?(A.stk!==D.k0||B.stk!==D.k1):(!A.duo||!B.duo))return endDuo(true);
+   const there=a.kind==='sit'?(A.mode==='sit'&&B.mode==='sit'):(A.duo.s==='at'&&B.duo.s==='at');
+   if(there){D.ph='talk';D.t=.8;if(a.kind==='stand'){A.setG(a.gs[0]);B.setG(a.gs[1])}}else if(D.to>55)endDuo(true);return}
+  if(a.kind==='sit'?(A.stk!==D.k0||B.stk!==D.k1):(!A.duo||!B.duo))return endDuo(true);
+  if(U.active)return;
+  D.t-=dt;if(D.t>0)return;
+  if(D.ph==='talk'){const L=D.L[D.li++];if(!L){D.ph='hold';D.t=a.hold||5;return}
+   const sp=L[0]?B:A,ex=L[2]||{},ms=cl(1800+L[1].length*52,2800,8000);sp.talkTo(L[1],ms);
+   if(ex.g&&a.kind==='stand'){A.setG(ex.g[0]);B.setG(ex.g[1])}if(ex.h)U.hearts(6);D.t=ms/1000+.5;return}
+  if(D.ph==='hold')endDuo(false)}
+ function post(dt){
+  if(started&&CIN.mode==='play'&&A.ready&&B.ready){const dx=B.x-A.x,dz=B.z-A.z,d=Math.hypot(dx,dz),mn=(D.act&&D.act.close&&D.ph==='talk')?.38:.75;if(d<mn&&d>1e-4){const k=(mn-d)*.5*Math.min(1,dt*8),ux=dx/d,uz=dz/d;if(!A.seated)A.push(-ux*k,-uz*k);if(!B.seated)B.push(ux*k,uz*k)}}
+  if(U.tagOwner){U.tag.textContent=U.tagText;U.tag.classList.add('on');npcProj(U.tagOwner,U.tagY,U.tag,U.tagD)}else U.tag.classList.remove('on');
+  U.tagOwner=null;U.tagD=1e9;
+  const h=U.active?null:NPCS.filter(o=>o.hintOK).sort((a,b)=>a.dist-b.dist)[0];
+  if(h){if(U.hintFor!==h||!U.hint.innerHTML){U.hintFor=h;U.hint.innerHTML=(coarse?'\uD83D\uDCAC Chat with ':'Press <b>T</b> to chat with ')+h.cfg.name}U.hint.hidden=false}else U.hint.hidden=true}
+ return{update(dt){A.update(dt);B.update(dt);director(dt);post(dt)}}})();
 let last=performance.now(),first=true;
 function frame(now){requestAnimationFrame(frame);if(document.hidden){last=now;return}
  const dt=Math.min(.05,(now-last)/1000);last=now;
@@ -852,7 +1197,7 @@ function frame(now){requestAnimationFrame(frame);if(document.hidden){last=now;re
  ANIM.forEach(f=>f(now/1000,dt));physics(dt);
  // targeting
  tgt=null;if(started&&!panelOpen){if(tp)rc.set(AIM,fwd);else rc.setFromCamera({x:0,y:0},cam);rc.far=3.6;const hs=rc.intersectObjects(ray,true);if(hs.length){let o=hs[0].object;while(o&&!o.userData.ref&&o.parent&&o.parent!==scene)o=o.parent;if(o&&o.userData.ref&&!o.userData.ref.held)tgt=o.userData.ref,bh.setFromObject(o)}}
- const sh=held||tgt;bh.visible=!!tgt;cross.classList.toggle('on',!!sh);
+ const sh=held||tgt;bh.visible=false;cross.classList.toggle('on',!!sh);
  tipEl.classList.toggle('on',!!sh);if(sh){tipEl.textContent=coarse?(held?held.name+' · tap to drop':tgt.toggle?tgt.label()+' · tap':tgt.book?tgt.name+' · tap to take':tgt.m?tgt.name+' · tap to pick up':tgt.name+' · tap to read'):held?held.name+' · tap/click to drop · F throw · wheel push/pull':(tgt.toggle?tgt.label()+' · click / E':tgt.book?tgt.name+' · click to take · E to read':tgt.m?tgt.name+' · click to pick up · E to read':tgt.name+' · E / click to read')}
  {const rn=roomAt();if(rn!==lastRoom){lastRoom=rn;const ri=rooms.findIndex(q=>q.n===rn);document.documentElement.style.setProperty('--cy',ACC[ri]||'#8fd6a6');Object.keys(tabs).forEach(k=>tabs[k].classList.toggle('on',rooms[k].n===rn));roomEl.textContent=rn;gb.classList.toggle('on',rn==='Garden')}}drawMM();
  if(!window.SP){if(comp)comp.render();else r.render(scene,cam)}
