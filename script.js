@@ -1284,3 +1284,51 @@ hero.addEventListener('pointermove',e=>{const r=hero.getBoundingClientRect();her
 s.addEventListener('scroll',()=>hero.style.setProperty('--sy',s.scrollTop),{passive:true});
 })();
 (function(){const v=window.visualViewport;if(!v)return;const f=()=>document.documentElement.style.setProperty('--kb',Math.max(0,innerHeight-v.height-v.offsetTop)+'px');v.addEventListener('resize',f);v.addEventListener('scroll',f);f()})();
+// ================= MOBILE: ROTATE PROMPT + LANDSCAPE FULLSCREEN =================
+(function(){
+ const H=window.HOUSE;if(!H)return;
+ const isMobile=()=>matchMedia('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<900;
+ const isLand=()=>innerWidth>innerHeight;
+ const de=document.documentElement;
+ const reqFS=()=>{try{const f=de.requestFullscreen||de.webkitRequestFullscreen;if(f){const p=f.call(de,{navigationUI:'hide'});if(p&&p.catch)p.catch(()=>{})}}catch(e){}};
+ const exitFS=()=>{try{if(document.fullscreenElement||document.webkitFullscreenElement){const f=document.exitFullscreen||document.webkitExitFullscreen;const p=f.call(document);if(p&&p.catch)p.catch(()=>{})}}catch(e){}};
+ const lockLand=()=>{try{const o=screen.orientation;if(o&&o.lock){const p=o.lock('landscape');if(p&&p.catch)p.catch(()=>{})}}catch(e){}};
+ const unlock=()=>{try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock()}catch(e){}};
+
+ const ov=document.createElement('div');ov.id='rot';ov.hidden=true;
+ ov.innerHTML='<div class="rot-in"><div class="rot-ph"><i></i></div><h2>Rotate your phone</h2><p>The 3D house is best explored in landscape, full screen.</p><button type="button" id="rotBack">Back to website</button></div>';
+ document.body.appendChild(ov);
+
+ let pending=null,waiting=false,active=false,origEnterRef=null;
+ const show=()=>{ov.hidden=false};
+ const hide=()=>{ov.hidden=true};
+ const go=()=>{waiting=false;hide();const i=pending;pending=null;active=true;origEnterRef(i)};
+
+ function check(){
+  if(waiting){if(isLand())go();return}
+  if(active&&isMobile()){isLand()?hide():show()}
+ }
+ addEventListener('resize',check);
+ addEventListener('orientationchange',()=>setTimeout(check,150));
+
+ const origEnter=H.enter,origHome=H.home;origEnterRef=i=>origEnter.call(H,i);
+ H.enter=function(i){
+  if(!isMobile())return origEnter.call(H,i);
+  pending=(i===undefined?null:i);
+  reqFS();lockLand();           // must run inside the tap (user gesture)
+  if(isLand())return go();
+  waiting=true;show();
+ };
+ H.home=function(){
+  waiting=false;active=false;pending=null;hide();unlock();exitFS();
+  return origHome.apply(H,arguments);
+ };
+ // Make the real enter available to go()
+ H._enter=origEnter;
+ ov.querySelector('#rotBack').onclick=()=>{
+  if(waiting){waiting=false;pending=null;hide();unlock();exitFS()}
+  else H.home();
+ };
+ // go() must call the original enter, not the wrapper
+ const _go=go;
+})();
