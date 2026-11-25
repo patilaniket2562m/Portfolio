@@ -1,4 +1,31 @@
+// ===== lazy loader: the 3D house starts only on click =====
 (function(){
+const ld=document.getElementById('load'),ldt=ld&&ld.querySelector('span');
+const showLoad=t=>{if(!ld)return;ldt.textContent=t;ld.style.display='';ld.style.opacity=1};
+const hideLoad=()=>{if(!ld)return;ld.style.opacity=0;setTimeout(()=>ld.style.display='none',700)};
+addEventListener('load',()=>setTimeout(hideLoad,300));
+const LIBS=['https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
+            'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js'];
+const loadScript=src=>new Promise((ok,no)=>{const e=document.createElement('script');e.src=src;e.onload=ok;e.onerror=()=>no(new Error('Could not load '+src));document.head.appendChild(e)});
+let libsP=null,started=false,busy=false;
+const loadLibs=()=>libsP||(libsP=(async()=>{for(const s of LIBS)await loadScript(s)})().catch(e=>{libsP=null;throw e}));
+window.prefetchHouse=()=>LIBS.forEach(h=>{const l=document.createElement('link');l.rel='prefetch';l.as='script';l.href=h;document.head.appendChild(l)});
+window.enterHouse=async function(room){
+  if(window.HOUSE&&window.HOUSE.ready){HOUSE.enter(room);return}
+  if(busy)return;busy=true;showLoad('BUILDING THE HOUSE\u2026');
+  try{
+    await loadLibs();
+    if(!started){started=true;window.NPC_API=window.NPC_API||'/api/chat';
+      await new Promise(r=>setTimeout(r,50));
+      window.__startHouse()}
+    if(!window.HOUSE){hideLoad();return}
+    if(!HOUSE.ready)await new Promise(ok=>addEventListener('house-ready',ok,{once:true}));
+    hideLoad();HOUSE.enter(room);
+  }catch(e){console.warn(e);if(ldt)ldt.textContent='Could not load the 3D house. Check your connection.';setTimeout(hideLoad,2500)}
+  finally{busy=false}
+};
+})();
+window.__startHouse=function(){
 const $=s=>document.querySelector(s),T=THREE,V3=T.Vector3,rnd=Math.random,cl=(v,a,b)=>Math.max(a,Math.min(b,v));
 const coarse=matchMedia('(pointer:coarse)').matches;
 let r;const cv=$('#gl');
@@ -1226,17 +1253,16 @@ function frame(now){requestAnimationFrame(frame);if(document.hidden){last=now;re
  tipEl.classList.toggle('on',!!sh);if(sh){tipEl.textContent=coarse?(held?held.name+' · tap to drop':tgt.toggle?tgt.label()+' · tap':tgt.book?tgt.name+' · tap to take':tgt.m?tgt.name+' · tap to pick up':tgt.name+' · tap to read'):held?held.name+' · tap/click to drop · F throw · wheel push/pull':(tgt.toggle?tgt.label()+' · click / E':tgt.book?tgt.name+' · click to take · E to read':tgt.m?tgt.name+' · click to pick up · E to read':tgt.name+' · E / click to read')}
  {const rn=roomAt();if(rn!==lastRoom){lastRoom=rn;const ri=rooms.findIndex(q=>q.n===rn);document.documentElement.style.setProperty('--cy',ACC[ri]||'#8fd6a6');Object.keys(tabs).forEach(k=>tabs[k].classList.toggle('on',rooms[k].n===rn));roomEl.textContent=rn;gb.classList.toggle('on',rn==='Garden')}}drawMM();
  if(!window.SP){if(comp)comp.render();else r.render(scene,cam)}
- if(first){first=false;$('#load').style.opacity=0;setTimeout(()=>$('#load').style.display='none',700);const g=$('#go');g.disabled=false;g.textContent='Enter the house';$('#start').hidden=false}}
-$('#go').onclick=()=>CIN.begin();
+ if(first){first=false;window.HOUSE.ready=true;dispatchEvent(new Event('house-ready'))}}
 requestAnimationFrame(frame);
-})();
+};
 
 
 (function(){const s=document.getElementById('site');if(!s)return;const pr=s.querySelector('.s-prog'),nv=s.querySelector('.s-nav'),hc=s.querySelector('.s-hc');
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;e.target.classList.add('in');io.unobserve(e.target);e.target.querySelectorAll('[data-count]').forEach(n=>{const t=+n.dataset.count,st=performance.now();(function f(now){const k=Math.min(1,(now-st)/1400);n.textContent=Math.round(t*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(f)})(st)})}),{root:s,threshold:.15});
 s.querySelectorAll('[data-r]').forEach(e=>io.observe(e));
 s.addEventListener('scroll',()=>{const st=s.scrollTop,m=Math.max(1,s.scrollHeight-s.clientHeight);pr.style.width=(st/m*100)+'%';nv.classList.toggle('s-solid',st>40);hc.style.transform='translateY('+st*.22+'px)';hc.style.opacity=Math.max(0,1-st/(innerHeight*.8));window.SP=st>innerHeight*1.05},{passive:true});
-s.querySelectorAll('[data-enter]').forEach(b=>b.onclick=()=>window.HOUSE&&HOUSE.enter(b.dataset.room===undefined?null:+b.dataset.room));
+s.querySelectorAll('[data-enter]').forEach(b=>{b.onclick=()=>enterHouse(b.dataset.room===undefined?null:+b.dataset.room);b.addEventListener('pointerenter',prefetchHouse,{once:true})});
 })();
 
 (function(){const s=document.getElementById('site');if(!s)return;const L=[...s.querySelectorAll('.s-nav nav a')],S=L.map(a=>s.querySelector(a.getAttribute('href')));s.addEventListener('scroll',()=>{const y=s.scrollTop+innerHeight*.35;let c=-1;S.forEach((e,i)=>{if(e&&e.offsetTop<=y)c=i});L.forEach((a,i)=>a.classList.toggle('on',i===c))},{passive:true})})();
