@@ -412,3 +412,14 @@ body{touch-action:manipulation}
 @keyframes npcpulse{50%{opacity:.55}}
 .npcHeart{position:fixed;z-index:30;pointer-events:none;font-style:normal;font-size:1.4rem;opacity:0;animation:npcheart 2.4s ease-out forwards}
 @keyframes npcheart{0%{opacity:0;transform:translate(-50%,0) scale(.6)}15%{opacity:1}100%{opacity:0;transform:translate(-50%,-150px) scale(1.2)}}
+
+/* ===== Rotate-phone prompt (mobile) ===== */
+#rot{position:fixed;inset:0;z-index:100;display:grid;place-items:center;text-align:center;padding:1.5rem;background:radial-gradient(ellipse at 50% 30%,#1a2233,#07090d 70%);color:#fff}
+#rot[hidden]{display:none}
+#rot h2{font:800 1.6rem Syne,sans-serif;margin:1.6rem 0 .5rem}
+#rot p{color:#a9a49b;max-width:300px;margin:0 auto 1.4rem;font:400 .95rem 'DM Sans',system-ui,sans-serif}
+#rot button{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:.6rem 1.2rem;font:500 .85rem system-ui,sans-serif}
+.rot-ph{width:64px;height:112px;margin:0 auto;border:4px solid #fff;border-radius:14px;position:relative;animation:rotPhone 2.4s ease-in-out infinite;transform-origin:center}
+.rot-ph i{position:absolute;left:50%;bottom:7px;width:18px;height:3px;margin-left:-9px;border-radius:2px;background:#fff;opacity:.7}
+.rot-ph::before{content:"";position:absolute;left:50%;top:6px;width:10px;height:3px;margin-left:-5px;border-radius:2px;background:#fff;opacity:.5}
+@keyframes rotPhone{0%,15%{transform:rotate(0)}55%,85%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
